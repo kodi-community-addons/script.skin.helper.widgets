@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="32163">
+        <setting id="enableSpecialsInWidgets" type="bool" label="32025" default="false"/>
+        <setting id="hideWatchedItemsInWidgets" type="bool" label="32035" default="true"/>
+        <setting id="nextupInprogressShowsOnly" type="bool" label="32036" default="true"/>
+        <setting id="groupRecentEpisodes" type="bool" label="32050" default="false"/>
+        <setting id="default_limit" type="number" label="32053" default="25"/>
+    </category>
+</settings>
