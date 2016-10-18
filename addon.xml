@@ -12,7 +12,6 @@
 	<extension point="xbmc.python.pluginsource" library="plugin.py">
         <provides>video audio</provides>
     </extension>
-	<extension library="service.py" point="xbmc.service" start="login" />
 
 	<extension point="xbmc.addon.metadata">
 		<summary lang="en">Ready to use widgets for all kind of media types</summary>

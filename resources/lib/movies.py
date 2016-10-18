@@ -1,12 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from utils import *
+from utils import ADDON, process_method_on_list
 from operator import itemgetter
-#import ArtworkUtils as artutils
+from artutils import kodidb, Imdb
+import xbmc
 
 class Movies(object):
     '''all movie widgets provided by the script'''
     arguments = {}
+    
+    def __init__(self):
+        self.kodi_db = kodidb.KodiDb()
+        self.imdb = Imdb()
     
     def listing(self):
         '''main listing with all our movie nodes'''
@@ -21,33 +26,32 @@ class Movies(object):
             (ADDON.getLocalizedString(32046), "top250&mediatype=movies", "DefaultMovies.png"),
             (xbmc.getLocalizedString(135), "browsegenres&mediatype=movies", "DefaultGenres.png")
             ]
-        return process_method_on_list(create_main_entry,all_items)
+        return process_method_on_list(self.kodi_db.create_main_entry,all_items)
 
     def recommended(self):
         ''' get recommended movies - library movies with score higher than 7 '''
-        filters = [FILTER_RATING]
+        filters = [kodidb.FILTER_RATING]
         if self.arguments["hide_watched"]:
-            filters += FILTER_UNWATCHED
-        return get_kodi_json('VideoLibrary.GetMovies','rating',filters,FIELDS_MOVIES,(0,self.arguments["limit"]),"movies")
-         
+            filters += kodidb.FILTER_
+        return self.kodi_db.movies(sort=kodidb.SORT_RATING, filters=filters, limits=(0,self.arguments["limit"]))
+
     def recent(self):
         ''' get recently added movies '''
         filters = []
         if self.arguments["hide_watched"]:
-            filters += FILTER_UNWATCHED
-        return get_kodi_json('VideoLibrary.GetMovies','dateadded',filters,FIELDS_MOVIES,(0,self.arguments["limit"]),"movies")
+            filters += kodidb.FILTER_
+        return self.kodi_db.movies(sort=kodidb.SORT_DATEADDED, filters=filters, limits=(0,self.arguments["limit"]))
                 
     def random(self):
         ''' get random movies '''
         filters = []
         if self.arguments["hide_watched"]:
-            filters += FILTER_UNWATCHED
-        result = get_kodi_json('VideoLibrary.GetMovies','random',filters,FIELDS_MOVIES,(0,self.arguments["limit"]),"movies")
-        return result
+            filters += kodidb.FILTER_
+        return self.kodi_db.movies(sort=kodidb.SORT_RANDOM, filters=filters, limits=(0,self.arguments["limit"]))
                 
     def inprogress(self):
         ''' get in progress movies '''
-        return get_kodi_json('VideoLibrary.GetMovies','lastplayed',[FILTER_INPROGRESS],FIELDS_MOVIES,(0,self.arguments["limit"]),"movies")
+        return self.kodi_db.movies(sort=kodidb.SORT_LASTPLAYED, filters=[kodidb.FILTER_INPROGRESS], limits=(0,self.arguments["limit"]))
 
     def similar(self):
         ''' get similar movies for given imdbid or just from random watched title if no imdbid'''
@@ -60,7 +64,7 @@ class Movies(object):
         ref_movie = None
         if imdb_id:
             #get movie by imdbid
-            ref_movie = self.get_movie_by_imdbid(imdb_id)
+            ref_movie = self.kodi_db.movie_by_imdbid(imdb_id)
         if not ref_movie:
             #just get a random watched movie
             ref_movie = self.get_random_watched_movie()
@@ -86,9 +90,9 @@ class Movies(object):
         all_items = []
         if not genre:
             #get a random genre if no genre provided
-            json_result = get_kodi_json('VideoLibrary.GetGenres','random',[],[],(0,1),"genres",{"type": "movie"})
-            if json_result: 
-                genre = json_result[0]["label"]
+            genres = self.kodi_db.genres("movie")
+            if genres: 
+                genre = genres[0]["label"]
         if genre:
             #get all movies from the same genre
             for item in self.get_genre_movies(genre,self.arguments["hide_watched"],self.arguments["limit"]):
@@ -120,13 +124,11 @@ class Movies(object):
     def top250(self):
         ''' get imdb top250 movies in library '''
         all_items = []
-        all_movies = get_kodi_json('VideoLibrary.GetMovies','',[],["imdbnumber"],(),"movies")
-        #top_250 = artutils.getImdbTop250() #TODO
-        top_250 = {}
+        all_movies = self.kodi_db.get_json('VideoLibrary.GetMovies',fields=["imdbnumber"],returntype="movies")
+        top_250 = self.imdb.get_top250_db()
         for movie in all_movies:
             if movie["imdbnumber"] in top_250:
-                movie = get_kodi_json('VideoLibrary.GetMovieDetails','{ "movieid": %d, "properties": [ %s ] }'
-                    %(movie["movieid"],FIELDS_MOVIES),"moviedetails")
+                movie = self.kodi_db.movie(movie["movieid"])
                 movie["top250_rank"] = int(top_250[movie["imdbnumber"]])
                 all_items.append(movie)
         return sorted(all_items,key=itemgetter("top250_rank"))[:self.arguments["limit"]]
@@ -138,7 +140,7 @@ class Movies(object):
             random movies in the genre.
             TODO: get auto generated collage pictures from skinhelper's artutils ?
         '''
-        all_genres = get_kodi_json('VideoLibrary.GetGenres','title',[],[],None,"genres",{"type": "movie"})
+        all_genres = self.kodi_db.genres("movie")
         return process_method_on_list(self.get_genre_artwork,all_genres)
         
     def get_genre_artwork(self, genre_json):
@@ -148,7 +150,7 @@ class Movies(object):
         genre_json["file"] = "videodb://movies/genres/%s/"%genre_json["genreid"]
         genre_json["isFolder"] = True
         genre_json["IsPlayable"] = "false"
-        genre_json["thumbnail"] = "DefaultGenre.png"
+        genre_json["thumbnail"] = genre_json.get("thumbnail", "DefaultGenre.png") #TODO: get icon from resource addon ?
         genre_json["type"] = "genre"
         genre_movies = self.get_genre_movies(genre_json["label"],False,5)
         for count, genre_movie in enumerate(genre_movies):
@@ -158,31 +160,19 @@ class Movies(object):
                 #set genre's primary fanart image to first movie fanart
                 genre_json["art"]["fanart"] = genre_movie["art"].get("fanart","")
         return genre_json
-        
-    @staticmethod
-    def get_movie_by_imdbid(imdb_id):
-        '''gets a movie from kodidb by imdbid.'''
-        filters = [{ "operator":"is", "field":"imdbnumber", "value":imdb_id}]
-        movies = get_kodi_json('VideoLibrary.GetMovies',None,filters,FIELDS_MOVIES,None,"movies")
-        if movies:
-            return movies[0]
-        else:
-            return None
-            
-    @staticmethod
-    def get_random_watched_movie():
+           
+    def get_random_watched_movie(self):
         '''gets a random watched movie from kodidb.'''
-        movies = get_kodi_json('VideoLibrary.GetMovies','random',[FILTER_WATCHED],FIELDS_MOVIES,(0,1),"movies")
+        movies = self.kodi_db.movies(sort=kodidb.SORT_RANDOM, filters=[kodidb.FILTER_WATCHED], limits=(0,1))
         if movies:
             return movies[0]
         else:
             return None
             
-    @staticmethod
-    def get_genre_movies(genre,hide_watched=False,limit=100):
+    def get_genre_movies(self,genre,hide_watched=False,limit=100):
         '''helper method to get all movies in a specific genre'''
         filters = [{"operator":"is", "field":"genre","value":genre}]
         if hide_watched:
-            filters += FILTER_UNWATCHED
-        return get_kodi_json('VideoLibrary.GetMovies','random',filters,FIELDS_MOVIES,(0,limit),"movies")
+            filters += kodidb.FILTER_
+        return self.kodi_db.movies(sort=kodidb.SORT_RANDOM, filters=filters, limits=(0,limit))
 

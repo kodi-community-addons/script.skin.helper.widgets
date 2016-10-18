@@ -2,22 +2,30 @@
 # -*- coding: utf-8 -*-
 
 import urlparse
-from utils import *
+from utils import process_method_on_list, WINDOW, log_msg, SETTING
 from operator import itemgetter
-import simplecache
+from simplecache import SimpleCache
 import xbmcplugin, xbmcgui, xbmc, xbmcaddon, xbmcvfs
 import os,sys
+from artutils import KodiDb
+
+ADDON_HANDLE = int(sys.argv[1])
+IGNORE_CACHE = True
 
 class Main(object):
     arguments = {}
     
     def __init__(self):
         ''' our main subroutine which will load the correct endpoint based on the given parameters '''
+        
         #skip if shutdown requested
         if WINDOW.getProperty("SkinHelperShutdownRequested"):
             log_msg("Not forfilling request: Kodi is exiting!" ,xbmc.LOGWARNING)
-            xbmcplugin.endOfDirectory(handle=int(sys.argv[1]))
+            xbmcplugin.endOfDirectory(handle=ADDON_HANDLE)
             return
+
+        self.kodi_db = KodiDb()
+        self.cache = SimpleCache()
         
         #get the arguments provided to the plugin path
         self.get_arguments()
@@ -64,7 +72,7 @@ class Main(object):
         action = self.arguments["action"]
         refresh = self.arguments.get("refresh","")
         #set widget content type
-        xbmcplugin.setContent(int(sys.argv[1]), media_type)
+        xbmcplugin.setContent(ADDON_HANDLE, media_type)
 
         #try to get from cache first...
         #we use a checksum based on the arguments to make sure the cache is ignored when needed
@@ -73,8 +81,8 @@ class Main(object):
         cache_checksum = ".".join([repr(value) for value in self.arguments.itervalues()])
         if not refresh:
             cache_checksum = None
-        cache = simplecache.get(cache_str,checksum=cache_checksum)
-        if cache:
+        cache = self.cache.get(cache_str,checksum=cache_checksum)
+        if cache and not IGNORE_CACHE:
             log_msg("MEDIATYPE: %s - ACTION: %s -- got items from cache - CHECKSUM: %s" %(media_type,action,cache_checksum))
             all_items = cache
 
@@ -93,15 +101,15 @@ class Main(object):
                 all_items = sorted(all_items, key=lambda k: random.random())
             
             #prepare listitems and store in cache
-            all_items = process_method_on_list(prepare_listitem,all_items)
-            simplecache.set(cache_str,all_items,checksum=cache_checksum)
+            all_items = process_method_on_list(self.kodi_db.prepare_listitem,all_items)
+            self.cache.set(cache_str,all_items,checksum=cache_checksum)
 
         #fill that listing...
-        all_items = process_method_on_list(create_listitem,all_items)
-        xbmcplugin.addDirectoryItems(int(sys.argv[1]), all_items, len(all_items))
+        all_items = process_method_on_list(self.kodi_db.create_listitem,all_items)
+        xbmcplugin.addDirectoryItems(ADDON_HANDLE, all_items, len(all_items))
 
         #end directory listing
-        xbmcplugin.endOfDirectory(handle=int(sys.argv[1]))
+        xbmcplugin.endOfDirectory(handle=ADDON_HANDLE)
     
     def mainlisting(self):
         '''main listing'''
@@ -115,8 +123,8 @@ class Main(object):
             all_items.append( (xbmc.getLocalizedString(20360), "episodeslisting", "DefaultTvShows.png") )
         
         #process the listitems and display listing
-        all_items = process_method_on_list(create_main_entry,all_items)
-        all_items = process_method_on_list(prepare_listitem,all_items)
-        all_items = process_method_on_list(create_listitem,all_items)
-        xbmcplugin.addDirectoryItems(int(sys.argv[1]), all_items, len(all_items))
-        xbmcplugin.endOfDirectory(handle=int(sys.argv[1]))
+        all_items = process_method_on_list(self.kodi_db.create_main_entry,all_items)
+        all_items = process_method_on_list(self.kodi_db.prepare_listitem,all_items)
+        all_items = process_method_on_list(self.kodi_db.create_listitem,all_items)
+        xbmcplugin.addDirectoryItems(ADDON_HANDLE, all_items, len(all_items))
+        xbmcplugin.endOfDirectory(handle=ADDON_HANDLE)

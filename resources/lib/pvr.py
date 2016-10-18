@@ -1,12 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from utils import *
+from utils import ADDON, process_method_on_list
 from operator import itemgetter
-#import ArtworkUtils as artutils
+from artutils import KodiDb, ImDb
+import xbmc
+
 
 class Pvr(object):
     '''all pvr widgets provided by the script'''
     arguments = {}
+    
+    def __init__(self):
+        self.kodi_db = artutils.KodiDb()
     
     def listing(self):
         '''main listing with all our pvr nodes'''
@@ -28,7 +33,7 @@ class Pvr(object):
         filters = [FILTER_RATING]
         if self.arguments["hide_watched"]:
             filters += FILTER_UNWATCHED
-        return get_kodi_json('VideoLibrary.GetEpisodes','rating',filters,FIELDS_EPISODES,(0,self.arguments["limit"]),"episodes")
+        return kodi_db.get_db('VideoLibrary.GetEpisodes','rating',filters,self.kodi_db.FIELDS_EPISODES,(0,self.arguments["limit"]),"episodes")
                 
     def recent(self):
         ''' get recently added episodes '''
@@ -39,7 +44,7 @@ class Pvr(object):
         if self.arguments["hide_watched"]:
             filters += FILTER_UNWATCHED
         while unique_count < self.arguments["limit"]:
-            recent_episodes = get_kodi_json('VideoLibrary.GetEpisodes','dateadded',filters,FIELDS_EPISODES,
+            recent_episodes = kodi_db.get_db('VideoLibrary.GetEpisodes','dateadded',filters,self.kodi_db.FIELDS_EPISODES,
                 (total_count,self.arguments["limit"]+total_count),"episodes")
             if not self.arguments["group_episodes"]:
                 #grouping is not enabled, just return the result
@@ -68,11 +73,11 @@ class Pvr(object):
         filters = []
         if self.arguments["hide_watched"]:
             filters += FILTER_UNWATCHED
-        return get_kodi_json('VideoLibrary.GetEpisodes','random',filters,FIELDS_EPISODES,(0,self.arguments["limit"]),"episodes")
+        return kodi_db.get_db('VideoLibrary.GetEpisodes','random',filters,self.kodi_db.FIELDS_EPISODES,(0,self.arguments["limit"]),"episodes")
                 
     def inprogress(self):
         ''' get in progress episodes '''
-        return get_kodi_json('VideoLibrary.GetEpisodes','lastplayed',[FILTER_INPROGRESS],FIELDS_EPISODES,(0,self.arguments["limit"]),"episodes")
+        return kodi_db.get_db('VideoLibrary.GetEpisodes','lastplayed',[FILTER_INPROGRESS],self.kodi_db.FIELDS_EPISODES,(0,self.arguments["limit"]),"episodes")
 
     def inprogressandrecommended(self):
         ''' get recommended AND in progress episodes '''
@@ -99,7 +104,7 @@ class Pvr(object):
             filters = [ FILTER_INPROGRESS ]
         fields = [ "title", "lastplayed", "playcount" ]
         # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
-        all_shows = get_kodi_json('VideoLibrary.GetTvShows','lastplayed',filters,fields,(0,self.arguments["limit"]),"tvshows")
+        all_shows = kodi_db.get_db('VideoLibrary.GetTvShows','lastplayed',filters,fields,(0,self.arguments["limit"]),"tvshows")
         return process_method_on_list(self.get_next_episode_for_show, [d['tvshowid'] for d in all_shows])
         
     def get_next_episode_for_show(self,show_id):
@@ -107,7 +112,7 @@ class Pvr(object):
         filters = [ FILTER_UNWATCHED ]
         if not self.arguments["enable_specials"]:
             filters.append( {"field": "season", "operator": "greaterthan", "value": "0"} )
-        json_episodes = get_kodi_json('VideoLibrary.GetEpisodes',"episode",filters,FIELDS_EPISODES,(0,1),
+        json_episodes = kodi_db.get_db('VideoLibrary.GetEpisodes',"episode",filters,self.kodi_db.FIELDS_EPISODES,(0,1),
             "episodes", {"tvshowid": show_id}, "ascending")
         if json_episodes:
             return json_episodes[0]
