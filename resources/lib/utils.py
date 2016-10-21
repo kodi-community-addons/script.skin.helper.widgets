@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import xbmcgui, xbmc, xbmcaddon
-import os,sys
+import xbmc, xbmcaddon
+import sys
 from traceback import format_exc
 from datetime import datetime
 import time
@@ -19,27 +19,12 @@ except Exception:
     import json
 
 ADDON_ID = "script.skin.helper.widgets"
-ADDON = xbmcaddon.Addon(ADDON_ID)
-WINDOW = xbmcgui.Window(10000)
-SETTING = ADDON.getSetting
 
 def log_msg(msg, loglevel = xbmc.LOGNOTICE):
     if isinstance(msg, unicode):
         msg = msg.encode('utf-8')
     xbmc.log("Skin Helper Widgets --> %s" %msg, level=loglevel)
-
-def try_encode(text, encoding="utf-8"):
-    try:
-        return text.encode(encoding,"ignore")
-    except Exception:
-        return text
-
-def try_decode(text, encoding="utf-8"):
-    try:
-        return text.decode(encoding,"ignore")
-    except Exception:
-        return text
-   
+  
 def get_localdate_from_utc(timestring):
     try:
         systemtime = xbmc.getInfoLabel("System.Time")
@@ -56,14 +41,6 @@ def get_localdate_from_utc(timestring):
         log_msg("ERROR in Utils.get_localdate_from_utc ! --> %s" %e, xbmc.LOGERROR)
         return (timestring,timestring)
 
-def get_clean_image(image):
-    if image and "image://" in image:
-        image = image.replace("image://","").replace("music@","")
-        image=urllib.unquote(image.encode("utf-8"))
-        if image.endswith("/"):
-            image = image[:-1]
-    return try_decode(image)        
-
 def process_method_on_list(method_to_run,items):
     '''helper method that processes a method on each listitem with pooling if the system supports it'''
     all_items = []
@@ -74,7 +51,7 @@ def process_method_on_list(method_to_run,items):
         except Exception:
             #catch exception to prevent threadpool running forever
             log_msg(format_exc(sys.exc_info()))
-            log_msg("Error in %s" %method_to_run)
+            log_msg("Error in %s" %method_to_run, xbmc.LOGERROR)
         pool.close()
         pool.join()
     else:

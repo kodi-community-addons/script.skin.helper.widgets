@@ -1,70 +1,80 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from utils import ADDON, process_method_on_list
+from utils import process_method_on_list
 from operator import itemgetter
-from artutils import kodidb, Imdb
+from artutils import Imdb, kodi_constants
 import xbmc
 
 class Movies(object):
     '''all movie widgets provided by the script'''
-    arguments = {}
-    
-    def __init__(self):
-        self.kodi_db = kodidb.KodiDb()
+
+    def __init__(self, addon, kodidb, options):
+        '''Initializations pass our common classes and the widget options as arguments'''
+        self.kodidb = kodidb
+        self.addon = addon
+        self.options = options
         self.imdb = Imdb()
-    
+
+    def __del__(self):
+        '''Cleanup'''
+        del self.imdb
+
     def listing(self):
         '''main listing with all our movie nodes'''
-        all_items = [ 
-            (ADDON.getLocalizedString(32028), "inprogress&mediatype=movies", "DefaultMovies.png"), 
-            (ADDON.getLocalizedString(32038), "recent&mediatype=movies", "DefaultMovies.png"),
-            (ADDON.getLocalizedString(32003), "recommended&mediatype=movies", "DefaultMovies.png"),
-            (ADDON.getLocalizedString(32029), "inprogressandrecommended&mediatype=movies", "DefaultMovies.png"),
-            (ADDON.getLocalizedString(32032), "inprogressandrandom&mediatype=movies", "DefaultMovies.png"),
-            (ADDON.getLocalizedString(32006), "similar&mediatype=movies", "DefaultMovies.png"),
-            (ADDON.getLocalizedString(32048), "random&mediatype=movies", "DefaultMovies.png"),
-            (ADDON.getLocalizedString(32046), "top250&mediatype=movies", "DefaultMovies.png"),
+        all_items = [
+            (self.addon.getLocalizedString(32028), "inprogress&mediatype=movies", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32038), "recent&mediatype=movies", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32003), "recommended&mediatype=movies", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32029), "inprogressandrecommended&mediatype=movies", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32032), "inprogressandrandom&mediatype=movies", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32006), "similar&mediatype=movies", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32048), "random&mediatype=movies", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32046), "top250&mediatype=movies", "DefaultMovies.png"),
             (xbmc.getLocalizedString(135), "browsegenres&mediatype=movies", "DefaultGenres.png")
             ]
-        return process_method_on_list(self.kodi_db.create_main_entry,all_items)
+        return process_method_on_list(self.kodidb.create_main_entry,all_items)
 
     def recommended(self):
         ''' get recommended movies - library movies with score higher than 7 '''
-        filters = [kodidb.FILTER_RATING]
-        if self.arguments["hide_watched"]:
-            filters += kodidb.FILTER_
-        return self.kodi_db.movies(sort=kodidb.SORT_RATING, filters=filters, limits=(0,self.arguments["limit"]))
+        filters = [kodi_constants.FILTER_RATING]
+        if self.options["hide_watched"]:
+            filters += kodi_constants.FILTER_UNWATCHED
+        return self.kodidb.movies(sort=kodi_constants.SORT_RATING, filters=filters,
+            limits=(0,self.options["limit"]))
 
     def recent(self):
         ''' get recently added movies '''
         filters = []
-        if self.arguments["hide_watched"]:
-            filters += kodidb.FILTER_
-        return self.kodi_db.movies(sort=kodidb.SORT_DATEADDED, filters=filters, limits=(0,self.arguments["limit"]))
-                
+        if self.options["hide_watched"]:
+            filters += kodi_constants.FILTER_UNWATCHED
+        return self.kodidb.movies(sort=kodi_constants.SORT_DATEADDED, filters=filters,
+            limits=(0,self.options["limit"]))
+
     def random(self):
         ''' get random movies '''
         filters = []
-        if self.arguments["hide_watched"]:
-            filters += kodidb.FILTER_
-        return self.kodi_db.movies(sort=kodidb.SORT_RANDOM, filters=filters, limits=(0,self.arguments["limit"]))
-                
+        if self.options["hide_watched"]:
+            filters += kodi_constants.FILTER_UNWATCHED
+        return self.kodidb.movies(sort=kodi_constants.SORT_RANDOM, filters=filters,
+            limits=(0,self.options["limit"]))
+
     def inprogress(self):
         ''' get in progress movies '''
-        return self.kodi_db.movies(sort=kodidb.SORT_LASTPLAYED, filters=[kodidb.FILTER_INPROGRESS], limits=(0,self.arguments["limit"]))
+        return self.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED, filters=[kodi_constants.FILTER_INPROGRESS],
+            limits=(0,self.options["limit"]))
 
     def similar(self):
         ''' get similar movies for given imdbid or just from random watched title if no imdbid'''
-        imdb_id = self.arguments.get("imdbid","")
+        imdb_id = self.options.get("imdbid","")
         all_items = []
         all_titles = list()
         json_result = []
         #lookup movie by imdbid or just pick a random watched movie
-        
+
         ref_movie = None
         if imdb_id:
             #get movie by imdbid
-            ref_movie = self.kodi_db.movie_by_imdbid(imdb_id)
+            ref_movie = self.kodidb.movie_by_imdbid(imdb_id)
         if not ref_movie:
             #just get a random watched movie
             ref_movie = self.get_random_watched_movie()
@@ -73,7 +83,7 @@ class Movies(object):
             genres = ref_movie["genre"]
             similar_title = ref_movie["title"]
             for genre in genres:
-                self.arguments["genre"] = genre
+                self.options["genre"] = genre
                 genre_movies = self.forgenre()
                 for item in genre_movies:
                     #prevent duplicates so skip reference movie and titles already in the list
@@ -82,27 +92,27 @@ class Movies(object):
                         all_items.append(item)
                         all_titles.append(item["title"])
         #return the list capped by limit and sorted by rating
-        return sorted(all_items,key=itemgetter("rating"),reverse=True)[:self.arguments["limit"]]
-    
+        return sorted(all_items,key=itemgetter("rating"),reverse=True)[:self.options["limit"]]
+
     def forgenre(self):
         ''' get top rated movies for given genre'''
-        genre = self.arguments.get("genre","")
+        genre = self.options.get("genre","")
         all_items = []
         if not genre:
             #get a random genre if no genre provided
-            genres = self.kodi_db.genres("movie")
-            if genres: 
+            genres = self.kodidb.genres("movie")
+            if genres:
                 genre = genres[0]["label"]
         if genre:
             #get all movies from the same genre
-            for item in self.get_genre_movies(genre,self.arguments["hide_watched"],self.arguments["limit"]):
+            for item in self.get_genre_movies(genre,self.options["hide_watched"],self.options["limit"]):
                 #append original genre as listitem property for later reference by skinner
                 item["extraproperties"] = {"genretitle": genre, "originalpath": item["file"]}
                 all_items.append(item)
 
         #return the list sorted by rating
         return sorted(all_items,key=itemgetter("rating"),reverse=True)
-        
+
     def inprogressandrecommended(self):
         ''' get recommended AND in progress movies '''
         all_items = self.inprogress()
@@ -110,8 +120,8 @@ class Movies(object):
         for item in self.recommended():
             if item["title"] not in all_titles:
                 all_items.append(item)
-        return all_items[:self.arguments["limit"]]
-        
+        return all_items[:self.options["limit"]]
+
     def inprogressandrandom(self):
         ''' get in progress AND random movies '''
         all_items = self.inprogress()
@@ -119,20 +129,20 @@ class Movies(object):
         for item in self.random():
             if item["movieid"] not in all_ids:
                 all_items.append(item)
-        return all_items[:self.arguments["limit"]]
-    
+        return all_items[:self.options["limit"]]
+
     def top250(self):
         ''' get imdb top250 movies in library '''
         all_items = []
-        all_movies = self.kodi_db.get_json('VideoLibrary.GetMovies',fields=["imdbnumber"],returntype="movies")
+        all_movies = self.kodidb.get_json('VideoLibrary.GetMovies',fields=["imdbnumber"],returntype="movies")
         top_250 = self.imdb.get_top250_db()
         for movie in all_movies:
             if movie["imdbnumber"] in top_250:
-                movie = self.kodi_db.movie(movie["movieid"])
+                movie = self.kodidb.movie(movie["movieid"])
                 movie["top250_rank"] = int(top_250[movie["imdbnumber"]])
                 all_items.append(movie)
-        return sorted(all_items,key=itemgetter("top250_rank"))[:self.arguments["limit"]]
-    
+        return sorted(all_items,key=itemgetter("top250_rank"))[:self.options["limit"]]
+
     def browsegenres(self):
         '''
             special entry which can be used to create custom genre listings
@@ -140,9 +150,9 @@ class Movies(object):
             random movies in the genre.
             TODO: get auto generated collage pictures from skinhelper's artutils ?
         '''
-        all_genres = self.kodi_db.genres("movie")
+        all_genres = self.kodidb.genres("movie")
         return process_method_on_list(self.get_genre_artwork,all_genres)
-        
+
     def get_genre_artwork(self, genre_json):
         '''helper method for browsegenres'''
         #for each genre we get 5 random items from the library and attach the artwork to the genre listitem
@@ -160,19 +170,20 @@ class Movies(object):
                 #set genre's primary fanart image to first movie fanart
                 genre_json["art"]["fanart"] = genre_movie["art"].get("fanart","")
         return genre_json
-           
+
     def get_random_watched_movie(self):
-        '''gets a random watched movie from kodidb.'''
-        movies = self.kodi_db.movies(sort=kodidb.SORT_RANDOM, filters=[kodidb.FILTER_WATCHED], limits=(0,1))
+        '''gets a random watched movie from kodi_constants.'''
+        movies = self.kodidb.movies(sort=kodi_constants.SORT_RANDOM,
+            filters=[kodi_constants.FILTER_WATCHED], limits=(0,1))
         if movies:
             return movies[0]
         else:
             return None
-            
+
     def get_genre_movies(self,genre,hide_watched=False,limit=100):
         '''helper method to get all movies in a specific genre'''
         filters = [{"operator":"is", "field":"genre","value":genre}]
         if hide_watched:
-            filters += kodidb.FILTER_
-        return self.kodi_db.movies(sort=kodidb.SORT_RANDOM, filters=filters, limits=(0,limit))
+            filters += kodi_constants.FILTER_UNWATCHED
+        return self.kodidb.movies(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0,limit))
 
