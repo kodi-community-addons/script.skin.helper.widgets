@@ -37,8 +37,7 @@ class Main(object):
             self.show_widget_listing()
             
     def __del__(self):
-        '''Cleanup'''
-        del self.cache
+        '''Cleanup CPython instances'''
         del self.addon
         del self.win
         log_msg("Exited")

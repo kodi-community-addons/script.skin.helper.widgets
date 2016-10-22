@@ -20,7 +20,7 @@ except Exception:
 
 ADDON_ID = "script.skin.helper.widgets"
 
-def log_msg(msg, loglevel = xbmc.LOGNOTICE):
+def log_msg(msg, loglevel = xbmc.LOGDEBUG):
     if isinstance(msg, unicode):
         msg = msg.encode('utf-8')
     xbmc.log("Skin Helper Widgets --> %s" %msg, level=loglevel)
