@@ -259,3 +259,11 @@ msgstr ""
 msgctxt "#32060"
 msgid "In progress and Random media"
 msgstr ""
+
+msgctxt "#32061"
+msgid "In progress music videos"
+msgstr ""
+
+msgctxt "#32062"
+msgid "Random music videos"
+msgstr ""

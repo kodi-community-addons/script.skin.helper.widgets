@@ -53,7 +53,7 @@ class Main(object):
         
         if not "mediatype" in options and "action" in options:
             #get the mediatype and action from the path (for backwards compatability with old style paths)
-            for item in [("movies","movies"), ("shows","tvshows"), ("episode","episodes"), 
+            for item in [("movies","movies"), ("shows","tvshows"), ("episode","episodes"), ("musicvideos","musicvideos"), 
                 ("pvr","pvr"), ("albums","albums"), ("songs","songs"), ("media","media"), ("favourites","favourites")]:
                 if item[0] in options["action"]:
                     options["mediatype"] = item[1]
@@ -63,8 +63,8 @@ class Main(object):
         #prefer refresh param for the mediatype
         if "mediatype" in options:
             alt_refresh = self.win.getProperty("widgetreload-%s" %options["mediatype"])
-            if options["mediatype"] == "favourites":
-                options["skincache"] = "true"
+            if options["mediatype"] == "favourites" or "favourite" in options["action"]:
+                options["skipcache"] = "true"
             elif alt_refresh:
                 options["refresh"] = alt_refresh
                 
@@ -96,7 +96,6 @@ class Main(object):
         else:
             cache_checksum = ".".join([repr(value) for value in self.options.itervalues()])
         cache = self.cache.get(cache_str,checksum=cache_checksum)
-        cache = None
         if cache and not self.options.get("skipcache") == "true":
             log_msg("MEDIATYPE: %s - ACTION: %s -- got items from cache - CHECKSUM: %s" 
                 %(media_type,action,cache_checksum))
@@ -133,7 +132,7 @@ class Main(object):
         '''main listing'''
         all_items = []
         
-        #movie nodes
+        #movie node
         if xbmc.getCondVisibility("Library.HasContent(movies)"):
             all_items.append( (xbmc.getLocalizedString(342), "movieslisting", "DefaultMovies.png") )
         
@@ -142,7 +141,7 @@ class Main(object):
             all_items.append( (xbmc.getLocalizedString(20343), "tvshowslisting", "DefaultTvShows.png") )
             all_items.append( (xbmc.getLocalizedString(20360), "episodeslisting", "DefaultTvShows.png") )
             
-        #pvr nodes
+        #pvr node
         if xbmc.getCondVisibility("PVR.HasTvChannels"):
             all_items.append( (self.addon.getLocalizedString(32054), "pvrlisting", "DefaultAddonPVRClient.png") )
             
@@ -151,11 +150,15 @@ class Main(object):
             all_items.append( (xbmc.getLocalizedString(132), "albumslisting", "DefaultAddonAlbumInfo.png") )
             all_items.append( (xbmc.getLocalizedString(134), "songslisting", "DefaultAddonMusic.png") )
             
-        #media nodes
+        #musicvideo node
+        if xbmc.getCondVisibility("Library.HasContent(musicvideos)"):
+            all_items.append( (xbmc.getLocalizedString(20389), "musicvideoslisting", "DefaultAddonAlbumInfo.png") )
+            
+        #media node
         if xbmc.getCondVisibility("Library.HasContent(movies) | Library.HasContent(tvshows) | Library.HasContent(music)"):
             all_items.append( (self.addon.getLocalizedString(32057), "medialisting", "DefaultAddonAlbumInfo.png") )
             
-        #favourites
+        #favourites node
         all_items.append( (xbmc.getLocalizedString(10134), "favouriteslisting", "DefaultAddonAlbumInfo.png") )
         
         #process the listitems and display listing
