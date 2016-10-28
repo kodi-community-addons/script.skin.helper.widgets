@@ -101,8 +101,8 @@ msgid "Widgets"
 msgstr "Widgets"
 
 msgctxt "#32024"
-msgid "Enable artwork lookups for music/pvr widgets"
-msgstr "Activer la recherche des artworks pour les widgets musique/pvr"
+msgid "Enable artwork lookups"
+msgstr "Activer la recherche des artworks"
 
 msgctxt "#32025"
 msgid "Show specials in episode widgets"

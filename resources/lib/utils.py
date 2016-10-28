@@ -5,7 +5,7 @@ import xbmc, xbmcaddon
 import sys
 from traceback import format_exc
 from datetime import datetime
-import time
+import urllib
 
 try:
     from multiprocessing.pool import ThreadPool as Pool
@@ -25,22 +25,6 @@ def log_msg(msg, loglevel = xbmc.LOGDEBUG):
         msg = msg.encode('utf-8')
     xbmc.log("Skin Helper Widgets --> %s" %msg, level=loglevel)
   
-def get_localdate_from_utc(timestring):
-    try:
-        systemtime = xbmc.getInfoLabel("System.Time")
-        utc = datetime.fromtimestamp(time.mktime(time.strptime(timestring, '%Y-%m-%d %H:%M:%S')))
-        epoch = time.mktime(utc.timetuple())
-        offset = datetime.fromtimestamp (epoch) - datetime.utcfromtimestamp(epoch)
-        correcttime = utc + offset
-        if "AM" in systemtime or "PM" in systemtime:
-            return (correcttime.strftime("%Y-%m-%d"),correcttime.strftime("%I:%M %p"))
-        else:
-            return (correcttime.strftime("%d-%m-%Y"),correcttime.strftime("%H:%M"))
-    except Exception as e:
-        log_msg(format_exc(sys.exc_info()),xbmc.LOGDEBUG)
-        log_msg("ERROR in Utils.get_localdate_from_utc ! --> %s" %e, xbmc.LOGERROR)
-        return (timestring,timestring)
-
 def process_method_on_list(method_to_run,items):
     '''helper method that processes a method on each listitem with pooling if the system supports it'''
     all_items = []
@@ -58,3 +42,29 @@ def process_method_on_list(method_to_run,items):
         all_items = [method_to_run(item) for item in items]
     all_items = filter(None, all_items)
     return all_items
+    
+def get_clean_image(image):
+    if image and "image://" in image:
+        image = image.replace("image://","").replace("music@","")
+        image=urllib.unquote(image.encode("utf-8"))
+        if image.endswith("/"):
+            image = image[:-1]
+        if not isinstance(image, unicode):
+            image = image.decode("utf8")
+    return image
+    
+def create_main_entry(item):
+    '''helper to create a simple (directory) listitem'''
+    if "//" in item[1]:
+        filepath = item[1]
+    else:
+        filepath = "plugin://script.skin.helper.widgets/?action=%s" %item[1]
+    return {
+            "label": item[0],
+            "file": filepath,
+            "icon": item[2],
+            "art": {"fanart": "special://home/addons/script.skin.helper.widgets/fanart.jpg"},
+            "isFolder": True,
+            "type": "file",
+            "IsPlayable": "false"
+            }

@@ -101,7 +101,7 @@ msgid "Widgets"
 msgstr "יישומונים"
 
 msgctxt "#32024"
-msgid "Enable artwork lookups for music/pvr widgets"
+msgid "Enable artwork lookups"
 msgstr ""
 
 msgctxt "#32025"

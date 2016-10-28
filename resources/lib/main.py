@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import urlparse
-from utils import process_method_on_list, log_msg, ADDON_ID
+from utils import process_method_on_list, log_msg, ADDON_ID, create_main_entry
 from simplecache import SimpleCache
 import xbmcplugin, xbmc, xbmcaddon, xbmcgui
 import sys
-from artutils import KodiDb
+from artutils import ArtUtils
 import time
 
 ADDON_HANDLE = int(sys.argv[1])
@@ -17,7 +17,7 @@ class Main(object):
     def __init__(self):
         ''' Initialization '''
         
-        self.kodidb = KodiDb()
+        self.artutils = ArtUtils()
         self.cache = SimpleCache()
         self.addon = xbmcaddon.Addon(ADDON_ID)
         self.win = xbmcgui.Window(10000)
@@ -36,11 +36,15 @@ class Main(object):
             #we have a mediatype and action so display the widget listing
             self.show_widget_listing()
             
-    def __del__(self):
-        '''Cleanup CPython instances'''
+        self.close()
+            
+    def close(self):
+        '''Cleanup Kodi Cpython instances'''
+        self.artutils.close()
+        self.cache.close()
         del self.addon
         del self.win
-        log_msg("Exited")
+        log_msg("MainModule exited")
 
     def get_options(self):
         '''get the options provided to the plugin path'''
@@ -49,26 +53,26 @@ class Main(object):
         
         if not "mediatype" in options and "action" in options:
             #get the mediatype and action from the path (for backwards compatability with old style paths)
-            for item in [("movies","movies"), ("shows","tvshows"), ("episode","episodes"), ("tv","pvr")]:
+            for item in [("movies","movies"), ("shows","tvshows"), ("episode","episodes"), 
+                ("pvr","pvr"), ("albums","albums"), ("songs","songs"), ("media","media"), ("favourites","favourites")]:
                 if item[0] in options["action"]:
-                    log_msg("check if %s in %s" %(item[0],options["action"]))
                     options["mediatype"] = item[1]
                     options["action"] = options["action"].replace(item[1],"").replace(item[0],"")
                     break
         
         #prefer refresh param for the mediatype
         if "mediatype" in options:
-            altrefresh = self.win.getProperty("widgetreload-%s" %options["mediatype"])
+            alt_refresh = self.win.getProperty("widgetreload-%s" %options["mediatype"])
             if options["mediatype"] == "favourites":
-                options["refresh"] = "skipcache"
-            elif altrefresh:
+                options["skincache"] = "true"
+            elif alt_refresh:
                 options["refresh"] = alt_refresh
                 
         #set the widget settings as options
-        options["hide_watched"] = self.addon.getSetting("hideWatchedItemsInWidgets") == "true"
-        options["next_inprogress_only"] = self.addon.getSetting("nextupInprogressShowsOnly") == "true"
-        options["enable_specials"] = self.addon.getSetting("enableSpecialsInWidgets") == "true"
-        options["group_episodes"] = self.addon.getSetting("groupRecentEpisodes") == "true"
+        options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
+        options["next_inprogress_only"] = self.addon.getSetting("nextup_inprogressonly") == "true"
+        options["episodes_enable_specials"] = self.addon.getSetting("episodes_enable_specials") == "true"
+        options["group_episodes"] = self.addon.getSetting("episodes_grouping") == "true"
         if "limit" in options:
             options["limit"] = int(options["limit"])
         else:
@@ -92,7 +96,8 @@ class Main(object):
         else:
             cache_checksum = ".".join([repr(value) for value in self.options.itervalues()])
         cache = self.cache.get(cache_str,checksum=cache_checksum)
-        if cache and not refresh == "skipcache":
+        cache = None
+        if cache and not self.options.get("skipcache") == "true":
             log_msg("MEDIATYPE: %s - ACTION: %s -- got items from cache - CHECKSUM: %s" 
                 %(media_type,action,cache_checksum))
             all_items = cache
@@ -104,7 +109,7 @@ class Main(object):
             
             #dynamically import and load the correct module, class and function
             media_module = __import__(media_type)
-            media_class = getattr( media_module, media_type.capitalize() )(self.addon, self.kodidb, self.options)
+            media_class = getattr( media_module, media_type.capitalize() )(self.addon, self.artutils, self.options)
             all_items = getattr(media_class, action)()
             
             #randomize output if requested by skinner or user
@@ -112,15 +117,17 @@ class Main(object):
                 all_items = sorted(all_items, key=lambda k: random.random())
             
             #prepare listitems and store in cache
-            all_items = process_method_on_list(self.kodidb.prepare_listitem,all_items)
+            all_items = process_method_on_list(self.artutils.kodidb.prepare_listitem,all_items)
             self.cache.set(cache_str,all_items,checksum=cache_checksum)
 
         #fill that listing...
-        all_items = process_method_on_list(self.kodidb.create_listitem,all_items)
+        xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
+        all_items = process_method_on_list(self.artutils.kodidb.create_listitem,all_items)
         xbmcplugin.addDirectoryItems(ADDON_HANDLE, all_items, len(all_items))
 
         #end directory listing
         xbmcplugin.endOfDirectory(handle=ADDON_HANDLE)
+        
     
     def mainlisting(self):
         '''main listing'''
@@ -134,10 +141,26 @@ class Main(object):
         if xbmc.getCondVisibility("Library.HasContent(tvshows)"):
             all_items.append( (xbmc.getLocalizedString(20343), "tvshowslisting", "DefaultTvShows.png") )
             all_items.append( (xbmc.getLocalizedString(20360), "episodeslisting", "DefaultTvShows.png") )
+            
+        #pvr nodes
+        if xbmc.getCondVisibility("PVR.HasTvChannels"):
+            all_items.append( (self.addon.getLocalizedString(32054), "pvrlisting", "DefaultAddonPVRClient.png") )
+            
+        #music nodes
+        if xbmc.getCondVisibility("Library.HasContent(music)"):
+            all_items.append( (xbmc.getLocalizedString(132), "albumslisting", "DefaultAddonAlbumInfo.png") )
+            all_items.append( (xbmc.getLocalizedString(134), "songslisting", "DefaultAddonMusic.png") )
+            
+        #media nodes
+        if xbmc.getCondVisibility("Library.HasContent(movies) | Library.HasContent(tvshows) | Library.HasContent(music)"):
+            all_items.append( (self.addon.getLocalizedString(32057), "medialisting", "DefaultAddonAlbumInfo.png") )
+            
+        #favourites
+        all_items.append( (xbmc.getLocalizedString(10134), "favouriteslisting", "DefaultAddonAlbumInfo.png") )
         
         #process the listitems and display listing
-        all_items = process_method_on_list(self.kodidb.create_main_entry,all_items)
-        all_items = process_method_on_list(self.kodidb.prepare_listitem,all_items)
-        all_items = process_method_on_list(self.kodidb.create_listitem,all_items)
+        all_items = process_method_on_list(create_main_entry,all_items)
+        all_items = process_method_on_list(self.artutils.kodidb.prepare_listitem,all_items)
+        all_items = process_method_on_list(self.artutils.kodidb.create_listitem,all_items)
         xbmcplugin.addDirectoryItems(ADDON_HANDLE, all_items, len(all_items))
         xbmcplugin.endOfDirectory(handle=ADDON_HANDLE)

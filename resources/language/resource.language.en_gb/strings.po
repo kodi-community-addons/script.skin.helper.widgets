@@ -113,7 +113,7 @@ msgid "Widgets"
 msgstr ""
 
 msgctxt "#32024"
-msgid "Enable artwork lookups for music/pvr widgets"
+msgid "Enable artwork lookups"
 msgstr ""
 
 msgctxt "#32025"
@@ -230,4 +230,32 @@ msgstr ""
 
 msgctxt "#32053"
 msgid "Default number of items to show in widget"
+msgstr ""
+
+msgctxt "#32054"
+msgid "PVR"
+msgstr ""
+
+msgctxt "#32055"
+msgid "Similar songs"
+msgstr ""
+
+msgctxt "#32056"
+msgid "Similar albums"
+msgstr ""
+
+msgctxt "#32057"
+msgid "Mixed Media"
+msgstr ""
+
+msgctxt "#32058"
+msgid "Movies and Tvshows in IMDB Top250"
+msgstr ""
+
+msgctxt "#32059"
+msgid "Random media"
+msgstr ""
+
+msgctxt "#32060"
+msgid "In progress and Random media"
 msgstr ""

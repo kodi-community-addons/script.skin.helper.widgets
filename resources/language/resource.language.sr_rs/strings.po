@@ -101,7 +101,7 @@ msgid "Widgets"
 msgstr "Виџгети"
 
 msgctxt "#32024"
-msgid "Enable artwork lookups for music/pvr widgets"
+msgid "Enable artwork lookups"
 msgstr "Омогући слике за Музику/ПВР"
 
 msgctxt "#32025"

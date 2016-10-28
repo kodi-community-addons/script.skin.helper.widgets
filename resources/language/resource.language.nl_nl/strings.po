@@ -66,7 +66,7 @@ msgstr "Hervatbare media"
 
 msgctxt "#32012"
 msgid "Recently added songs"
-msgstr "Recnt toegevoegde liedjes"
+msgstr "Recent toegevoegde liedjes"
 
 msgctxt "#32013"
 msgid "Recently played songs"
@@ -113,8 +113,8 @@ msgid "Widgets"
 msgstr "Widgets"
 
 msgctxt "#32024"
-msgid "Enable artwork lookups for music/pvr widgets"
-msgstr "Artwork opzoeken voor pvr en muziek widgets"
+msgid "Enable artwork lookups"
+msgstr "Artwork opzoeken"
 
 msgctxt "#32025"
 msgid "Show specials in episode widgets"

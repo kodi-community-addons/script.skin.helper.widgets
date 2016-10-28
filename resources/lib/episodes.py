@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from utils import ADDON_ID, process_method_on_list
+from utils import ADDON_ID, process_method_on_list, create_main_entry
 from operator import itemgetter
 from artutils import kodi_constants
 from thetvdb import TheTvDb
@@ -13,38 +13,41 @@ class Episodes(object):
     kodidb = None
     addon = None
     
-    def __init__(self, addon, kodidb, options):
+    def __init__(self, addon, artutils, options):
         '''Initialization'''
-        self.tvdb = TheTvDb()
         self.addon = addon
-        self.kodidb = kodidb
+        self.artutils = artutils
         self.options = options
-        
-    def __del__(self):
-        '''Cleanup'''
-        del self.tvdb
-    
+            
     def listing(self):
         '''main listing with all our episode nodes'''
+        tag = self.options.get("tag","")
         all_items = [ 
-            (self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes", "DefaultTvShows.png"), 
-            (self.addon.getLocalizedString(32002), "next&mediatype=episodes", "DefaultTvShows.png"), 
-            (self.addon.getLocalizedString(32039), "recent&mediatype=episodes", "DefaultRecentlyAddedEpisodes.png"),
-            (self.addon.getLocalizedString(32009), "recommended&mediatype=episodes", "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32010), "inprogressandrecommended&mediatype=episodes", "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32049), "inprogressandrandom&mediatype=episodes", "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32008), "random&mediatype=episodes", "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32042), "unaired&mediatype=episodes", "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32043), "nextaired&mediatype=episodes", "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"), 
+            (self.addon.getLocalizedString(32002), "next&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"), 
+            (self.addon.getLocalizedString(32039), "recent&mediatype=episodes&tag=%s"%tag, "DefaultRecentlyAddedEpisodes.png"),
+            (self.addon.getLocalizedString(32009), "recommended&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32010), "inprogressandrecommended&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32049), "inprogressandrandom&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32042), "unaired&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32043), "nextaired&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
+            (xbmc.getLocalizedString(10134), "favourites&mediatype=episodes&tag=%s"%tag, "DefaultMovies.png")
             ]
-        return process_method_on_list(self.kodidb.create_main_entry,all_items)
+        return process_method_on_list(create_main_entry,all_items)
+        
+    def favourites(self):
+        '''get favourites'''
+        from favourites import Favourites
+        self.options["mediafilter"] = "episodes"
+        return Favourites(self.addon, self.artutils, self.options).listing()
 
     def recommended(self):
         ''' get recommended episodes - library episodes with score higher than 7 '''
         filters = [kodi_constants.FILTER_RATING]
         if self.options["hide_watched"]:
-            filters += kodi_constants.FILTER_UNWATCHED
-        return self.kodidb.episodes(sort=kodi_constants.SORT_RATING, filters=filters, 
+            filters.append(kodi_constants.FILTER_UNWATCHED)
+        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_RATING, filters=filters, 
             limits=(0,self.options["limit"]))
                 
     def recent(self):
@@ -54,9 +57,9 @@ class Episodes(object):
         unique_count = 0
         filters = []
         if self.options["hide_watched"]:
-            filters += kodi_constants.FILTER_UNWATCHED
+            filters.append(kodi_constants.FILTER_UNWATCHED)
         while unique_count < self.options["limit"]:
-            recent_episodes = self.kodidb.episodes(sort=kodi_constants.SORT_DATEADDED,
+            recent_episodes = self.artutils.kodidb.episodes(sort=kodi_constants.SORT_DATEADDED,
                 filters=filters,limits=(total_count,self.options["limit"]+total_count))
             if not self.options["group_episodes"]:
                 #grouping is not enabled, just return the result
@@ -84,13 +87,13 @@ class Episodes(object):
         ''' get random episodes '''
         filters = []
         if self.options["hide_watched"]:
-            filters += kodi_constants.FILTER_UNWATCHED
-        return self.kodidb.episodes(sort=kodi_constants.SORT_DATEADDED, filters=filters, 
+            filters.append(kodi_constants.FILTER_UNWATCHED)
+        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_DATEADDED, filters=filters, 
             limits=(0,self.options["limit"]))
                 
     def inprogress(self):
         ''' get in progress episodes '''
-        return self.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED, filters=[kodi_constants.FILTER_INPROGRESS], 
+        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED, filters=[kodi_constants.FILTER_INPROGRESS], 
             limits=(0,self.options["limit"]))
 
     def inprogressandrecommended(self):
@@ -118,16 +121,16 @@ class Episodes(object):
             filters = [ kodi_constants.FILTER_INPROGRESS ]
         fields = [ "title", "lastplayed", "playcount" ]
         # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
-        all_shows = self.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters, 
+        all_shows = self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters, 
             limits=(0,self.options["limit"]))
         return process_method_on_list(self.get_next_episode_for_show, [d['tvshowid'] for d in all_shows])
         
     def get_next_episode_for_show(self,show_id):
         '''get next unwatched episode for tvshow'''
         filters = [ kodi_constants.FILTER_UNWATCHED ]
-        if not self.options["enable_specials"]:
+        if not self.options["episodes_enable_specials"]:
             filters.append( {"field": "season", "operator": "greaterthan", "value": "0"} )
-        json_episodes = self.kodidb.episodes(sort=kodi_constants.SORT_EPISODE, filters=filters, 
+        json_episodes = self.artutils.kodidb.episodes(sort=kodi_constants.SORT_EPISODE, filters=filters, 
             limits=(0,1), tvshowid=show_id)
         if json_episodes:
             return json_episodes[0]
@@ -136,13 +139,19 @@ class Episodes(object):
             
     def unaired(self):
         ''' get all unaired episodes for shows in the library - provided by tvdb module'''
-        self.tvdb.days_ahead = 120
-        return self.tvdb.get_kodi_series_unaired_episodes_list(False)[:self.options["limit"]]
+        tvdb = TheTvDb()
+        tvdb.days_ahead = 120
+        episodes = tvdb.get_kodi_unaired_episodes(False)[:self.options["limit"]]
+        #del tvdb
+        return [ self.map_episode_props(episode) for episode in episodes]
         
     def nextaired(self):
         ''' get all next airing episodes for shows in the library - provided by tvdb module'''
-        self.tvdb.days_ahead = 45
-        result = self.tvdb.get_kodi_series_unaired_episodes_list(True)
+        tvdb = TheTvDb()
+        tvdb.days_ahead = 45
+        episodes = tvdb.get_kodi_unaired_episodes(True)
+        #del tvdb
+        return [ self.map_episode_props(episode) for episode in episodes]
      
     @staticmethod
     def create_grouped_entry(tvshow_episodes):
@@ -162,5 +171,15 @@ class Episodes(object):
         else:
             #just add the single item
             return firstepisode
+    
+    @staticmethod
+    def map_episode_props(episode_details):
+        '''adds some of the optional fields as extra properties for the listitem'''
+        extraprops = {}
+        for item in ["network", "airdate", "airdate.label", "airtime", "airdatetime", "airdatetime.label"]:
+            extraprops[item] = episode_details[item]
+        extraprops["DBTYPE"] = "episode"
+        episode_details["extraproperties"] = extraprops
+        return episode_details
         
         
