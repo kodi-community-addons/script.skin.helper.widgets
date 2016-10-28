@@ -4,6 +4,7 @@ from utils import process_method_on_list, create_main_entry
 from operator import itemgetter
 from artutils import kodi_constants
 from thetvdb import TheTvDb
+from episodes import Episodes
 import xbmc
 
 class Tvshows(object):
@@ -37,6 +38,14 @@ class Tvshows(object):
                 (self.addon.getLocalizedString(32014), "similar&mediatype=tvshows", icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=tvshows", icon),
                 (xbmc.getLocalizedString(20459), "tags&mediatype=tvshows", icon)
+                ]
+        if tag:
+            #add episode nodes with tag filter
+            all_items += [ 
+                (label_prefix + self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes&tag=%s"%tag, icon),
+                (label_prefix + self.addon.getLocalizedString(32039), "recent&mediatype=episodes&tag=%s"%tag, icon),
+                (label_prefix + self.addon.getLocalizedString(32002), "next&mediatype=episodes&tag=%s"%tag, icon),
+                (label_prefix + self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s"%tag, icon)
                 ]
         return process_method_on_list(create_main_entry,all_items)
         
@@ -228,3 +237,4 @@ class Tvshows(object):
         from favourites import Favourites
         self.options["mediafilter"] = "tvshows"
         return Favourites(self.addon, self.artutils, self.options).listing()
+        

@@ -21,18 +21,17 @@ class Episodes(object):
             
     def listing(self):
         '''main listing with all our episode nodes'''
-        tag = self.options.get("tag","")
         all_items = [ 
-            (self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"), 
-            (self.addon.getLocalizedString(32002), "next&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"), 
-            (self.addon.getLocalizedString(32039), "recent&mediatype=episodes&tag=%s"%tag, "DefaultRecentlyAddedEpisodes.png"),
-            (self.addon.getLocalizedString(32009), "recommended&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32010), "inprogressandrecommended&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32049), "inprogressandrandom&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32042), "unaired&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
-            (self.addon.getLocalizedString(32043), "nextaired&mediatype=episodes&tag=%s"%tag, "DefaultTvShows.png"),
-            (xbmc.getLocalizedString(10134), "favourites&mediatype=episodes&tag=%s"%tag, "DefaultMovies.png")
+            (self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes", "DefaultTvShows.png"), 
+            (self.addon.getLocalizedString(32002), "next&mediatype=episodes", "DefaultTvShows.png"), 
+            (self.addon.getLocalizedString(32039), "recent&mediatype=episodes", "DefaultRecentlyAddedEpisodes.png"),
+            (self.addon.getLocalizedString(32009), "recommended&mediatype=episodes", "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32010), "inprogressandrecommended&mediatype=episodes", "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32049), "inprogressandrandom&mediatype=episodes", "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32008), "random&mediatype=episodes", "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32042), "unaired&mediatype=episodes", "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32043), "nextaired&mediatype=episodes", "DefaultTvShows.png"),
+            (xbmc.getLocalizedString(10134), "favourites&mediatype=episodes", "DefaultMovies.png")
             ]
         return process_method_on_list(create_main_entry,all_items)
         
@@ -58,6 +57,8 @@ class Episodes(object):
         filters = []
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
+        if self.options.get("tag"):
+            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
         while unique_count < self.options["limit"]:
             recent_episodes = self.artutils.kodidb.episodes(sort=kodi_constants.SORT_DATEADDED,
                 filters=filters,limits=(total_count,self.options["limit"]+total_count))
@@ -88,12 +89,17 @@ class Episodes(object):
         filters = []
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
+        if self.options.get("tag"):
+            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
         return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_DATEADDED, filters=filters, 
             limits=(0,self.options["limit"]))
                 
     def inprogress(self):
         ''' get in progress episodes '''
-        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED, filters=[kodi_constants.FILTER_INPROGRESS], 
+        filters = [kodi_constants.FILTER_INPROGRESS]
+        if self.options.get("tag"):
+            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
+        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED, filters=filters, 
             limits=(0,self.options["limit"]))
 
     def inprogressandrecommended(self):
@@ -119,6 +125,8 @@ class Episodes(object):
         filters = [ kodi_constants.FILTER_UNWATCHED ]
         if self.options["next_inprogress_only"]:
             filters = [ kodi_constants.FILTER_INPROGRESS ]
+        if self.options.get("tag"):
+            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
         fields = [ "title", "lastplayed", "playcount" ]
         # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
         all_shows = self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters, 
