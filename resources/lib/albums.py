@@ -111,7 +111,7 @@ class Albums(object):
     def process_album(self, item):
         '''transform the json received from kodi into something we can use'''
         if self.enable_artwork:
-            extend_dict(item, self.artutils.get_music_artwork( item["title"], item["artist"][0]))
+            extend_dict(item, self.artutils.get_music_artwork( item["artist"][0], item["title"]))
         if self.browse_album:
             item["file"] = "musicdb://albums/%s" %item["albumid"]
             item["isFolder"] = True

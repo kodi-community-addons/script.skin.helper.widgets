@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from utils import process_method_on_list, create_main_entry
 from operator import itemgetter
-from artutils import kodi_constants
+from artutils import kodi_constants, extend_dict
 import xbmc
 
 class Songs(object):
@@ -13,7 +13,7 @@ class Songs(object):
         self.artutils = artutils
         self.addon = addon
         self.options = options
-
+        self.enable_artwork = self.addon.getSetting("music_enable_artwork") == "true"
 
     def listing(self):
         '''main listing with all our song nodes'''
@@ -36,23 +36,27 @@ class Songs(object):
     def recommended(self):
         ''' get recommended songs - library songs with score higher than 7 '''
         filters = [kodi_constants.FILTER_RATING_MUSIC]
-        return self.artutils.kodidb.songs(sort=kodi_constants.SORT_RATING, filters=filters,
+        items = self.artutils.kodidb.songs(sort=kodi_constants.SORT_RATING, filters=filters,
             limits=(0,self.options["limit"]))
+        return process_method_on_list(self.process_song, items)
 
     def recent(self):
         ''' get recently added songs '''
-        return self.artutils.kodidb.get_json("AudioLibrary.GetRecentlyAddedSongs", filters=[],
+        items = self.artutils.kodidb.get_json("AudioLibrary.GetRecentlyAddedSongs", filters=[],
             fields=kodi_constants.FIELDS_SONGS, limits=(0,self.options["limit"]), returntype="songs")
+        return process_method_on_list(self.process_song, items)
 
     def random(self):
         ''' get random songs '''
-        return self.artutils.kodidb.songs(sort=kodi_constants.SORT_RANDOM, filters=[],
+        items = self.artutils.kodidb.songs(sort=kodi_constants.SORT_RANDOM, filters=[],
             limits=(0,self.options["limit"]))
+        return process_method_on_list(self.process_song, items)
 
     def recentplayed(self):
         ''' get in progress songs '''
-        return self.artutils.kodidb.songs(sort=kodi_constants.SORT_LASTPLAYED, filters=[],
+        items = self.artutils.kodidb.songs(sort=kodi_constants.SORT_LASTPLAYED, filters=[],
             limits=(0,self.options["limit"]))
+        return process_method_on_list(self.process_song, items)
 
     def similar(self):
         ''' get similar songs for recent played song'''
@@ -75,7 +79,8 @@ class Songs(object):
                         all_items.append(item)
                         all_titles.append(item["title"])
         #return the list capped by limit and sorted by rating
-        return sorted(all_items,key=itemgetter("rating"),reverse=True)[:self.options["limit"]]
+        items = sorted(all_items,key=itemgetter("rating"),reverse=True)[:self.options["limit"]]
+        return process_method_on_list(self.process_song, items)
 
         
     def get_random_played_song(self):
@@ -91,4 +96,11 @@ class Songs(object):
         '''helper method to get all songs in a specific genre'''
         filters = [{"operator":"contains", "field":"genre","value":genre}]
         return self.artutils.kodidb.songs(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0,limit))
+        
+    def process_song(self, item):
+        '''additional actions on a song item'''
+        if self.enable_artwork:
+            extend_dict(item, self.artutils.get_music_artwork( item["artist"][0], 
+                item["album"], item["title"], str(item["disc"])))
+        return item 
 

@@ -9,7 +9,7 @@ import urllib
 
 try:
     from multiprocessing.pool import ThreadPool as Pool
-    supportsPool = True
+    supportsPool = False
 except Exception: 
     supportsPool = False
 
