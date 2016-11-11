@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from utils import ADDON_ID, create_main_entry
+
+'''all episode widgets provided by the script'''
+
+from utils import create_main_entry
 from operator import itemgetter
 from artutils import kodi_constants, process_method_on_list, TheTvDb
 import xbmc

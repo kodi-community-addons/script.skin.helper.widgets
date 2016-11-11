@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+'''all favourites widgets provided by the script'''
+
 from utils import create_main_entry
 from artutils import Imdb, kodi_constants, extend_dict
 import xbmc
@@ -8,7 +11,7 @@ from urllib import quote_plus
 
 
 class Favourites(object):
-    '''all album widgets provided by the script'''
+    '''all favourites widgets provided by the script'''
 
     def __init__(self, addon, artutils, options):
         '''Initializations pass our common classes and the widget options as arguments'''
@@ -97,7 +100,8 @@ class Favourites(object):
                             item["file"] = "musicdb://albums/%s" % item["albumid"]
                             item["isFolder"] = True
                         else:
-                            item["file"] = u"plugin://script.skin.helper.service?action=playalbum&albumid=%s" % item["albumid"]
+                            item["file"] = u"plugin://script.skin.helper.service?action=playalbum&albumid=%s" \
+                                % item["albumid"]
                         all_items.append(item)
             # add unknown item in the result...
             if not match_found and not media_filter:
