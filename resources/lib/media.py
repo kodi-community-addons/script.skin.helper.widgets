@@ -1,16 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from utils import process_method_on_list, create_main_entry
+from utils import create_main_entry
 from operator import itemgetter
-from artutils import kodi_constants
+from artutils import kodi_constants, process_method_on_list
 from movies import Movies
 from tvshows import Tvshows
 from songs import Songs
 from pvr import Pvr
 from albums import Albums
 from episodes import Episodes
-import xbmc
 import random
+
 
 class Media(object):
     '''all media (mixed) widgets provided by the script'''
@@ -39,8 +39,8 @@ class Media(object):
             (self.addon.getLocalizedString(32059), "random&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32058), "top250&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32001), "favourites&mediatype=media", "DefaultMovies.png")
-            ]
-        return process_method_on_list(create_main_entry,all_items)
+        ]
+        return process_method_on_list(create_main_entry, all_items)
 
     def recommended(self):
         ''' get recommended media '''
@@ -58,7 +58,7 @@ class Media(object):
         all_items += self.songs.recent()
         all_items += self.episodes.recent()
         all_items += self.pvr.recordings()
-        return sorted(all_items,key=itemgetter("dateadded"),reverse=True)[:self.options["limit"]]
+        return sorted(all_items, key=itemgetter("dateadded"), reverse=True)[:self.options["limit"]]
 
     def random(self):
         ''' get random media '''
@@ -75,8 +75,8 @@ class Media(object):
         all_items = self.movies.inprogress()
         all_items += self.episodes.inprogress()
         all_items += self.pvr.recordings()
-        return sorted(all_items,key=itemgetter("lastplayed"),reverse=True)[:self.options["limit"]]
-            
+        return sorted(all_items, key=itemgetter("lastplayed"), reverse=True)[:self.options["limit"]]
+
     def similar(self):
         ''' get similar movies and similar tvshows for given imdbid'''
         all_items = self.movies.similar()
@@ -107,8 +107,8 @@ class Media(object):
         ''' get imdb top250 movies in library '''
         all_items = self.movies.top250()
         all_items += self.tvshows.top250()
-        return sorted(all_items,key=itemgetter("top250_rank"))[:self.options["limit"]]
-        
+        return sorted(all_items, key=itemgetter("top250_rank"))[:self.options["limit"]]
+
     def favourites(self):
         '''get favourite media'''
         from favourites import Favourites

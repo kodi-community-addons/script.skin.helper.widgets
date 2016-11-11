@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from utils import process_method_on_list, create_main_entry
+from utils import create_main_entry
 from operator import itemgetter
-from artutils import kodi_constants
-from thetvdb import TheTvDb
+from artutils import kodi_constants, process_method_on_list, TheTvDb
 from episodes import Episodes
 import xbmc
+
 
 class Tvshows(object):
     '''all tvshow widgets provided by the script'''
@@ -19,42 +19,45 @@ class Tvshows(object):
 
     def listing(self):
         '''main listing with all our tvshow nodes'''
-        tag = self.options.get("tag","")
+        tag = self.options.get("tag", "")
         if tag:
-            label_prefix = u"%s - " %tag
+            label_prefix = u"%s - " % tag
         else:
             label_prefix = u""
         icon = "DefaultTvShows.png"
         all_items = [
-            (label_prefix + self.addon.getLocalizedString(32044), "inprogress&mediatype=tvshows&tag=%s"%tag, icon),
-            (label_prefix + self.addon.getLocalizedString(32045), "recent&mediatype=tvshows&tag=%s"%tag, icon),
-            (label_prefix + self.addon.getLocalizedString(32037), "recommended&mediatype=tvshows&tag=%s"%tag, icon),
-            (label_prefix + self.addon.getLocalizedString(32041), "random&mediatype=tvshows&tag=%s"%tag, icon),
-            (label_prefix + self.addon.getLocalizedString(32047), "top250&mediatype=tvshows&tag=%s"%tag, icon),
-            (label_prefix + xbmc.getLocalizedString(135), "browsegenres&mediatype=tvshows&tag=%s"%tag, icon),
-            ]
+            (label_prefix + self.addon.getLocalizedString(32044), "inprogress&mediatype=tvshows&tag=%s" % tag, icon),
+            (label_prefix + self.addon.getLocalizedString(32045), "recent&mediatype=tvshows&tag=%s" % tag, icon),
+            (label_prefix + self.addon.getLocalizedString(32037), "recommended&mediatype=tvshows&tag=%s" % tag, icon),
+            (label_prefix + self.addon.getLocalizedString(32041), "random&mediatype=tvshows&tag=%s" % tag, icon),
+            (label_prefix + self.addon.getLocalizedString(32047), "top250&mediatype=tvshows&tag=%s" % tag, icon),
+            (label_prefix + xbmc.getLocalizedString(135), "browsegenres&mediatype=tvshows&tag=%s" % tag, icon),
+        ]
         if not tag:
-            all_items += [ 
+            all_items += [
                 (self.addon.getLocalizedString(32014), "similar&mediatype=tvshows", icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=tvshows", icon),
                 (xbmc.getLocalizedString(20459), "tags&mediatype=tvshows", icon)
-                ]
+            ]
         if tag:
-            #add episode nodes with tag filter
-            all_items += [ 
-                (label_prefix + self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes&tag=%s"%tag, icon),
-                (label_prefix + self.addon.getLocalizedString(32039), "recent&mediatype=episodes&tag=%s"%tag, icon),
-                (label_prefix + self.addon.getLocalizedString(32002), "next&mediatype=episodes&tag=%s"%tag, icon),
-                (label_prefix + self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s"%tag, icon)
-                ]
-        return process_method_on_list(create_main_entry,all_items)
-        
+            # add episode nodes with tag filter
+            all_items += [(label_prefix +
+                           self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes&tag=%s" %
+                           tag, icon), (label_prefix +
+                                        self.addon.getLocalizedString(32039), "recent&mediatype=episodes&tag=%s" %
+                                        tag, icon), (label_prefix +
+                                                     self.addon.getLocalizedString(32002), "next&mediatype=episodes&tag=%s" %
+                                                     tag, icon), (label_prefix +
+                                                                  self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s" %
+                                                                  tag, icon)]
+        return process_method_on_list(create_main_entry, all_items)
+
     def tags(self):
         '''get tags listing'''
         all_items = []
         for item in self.artutils.kodidb.files("videodb://tvshows/tags"):
-            details = (item["label"], "listing&mediatype=tvshows&tag=%s"%item["label"], "DefaultTags.png")
-            all_items.append( create_main_entry(details) )
+            details = (item["label"], "listing&mediatype=tvshows&tag=%s" % item["label"], "DefaultTags.png")
+            all_items.append(create_main_entry(details))
         return all_items
 
     def recommended(self):
@@ -63,8 +66,10 @@ class Tvshows(object):
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
-            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
-        tvshows = self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_RATING, filters=filters, limits=(0,self.options["limit"]))
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        tvshows = self.artutils.kodidb.tvshows(
+            sort=kodi_constants.SORT_RATING, filters=filters, limits=(
+                0, self.options["limit"]))
         return process_method_on_list(self.process_tvshow, tvshows)
 
     def recent(self):
@@ -73,77 +78,83 @@ class Tvshows(object):
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
-            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
-        tvshows = self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_DATEADDED, filters=filters, limits=(0,self.options["limit"]))
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        tvshows = self.artutils.kodidb.tvshows(
+            sort=kodi_constants.SORT_DATEADDED, filters=filters, limits=(
+                0, self.options["limit"]))
         return process_method_on_list(self.process_tvshow, tvshows)
-        
+
     def random(self):
         ''' get random tvshows '''
         filters = []
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
-            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
-        tvshows = self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0,self.options["limit"]))
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        tvshows = self.artutils.kodidb.tvshows(
+            sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(
+                0, self.options["limit"]))
         return process_method_on_list(self.process_tvshow, tvshows)
-        
+
     def inprogress(self):
         ''' get in progress tvshows '''
         filters = [kodi_constants.FILTER_INPROGRESS]
         if self.options.get("tag"):
-            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
-        tvshows = self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters, limits=(0,self.options["limit"]))
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        tvshows = self.artutils.kodidb.tvshows(
+            sort=kodi_constants.SORT_LASTPLAYED, filters=filters, limits=(
+                0, self.options["limit"]))
         return process_method_on_list(self.process_tvshow, tvshows)
-        
+
     def similar(self):
         ''' get similar tvshows for given imdbid or just from random watched title if no imdbid'''
-        imdb_id = self.options.get("imdbid","")
+        imdb_id = self.options.get("imdbid", "")
         all_items = []
         all_titles = list()
         json_result = []
-        #lookup tvshow by imdbid or just pick a random watched tvshow
+        # lookup tvshow by imdbid or just pick a random watched tvshow
         ref_tvshow = None
         if imdb_id:
-            #get tvshow by imdbid
+            # get tvshow by imdbid
             ref_tvshow = self.artutils.kodidb.tvshow_by_imdbid(imdb_id)
         if not ref_tvshow:
-            #just get a random watched tvshow
+            # just get a random watched tvshow
             ref_tvshow = self.get_random_watched_tvshow()
         if ref_tvshow:
-            #get all tvshows for the genres in the tvshow
+            # get all tvshows for the genres in the tvshow
             genres = ref_tvshow["genre"]
             similar_title = ref_tvshow["title"]
             for genre in genres:
                 self.options["genre"] = genre
                 genre_tvshows = self.forgenre()
                 for item in genre_tvshows:
-                    #prevent duplicates so skip reference tvshow and titles already in the list
+                    # prevent duplicates so skip reference tvshow and titles already in the list
                     if not item["title"] in all_titles and not item["title"] == similar_title:
                         item["extraproperties"] = {"similartitle": similar_title, "originalpath": item["file"]}
                         all_items.append(item)
                         all_titles.append(item["title"])
-        #return the list capped by limit and sorted by rating
-        tvshows = sorted(all_items,key=itemgetter("rating"),reverse=True)[:self.options["limit"]]
+        # return the list capped by limit and sorted by rating
+        tvshows = sorted(all_items, key=itemgetter("rating"), reverse=True)[:self.options["limit"]]
         return process_method_on_list(self.process_tvshow, tvshows)
 
     def forgenre(self):
         ''' get top rated tvshows for given genre'''
-        genre = self.options.get("genre","")
+        genre = self.options.get("genre", "")
         all_items = []
         if not genre:
-            #get a random genre if no genre provided
+            # get a random genre if no genre provided
             json_result = self.artutils.kodidb.genres("tvshow")
             if json_result:
                 genre = json_result[0]["label"]
         if genre:
-            #get all tvshows from the same genre
-            for item in self.get_genre_tvshows(genre,self.options["hide_watched"],self.options["limit"]):
-                #append original genre as listitem property for later reference by skinner
+            # get all tvshows from the same genre
+            for item in self.get_genre_tvshows(genre, self.options["hide_watched"], self.options["limit"]):
+                # append original genre as listitem property for later reference by skinner
                 item["extraproperties"] = {"genretitle": genre, "originalpath": item["file"]}
                 all_items.append(item)
 
-        #return the list sorted by rating
-        tvshows = sorted(all_items,key=itemgetter("rating"),reverse=True)
+        # return the list sorted by rating
+        tvshows = sorted(all_items, key=itemgetter("rating"), reverse=True)
         return process_method_on_list(self.process_tvshow, tvshows)
 
     def top250(self):
@@ -151,12 +162,14 @@ class Tvshows(object):
         all_items = []
         filters = []
         if self.options.get("tag"):
-            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
-        all_tvshows = self.artutils.kodidb.get_json('VideoLibrary.GetTvShows',fields=["imdbnumber"],returntype="tvshows",filters=filters)
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        all_tvshows = self.artutils.kodidb.get_json(
+            'VideoLibrary.GetTvShows', fields=["imdbnumber"],
+            returntype="tvshows", filters=filters)
         top_250 = self.artutils.imdb.get_top250_db()
         for tvshow in all_tvshows:
             if tvshow["imdbnumber"] and not tvshow["imdbnumber"].startswith("tt"):
-                #we have a tvdb id
+                # we have a tvdb id
                 tvdb_info = self.thetvdb.get_series(tvshow["imdbnumber"])
                 if tvdb_info:
                     tvshow["imdbnumber"] = tvdb_info["imdbnumber"]
@@ -164,7 +177,7 @@ class Tvshows(object):
                 tvshow_full = self.artutils.kodidb.tvshow(tvshow["tvshowid"])
                 tvshow_full["top250_rank"] = int(top_250[tvshow["imdbnumber"]])
                 all_items.append(tvshow_full)
-        tvshows = sorted(all_items,key=itemgetter("top250_rank"))[:self.options["limit"]]
+        tvshows = sorted(all_items, key=itemgetter("top250_rank"))[:self.options["limit"]]
         return process_method_on_list(self.process_tvshow, tvshows)
 
     def browsegenres(self):
@@ -175,66 +188,72 @@ class Tvshows(object):
             TODO: get auto generated collage pictures from skinhelper's artutils ?
         '''
         all_genres = self.artutils.kodidb.genres("tvshow")
-        return process_method_on_list(self.get_genre_artwork,all_genres)
+        return process_method_on_list(self.get_genre_artwork, all_genres)
 
     def get_genre_artwork(self, genre_json):
         '''helper method for browsegenres'''
-        #for each genre we get 5 random items from the library and attach the artwork to the genre listitem
+        # for each genre we get 5 random items from the library and attach the artwork to the genre listitem
         genre_json["art"] = {}
-        genre_json["file"] = "videodb://tvshows/genres/%s/"%genre_json["genreid"]
+        genre_json["file"] = "videodb://tvshows/genres/%s/" % genre_json["genreid"]
         if self.options.get("tag"):
             genre_json["file"] = "plugin://script.skin.helper.widgets?mediatype=tvshows&action=forgenre&tag=%s&genre=%s"\
-                %(self.options["tag"],genre_json["label"])
+                % (self.options["tag"], genre_json["label"])
         genre_json["isFolder"] = True
         genre_json["IsPlayable"] = "false"
-        genre_json["thumbnail"] = genre_json.get("thumbnail", "DefaultGenre.png") #TODO: get icon from resource addon ?
+        genre_json["thumbnail"] = genre_json.get("thumbnail",
+                                                 "DefaultGenre.png")  # TODO: get icon from resource addon ?
         genre_json["type"] = "genre"
-        genre_tvshows = self.get_genre_tvshows(genre_json["label"],False,5)
+        genre_tvshows = self.get_genre_tvshows(genre_json["label"], False, 5)
         if not genre_tvshows:
             return None
         for count, genre_tvshow in enumerate(genre_tvshows):
-            genre_json["art"]["poster.%s" %count] = genre_tvshow["art"].get("poster","")
-            genre_json["art"]["fanart.%s" %count] = genre_tvshow["art"].get("fanart","")
+            genre_json["art"]["poster.%s" % count] = genre_tvshow["art"].get("poster", "")
+            genre_json["art"]["fanart.%s" % count] = genre_tvshow["art"].get("fanart", "")
             if not "fanart" in genre_json["art"]:
-                #set genre's primary fanart image to first movie fanart
-                genre_json["art"]["fanart"] = genre_tvshow["art"].get("fanart","")
+                # set genre's primary fanart image to first movie fanart
+                genre_json["art"]["fanart"] = genre_tvshow["art"].get("fanart", "")
         return genre_json
 
     def nextaired(self):
         '''legacy method: get nextaired episodes instead'''
         from episodes import Episodes
-        eps = Episodes( self.addon, self.artutils.kodidb, self.options )
+        eps = Episodes(self.addon, self.artutils.kodidb, self.options)
         result = eps.nextaired()
         del eps
         return result
 
     def get_random_watched_tvshow(self):
         '''gets a random watched or inprogress tvshow from kodi_constants.'''
-        filters = [kodi_constants.FILTER_WATCHED,kodi_constants.FILTER_INPROGRESS]
-        tvshows = self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_RANDOM,filters=filters,filtertype="or",limits=(0,1))
+        filters = [kodi_constants.FILTER_WATCHED, kodi_constants.FILTER_INPROGRESS]
+        tvshows = self.artutils.kodidb.tvshows(
+            sort=kodi_constants.SORT_RANDOM,
+            filters=filters,
+            filtertype="or",
+            limits=(
+                0,
+                1))
         if tvshows:
             return tvshows[0]
         else:
             return None
 
-    def get_genre_tvshows(self,genre,hide_watched=False,limit=100):
+    def get_genre_tvshows(self, genre, hide_watched=False, limit=100):
         '''helper method to get all tvshows in a specific genre'''
-        filters = [{"operator":"is", "field":"genre","value":genre}]
+        filters = [{"operator": "is", "field": "genre", "value": genre}]
         if hide_watched:
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
-            filters.append({"operator":"contains", "field":"tag","value":self.options["tag"]})
-        return self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_RANDOM,filters=filters,limits=(0,limit))
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        return self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0, limit))
 
     def process_tvshow(self, item):
         '''set optional details to tvshow item'''
-        item["file"] = "videodb://tvshows/titles/%s" %item["tvshowid"]
+        item["file"] = "videodb://tvshows/titles/%s" % item["tvshowid"]
         item["isFolder"] = True
         return item
-        
+
     def favourites(self):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "tvshows"
         return Favourites(self.addon, self.artutils, self.options).listing()
-        
