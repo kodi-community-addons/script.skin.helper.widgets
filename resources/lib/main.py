@@ -122,6 +122,7 @@ class Main(object):
             media_module = __import__(media_type)
             media_class = getattr(media_module, media_type.capitalize())(self.addon, self.artutils, self.options)
             all_items = getattr(media_class, action)()
+            del media_class
 
             # randomize output if requested by skinner or user
             if self.options.get("randomize", "") == "true":

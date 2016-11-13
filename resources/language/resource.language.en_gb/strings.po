@@ -1,6 +1,6 @@
 # Kodi language file
-# Addon Name: Skin Helper Service
-# Addon id: script.skin.helper.service
+# Addon Name: Skin Helper Widgets
+# Addon id: script.skin.helper.widgets
 # Addon Provider: marcelveldt
 msgid ""
 msgstr ""
