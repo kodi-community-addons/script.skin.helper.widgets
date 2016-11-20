@@ -1,7 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''all favourites widgets provided by the script'''
+'''
+    script.skin.helper.widgets
+    favourites.py
+    all favourites widgets provided by the script
+'''
 
 from artutils import Imdb, kodi_constants, extend_dict
 import xbmc
@@ -34,7 +38,7 @@ class Favourites(object):
             if media_filter in ["media", "tvshows"]:
                 filters = [{"operator": "contains", "field": "tag", "value": "Favorite tvshows"}]
                 for item in self.artutils.kodidb.tvshows(filters=filters):
-                    item["file"] == "videodb://tvshows/titles/%s" % item["tvshowid"]
+                    item["file"] = "videodb://tvshows/titles/%s" % item["tvshowid"]
                     item["isFolder"] = True
                     all_items.append(item)
 

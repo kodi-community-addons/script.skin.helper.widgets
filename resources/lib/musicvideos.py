@@ -7,7 +7,7 @@
     all musivideos widgets provided by the script
 '''
 
-from utils import ADDON_ID, create_main_entry
+from utils import create_main_entry
 from artutils import kodi_constants, process_method_on_list
 import xbmc
 

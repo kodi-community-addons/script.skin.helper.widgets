@@ -1,6 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+'''
+    script.skin.helper.widgets
+    main.py
+    main plugin listing and entry point
+'''
+
 import urlparse
 from utils import log_msg, ADDON_ID, create_main_entry
 from simplecache import SimpleCache
@@ -10,7 +16,6 @@ import xbmcaddon
 import xbmcgui
 import sys
 from artutils import ArtUtils, process_method_on_list
-import time
 
 ADDON_HANDLE = int(sys.argv[1])
 

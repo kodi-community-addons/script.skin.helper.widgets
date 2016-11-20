@@ -117,7 +117,6 @@ class Tvshows(object):
         imdb_id = self.options.get("imdbid", "")
         all_items = []
         all_titles = list()
-        json_result = []
         # lookup tvshow by imdbid or just pick a random watched tvshow
         ref_tvshow = None
         if imdb_id:

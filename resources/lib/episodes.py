@@ -1,7 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''all episode widgets provided by the script'''
+'''
+    script.skin.helper.widgets
+    episodes.py
+    all episodes widgets provided by the script
+'''
 
 from utils import create_main_entry
 from operator import itemgetter

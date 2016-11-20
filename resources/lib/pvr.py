@@ -9,11 +9,9 @@
 
 from utils import create_main_entry
 from operator import itemgetter
-from artutils import kodi_constants, extend_dict, process_method_on_list, get_clean_image
+from artutils import extend_dict, process_method_on_list, get_clean_image
 import xbmc
-import xbmcplugin
 from urllib import quote_plus
-import sys
 
 
 class Pvr(object):
