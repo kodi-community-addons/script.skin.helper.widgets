@@ -1,5 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+'''
+    script.skin.helper.widgets
+    songs.py
+    all songs widgets provided by the script
+'''
+
 from utils import create_main_entry
 from operator import itemgetter
 from artutils import kodi_constants, extend_dict, process_method_on_list

@@ -1,9 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+'''
+    script.skin.helper.widgets
+    tvshows.py
+    all tvshows widgets provided by the script
+'''
+
 from utils import create_main_entry
 from operator import itemgetter
 from artutils import kodi_constants, process_method_on_list, TheTvDb
-from episodes import Episodes
 import xbmc
 
 
@@ -41,15 +47,15 @@ class Tvshows(object):
             ]
         if tag:
             # add episode nodes with tag filter
-            all_items += [(label_prefix +
-                           self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes&tag=%s" %
-                           tag, icon), (label_prefix +
-                                        self.addon.getLocalizedString(32039), "recent&mediatype=episodes&tag=%s" %
-                                        tag, icon), (label_prefix +
-                                                     self.addon.getLocalizedString(32002), "next&mediatype=episodes&tag=%s" %
-                                                     tag, icon), (label_prefix +
-                                                                  self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s" %
-                                                                  tag, icon)]
+            all_items += [
+                (label_prefix + self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes&tag=%s" %
+                    tag, icon),
+                (label_prefix + self.addon.getLocalizedString(32039), "recent&mediatype=episodes&tag=%s" %
+                    tag, icon),
+                (label_prefix + self.addon.getLocalizedString(32002), "next&mediatype=episodes&tag=%s" %
+                    tag, icon),
+                (label_prefix + self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s" %
+                    tag, icon)]
         return process_method_on_list(create_main_entry, all_items)
 
     def tags(self):
@@ -196,8 +202,8 @@ class Tvshows(object):
         genre_json["art"] = {}
         genre_json["file"] = "videodb://tvshows/genres/%s/" % genre_json["genreid"]
         if self.options.get("tag"):
-            genre_json["file"] = "plugin://script.skin.helper.widgets?mediatype=tvshows&action=forgenre&tag=%s&genre=%s"\
-                % (self.options["tag"], genre_json["label"])
+            genre_json["file"] = "plugin://script.skin.helper.widgets?"\
+                "mediatype=tvshows&action=forgenre&tag=%s&genre=%s" % (self.options["tag"], genre_json["label"])
         genre_json["isFolder"] = True
         genre_json["IsPlayable"] = "false"
         genre_json["thumbnail"] = genre_json.get("thumbnail",
@@ -209,7 +215,7 @@ class Tvshows(object):
         for count, genre_tvshow in enumerate(genre_tvshows):
             genre_json["art"]["poster.%s" % count] = genre_tvshow["art"].get("poster", "")
             genre_json["art"]["fanart.%s" % count] = genre_tvshow["art"].get("fanart", "")
-            if not "fanart" in genre_json["art"]:
+            if "fanart" not in genre_json["art"]:
                 # set genre's primary fanart image to first movie fanart
                 genre_json["art"]["fanart"] = genre_tvshow["art"].get("fanart", "")
         return genre_json
@@ -246,7 +252,8 @@ class Tvshows(object):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         return self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0, limit))
 
-    def process_tvshow(self, item):
+    @staticmethod
+    def process_tvshow(item):
         '''set optional details to tvshow item'''
         item["file"] = "videodb://tvshows/titles/%s" % item["tvshowid"]
         item["isFolder"] = True

@@ -1,7 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''all album widgets provided by the script'''
+'''
+    script.skin.helper.widgets
+    albums.py
+    all albums widgets provided by the script
+'''
 
 from utils import create_main_entry
 from operator import itemgetter
@@ -66,7 +70,6 @@ class Albums(object):
         ''' get similar albums for recent played album'''
         all_items = []
         all_titles = list()
-        json_result = []
         ref_album = self.get_random_played_album()
         if not ref_album:
             ref_album = self.get_random_highrated_album()

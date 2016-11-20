@@ -1,5 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+'''
+    script.skin.helper.widgets
+    movies.py
+    all movies widgets provided by the script
+'''
+
 from utils import create_main_entry
 from operator import itemgetter
 from artutils import kodi_constants, process_method_on_list
@@ -101,7 +108,6 @@ class Movies(object):
         imdb_id = self.options.get("imdbid", "")
         all_items = []
         all_titles = list()
-        json_result = []
         # lookup movie by imdbid or just pick a random watched movie
 
         ref_movie = None

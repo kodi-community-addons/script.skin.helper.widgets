@@ -1,5 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+'''
+    script.skin.helper.widgets
+    musivideos.py
+    all musivideos widgets provided by the script
+'''
+
 from utils import ADDON_ID, create_main_entry
 from artutils import kodi_constants, process_method_on_list
 import xbmc
@@ -22,10 +29,13 @@ class Musicvideos(object):
         tag = self.options.get("tag", "")
         all_items = [
             (self.addon.getLocalizedString(32061), "inprogress&mediatype=musicvideos&tag=%s" %
-             tag, "DefaultTvShows.png"), (self.addon.getLocalizedString(32040), "recent&mediatype=musicvideos&tag=%s" %
-                                          tag, "DefaultRecentlyAddedmusicvideos.png"), (self.addon.getLocalizedString(32062), "random&mediatype=musicvideos&tag=%s" %
-                                                                                        tag, "DefaultTvShows.png"), (xbmc.getLocalizedString(10134), "favourites&mediatype=musicvideos&tag=%s" %
-                                                                                                                     tag, "DefaultMovies.png")]
+                tag, "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32040), "recent&mediatype=musicvideos&tag=%s" %
+                tag, "DefaultRecentlyAddedmusicvideos.png"),
+            (self.addon.getLocalizedString(32062), "random&mediatype=musicvideos&tag=%s" %
+                tag, "DefaultTvShows.png"),
+            (xbmc.getLocalizedString(10134), "favourites&mediatype=musicvideos&tag=%s" %
+                tag, "DefaultMovies.png")]
         return process_method_on_list(create_main_entry, all_items)
 
     def favourites(self):

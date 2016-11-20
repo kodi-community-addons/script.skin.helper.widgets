@@ -3,7 +3,6 @@
 
 '''all favourites widgets provided by the script'''
 
-from utils import create_main_entry
 from artutils import Imdb, kodi_constants, extend_dict
 import xbmc
 import xbmcvfs

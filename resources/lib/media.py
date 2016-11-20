@@ -1,8 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+'''
+    script.skin.helper.widgets
+    media.py
+    all media (mixed) widgets provided by the script
+'''
+
 from utils import create_main_entry
 from operator import itemgetter
-from artutils import kodi_constants, process_method_on_list
+from artutils import process_method_on_list
 from movies import Movies
 from tvshows import Tvshows
 from songs import Songs

@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from utils import ADDON_ID, create_main_entry
+
+'''
+    script.skin.helper.widgets
+    pvr.py
+    all PVR widgets provided by the script
+'''
+
+from utils import create_main_entry
 from operator import itemgetter
 from artutils import kodi_constants, extend_dict, process_method_on_list, get_clean_image
 import xbmc
 import xbmcplugin
-import xbmcgui
 from urllib import quote_plus
 import sys
 
@@ -23,10 +29,12 @@ class Pvr(object):
     def listing(self):
         '''main listing with all our channel nodes'''
         all_items = [
-            (self.addon.getLocalizedString(32020), "channels&mediatype=pvr&skipcache=true", "DefaultAddonPVRClient.png"),
+            (self.addon.getLocalizedString(32020), "channels&mediatype=pvr&skipcache=true",
+                "DefaultAddonPVRClient.png"),
             (self.addon.getLocalizedString(32018), "recordings&mediatype=pvr", "DefaultAddonPVRClient.png"),
             (self.addon.getLocalizedString(32019), "nextrecordings&mediatype=pvr", "DefaultAddonPVRClient.png"),
-            (self.addon.getLocalizedString(32031), "nextrecordings&mediatype=pvr&reversed=true", "DefaultAddonPVRClient.png"),
+            (self.addon.getLocalizedString(32031), "nextrecordings&mediatype=pvr&reversed=true",
+                "DefaultAddonPVRClient.png"),
             (self.addon.getLocalizedString(32021), "timers&mediatype=pvr", "DefaultAddonPVRClient.png")
         ]
         return process_method_on_list(create_main_entry, all_items)
@@ -40,6 +48,7 @@ class Pvr(object):
         return all_items
 
     def recordings(self, next_only=False):
+        '''get all recordings'''
         all_items = []
         all_titles = []
         if xbmc.getCondVisibility("PVR.HasTVChannels"):

@@ -1,10 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+'''
+    script.skin.helper.widgets
+    utils.py
+    helper methods
+'''
+
 import xbmc
 
 ADDON_ID = "script.skin.helper.widgets"
-
 
 def log_msg(msg, loglevel=xbmc.LOGDEBUG):
     '''log message to kodi log'''
