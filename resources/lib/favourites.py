@@ -7,7 +7,7 @@
     all favourites widgets provided by the script
 '''
 
-from artutils import Imdb, extend_dict
+from artutils import extend_dict
 import xbmc
 import xbmcvfs
 from urllib import quote_plus
