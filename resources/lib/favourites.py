@@ -7,7 +7,7 @@
     all favourites widgets provided by the script
 '''
 
-from artutils import Imdb, kodi_constants, extend_dict
+from artutils import Imdb, extend_dict
 import xbmc
 import xbmcvfs
 from urllib import quote_plus
@@ -53,7 +53,7 @@ class Favourites(object):
                     result = self.artutils.kodidb.tvshow(tvshowid)
                     if result:
                         match_found = True
-                        item["file"] == "videodb://tvshows/titles/%s" % item["tvshowid"]
+                        item["file"] = "videodb://tvshows/titles/%s" % item["tvshowid"]
                         item["isFolder"] = True
                         all_items.append(result)
 
