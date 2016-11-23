@@ -267,3 +267,15 @@ msgstr ""
 msgctxt "#32062"
 msgid "Random music videos"
 msgstr ""
+
+msgctxt "#32063"
+msgid "Recently added artists"
+msgstr ""
+
+msgctxt "#32064"
+msgid "Random artists"
+msgstr ""
+
+msgctxt "#32065"
+msgid "Recommended artists"
+msgstr ""

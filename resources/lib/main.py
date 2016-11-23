@@ -70,8 +70,9 @@ class Main(object):
                 ("pvr", "pvr"),
                 ("albums", "albums"),
                 ("songs", "songs"),
+                ("artists", "artists"),
                 ("media", "media"),
-                    ("favourites", "favourites")]:
+                ("favourites", "favourites")]:
                 if item[0] in options["action"]:
                     options["mediatype"] = item[1]
                     options["action"] = options["action"].replace(item[1], "").replace(item[0], "")
@@ -86,6 +87,8 @@ class Main(object):
                 options["refresh"] = alt_refresh
             if not options.get("action"):
                 options["action"] = "listing"
+            if "listing" in options["action"]:
+                options["skipcache"] = "true"
 
         # set the widget settings as options
         options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
@@ -166,8 +169,9 @@ class Main(object):
 
         # music nodes
         if xbmc.getCondVisibility("Library.HasContent(music)"):
-            all_items.append((xbmc.getLocalizedString(132), "albumslisting", "DefaultAddonAlbumInfo.png"))
-            all_items.append((xbmc.getLocalizedString(134), "songslisting", "DefaultAddonMusic.png"))
+            all_items.append((xbmc.getLocalizedString(132), "albumslisting", "DefaultAlbumCover.png"))
+            all_items.append((xbmc.getLocalizedString(134), "songslisting", "DefaultMusicSongs.png"))
+            all_items.append((xbmc.getLocalizedString(133), "artistslisting", "DefaultArtist.png"))
 
         # musicvideo node
         if xbmc.getCondVisibility("Library.HasContent(musicvideos)"):
