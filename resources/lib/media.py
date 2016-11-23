@@ -121,3 +121,7 @@ class Media(object):
         from favourites import Favourites
         self.options["mediafilter"] = "media"
         return Favourites(self.addon, self.artutils, self.options).listing()
+        
+    def favourite(self):
+        '''synonym to favourites'''
+        return self.favourites()

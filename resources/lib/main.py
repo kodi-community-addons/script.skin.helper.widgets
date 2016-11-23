@@ -84,6 +84,8 @@ class Main(object):
                 options["skipcache"] = "true"
             elif alt_refresh:
                 options["refresh"] = alt_refresh
+            if not options.get("action"):
+                options["action"] = "listing"
 
         # set the widget settings as options
         options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
