@@ -88,7 +88,7 @@ class Pvr(object):
 
     def process_channel(self, channeldata):
         '''transform the json received from kodi into something we can use'''
-        item = {}
+        item = { "art": {} }
         channelname = channeldata["label"]
         channellogo = get_clean_image(channeldata['thumbnail'])
         if channeldata.get('broadcastnow'):
@@ -113,7 +113,8 @@ class Pvr(object):
         item["channelid"] = channeldata["channelid"]
         if not channellogo:
             channellogo = self.artutils.get_channellogo(channelname).get("ChannelLogo", "")
-        item["art"] = {"thumbnail": channellogo}
+        if not item["art"].get("thumb"):
+            item["art"]["thumb"] = channellogo
         item["channellogo"] = channellogo
         item["isFolder"] = False
         return item
@@ -131,6 +132,8 @@ class Pvr(object):
             item["lastplayed"] = item["endtime"].split(" ")[0]
         else:
             item["lastplayed"] = ""
+        if not item["art"].get("thumb"):
+            item["art"]["thumb"] = channellogo
         return item
 
     def process_timer(self, item):
