@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
 "POT-Creation-Date: 2014-10-26 17:05+0000\n"
-"PO-Revision-Date: 2016-05-21 19:07+0200\n"
-"Last-Translator: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Guilouz\n"
-"Language: fr\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
 msgctxt "#32000"
 msgid "Favourites"
@@ -47,6 +47,18 @@ msgstr "Films similaires"
 msgctxt "#32007"
 msgid "In progress and Recommended Media"
 msgstr "Médias en cours et recommandés"
+
+msgctxt "#32008"
+msgid "Random Episodes"
+msgstr "Episodes aléatoires"
+
+msgctxt "#32009"
+msgid "Recommended Episodes"
+msgstr "Episodes recommandés"
+
+msgctxt "#32010"
+msgid "In progress and recommended Episodes"
+msgstr "Episodes en cours et recommandés"
 
 msgctxt "#32011"
 msgid "In progress Media"
@@ -179,3 +191,79 @@ msgstr "Episodes à venir"
 msgctxt "#32043"
 msgid "Next airing episodes"
 msgstr "Episodes diffusés prochainement"
+
+msgctxt "#32044"
+msgid "In progress TV shows"
+msgstr "Séries TV en cours"
+
+msgctxt "#32045"
+msgid "Recently added TV shows"
+msgstr "Séries TV récemment ajoutées"
+
+msgctxt "#32046"
+msgid "IMDB Top 250 movies in library"
+msgstr "Top 250 IMDB des films de la bibliothèque"
+
+msgctxt "#32047"
+msgid "IMDB Top 250 Tv shows in library"
+msgstr "Top 250 IMDB des séries TV de la bibliothèque"
+
+msgctxt "#32048"
+msgid "Random movies"
+msgstr "Films aléatoires"
+
+msgctxt "#32049"
+msgid "In progress and random Episodes"
+msgstr "Episodes en cours et aléatoires"
+
+msgctxt "#32050"
+msgid "Group items in recent episodes widget"
+msgstr "Grouper les éléments du widget des épisodes récents"
+
+msgctxt "#32051"
+msgid "Browse TV Show"
+msgstr "Parcourir le série TV"
+
+msgctxt "#32052"
+msgid "Browse Season"
+msgstr "Parcourir la saison"
+
+msgctxt "#32053"
+msgid "Default number of items to show in widget"
+msgstr "Nombre d'éléments par défaut à afficher sur le widget"
+
+msgctxt "#32054"
+msgid "PVR"
+msgstr "PVR"
+
+msgctxt "#32055"
+msgid "Similar songs"
+msgstr "Chansons similaires"
+
+msgctxt "#32056"
+msgid "Similar albums"
+msgstr "Albums similaires"
+
+msgctxt "#32057"
+msgid "Mixed Media"
+msgstr "Médias mélangés"
+
+msgctxt "#32058"
+msgid "Movies and Tvshows in IMDB Top250"
+msgstr "Films et séries TV du Top 250 IMDB"
+
+msgctxt "#32059"
+msgid "Random media"
+msgstr "Médias aléatoires"
+
+msgctxt "#32060"
+msgid "In progress and Random media"
+msgstr "Médias en cours et aléatoires"
+
+msgctxt "#32061"
+msgid "In progress music videos"
+msgstr "Clips vidéos en cours"
+
+msgctxt "#32062"
+msgid "Random music videos"
+msgstr "Clips vidéos aléatoires"
