@@ -93,8 +93,6 @@ class Tvshows(object):
     def random(self):
         ''' get random tvshows '''
         filters = []
-        if self.options["hide_watched"]:
-            filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         tvshows = self.artutils.kodidb.tvshows(
@@ -262,4 +260,8 @@ class Tvshows(object):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "tvshows"
-        return Favourites(self.addon, self.artutils, self.options).listing()
+        return Favourites(self.addon, self.artutils, self.options).favourites()
+        
+    def favourite(self):
+        '''synonym to favourites'''
+        return self.favourites()

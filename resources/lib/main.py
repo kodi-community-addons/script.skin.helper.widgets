@@ -72,20 +72,22 @@ class Main(object):
                 ("songs", "songs"),
                 ("artists", "artists"),
                 ("media", "media"),
-                ("favourites", "favourites")]:
+                    ("favourites", "favourites")]:
                 if item[0] in options["action"]:
                     options["mediatype"] = item[1]
                     options["action"] = options["action"].replace(item[1], "").replace(item[0], "")
                     break
 
-        # prefer refresh param for the mediatype
+        # prefer reload param for the mediatype
         if "mediatype" in options:
-            alt_refresh = self.win.getProperty("widgetreload-%s" % options["mediatype"])
             if options["mediatype"] == "favourites" or "favourite" in options["action"]:
                 options["skipcache"] = "true"
-            elif alt_refresh:
-                options["refresh"] = alt_refresh
-            if not options.get("action"):
+            elif options["mediatype"] in ["movies", "episodes", "musicvideos", "songs"]:
+                alt_reload = self.win.getProperty("widgetreload-%s" % options["mediatype"])
+                options["reload"] = alt_reload
+            if not options.get("action") and options["mediatype"] == "favourites":
+                options["action"] = "favourites"
+            elif not options.get("action"):
                 options["action"] = "listing"
             if "listing" in options["action"]:
                 options["skipcache"] = "true"
@@ -105,7 +107,7 @@ class Main(object):
         '''display the listing for the provided action and mediatype'''
         media_type = self.options["mediatype"]
         action = self.options["action"]
-        refresh = self.options.get("refresh", "")
+        reload = self.options.get("reload", "")
         # set widget content type
         xbmcplugin.setContent(ADDON_HANDLE, media_type)
 
@@ -113,10 +115,13 @@ class Main(object):
         # we use a checksum based on the options to make sure the cache is ignored when needed
         all_items = []
         cache_str = "SkinHelper.Widgets.%s.%s" % (media_type, action)
-        if not refresh:
+        if not self.win.getProperty("widgetreload2"):
+            # at startup we simply accept whatever is in the cache
             cache_checksum = None
         else:
-            cache_checksum = ".".join([repr(value) for value in self.options.itervalues()])
+            cache_checksum = ""
+            for key in sorted(self.options):
+                cache_checksum += "%s.%s" %(key, self.options[key])
         cache = self.cache.get(cache_str, checksum=cache_checksum)
         if cache and not self.options.get("skipcache") == "true":
             log_msg("MEDIATYPE: %s - ACTION: %s -- got items from cache - CHECKSUM: %s"
@@ -164,7 +169,7 @@ class Main(object):
             all_items.append((xbmc.getLocalizedString(20360), "episodeslisting", "DefaultTvShows.png"))
 
         # pvr node
-        if xbmc.getCondVisibility("PVR.HasTvChannels"):
+        if xbmc.getCondVisibility("Pvr.HasTVChannels"):
             all_items.append((self.addon.getLocalizedString(32054), "pvrlisting", "DefaultAddonPVRClient.png"))
 
         # music nodes

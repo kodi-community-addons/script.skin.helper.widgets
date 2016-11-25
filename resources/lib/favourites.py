@@ -7,7 +7,8 @@
     all favourites widgets provided by the script
 '''
 
-from artutils import extend_dict
+from artutils import extend_dict, process_method_on_list
+from utils import create_main_entry
 import xbmc
 import xbmcvfs
 from urllib import quote_plus
@@ -25,6 +26,17 @@ class Favourites(object):
         self.browse_album = self.addon.getSetting("music_browse_album") == "true"
 
     def listing(self):
+        '''main listing with only our favourites nodes'''
+        all_items = [
+            (xbmc.getLocalizedString(10134),
+             "favourites&mediatype=favourites",
+             "DefaultFiles.png"),
+            (self.addon.getLocalizedString(32001),
+             "favourites&mediatype=favourite&mediafilter=media",
+             "DefaultMovies.png")]
+        return process_method_on_list(create_main_entry, all_items)
+
+    def favourites(self):
         '''show kodi favourites '''
         all_items = []
         media_filter = self.options.get("mediafilter", "")

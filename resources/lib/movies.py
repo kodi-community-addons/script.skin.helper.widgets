@@ -243,4 +243,8 @@ class Movies(object):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "movies"
-        return Favourites(self.addon, self.artutils, self.options).listing()
+        return Favourites(self.addon, self.artutils, self.options).favourites()
+        
+    def favourite(self):
+        '''synonym to favourites'''
+        return self.favourites()

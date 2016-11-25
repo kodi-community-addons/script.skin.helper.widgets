@@ -27,20 +27,27 @@ class Pvr(object):
     def listing(self):
         '''main listing with all our channel nodes'''
         all_items = [
-            (self.addon.getLocalizedString(32020), "channels&mediatype=pvr&skipcache=true",
-                "DefaultAddonPVRClient.png"),
-            (self.addon.getLocalizedString(32018), "recordings&mediatype=pvr", "DefaultAddonPVRClient.png"),
-            (self.addon.getLocalizedString(32019), "nextrecordings&mediatype=pvr", "DefaultAddonPVRClient.png"),
-            (self.addon.getLocalizedString(32031), "nextrecordings&mediatype=pvr&reversed=true",
-                "DefaultAddonPVRClient.png"),
-            (self.addon.getLocalizedString(32021), "timers&mediatype=pvr", "DefaultAddonPVRClient.png")
-        ]
+            (self.addon.getLocalizedString(32020),
+             "channels&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]",
+             "DefaultAddonPVRClient.png"),
+            (self.addon.getLocalizedString(32018),
+             "recordings&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]",
+             "DefaultAddonPVRClient.png"),
+            (self.addon.getLocalizedString(32019),
+             "nextrecordings&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]",
+             "DefaultAddonPVRClient.png"),
+            (self.addon.getLocalizedString(32031),
+             "nextrecordings&mediatype=pvr&reversed=true&reload=$INFO[Window(Home).Property(widgetreload2)]",
+             "DefaultAddonPVRClient.png"),
+            (self.addon.getLocalizedString(32021),
+             "timers&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]",
+             "DefaultAddonPVRClient.png")]
         return process_method_on_list(create_main_entry, all_items)
 
     def channels(self):
         ''' get all channels '''
         all_items = []
-        if xbmc.getCondVisibility("PVR.HasTVChannels"):
+        if xbmc.getCondVisibility("Pvr.HasTVChannels"):
             all_items = self.artutils.kodidb.channels(limits=(0, self.options["limit"]))
             all_items = process_method_on_list(self.process_channel, all_items)
         return all_items
@@ -49,7 +56,7 @@ class Pvr(object):
         '''get all recordings'''
         all_items = []
         all_titles = []
-        if xbmc.getCondVisibility("PVR.HasTVChannels"):
+        if xbmc.getCondVisibility("Pvr.HasTVChannels"):
             # Get a list of all the unwatched tv recordings
             recordings = self.artutils.kodidb.recordings()
             recordings = sorted(recordings, key=itemgetter('endtime'))[:self.options["limit"]]
@@ -81,14 +88,14 @@ class Pvr(object):
     def timers(self):
         '''get pvr timers'''
         all_items = []
-        if xbmc.getCondVisibility("PVR.HasTVChannels"):
+        if xbmc.getCondVisibility("Pvr.HasTVChannels"):
             all_items = sorted(self.artutils.kodidb.timers(), key=itemgetter('starttime'))
             all_items = process_method_on_list(self.process_timer, all_items)
         return all_items
 
     def process_channel(self, channeldata):
         '''transform the json received from kodi into something we can use'''
-        item = { "art": {} }
+        item = { }
         channelname = channeldata["label"]
         channellogo = get_clean_image(channeldata['thumbnail'])
         if channeldata.get('broadcastnow'):
@@ -113,8 +120,8 @@ class Pvr(object):
         item["channelid"] = channeldata["channelid"]
         if not channellogo:
             channellogo = self.artutils.get_channellogo(channelname).get("ChannelLogo", "")
-        if not item["art"].get("thumb"):
-            item["art"]["thumb"] = channellogo
+        if channellogo:
+            item["art"] = {"thumb": channellogo}
         item["channellogo"] = channellogo
         item["isFolder"] = False
         return item

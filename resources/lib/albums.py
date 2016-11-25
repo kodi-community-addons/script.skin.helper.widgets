@@ -40,7 +40,7 @@ class Albums(object):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "albums"
-        return Favourites(self.addon, self.artutils, self.options).listing()
+        return Favourites(self.addon, self.artutils, self.options).favourites()
 
     def recommended(self):
         ''' get recommended albums - library albums with sorted by rating '''

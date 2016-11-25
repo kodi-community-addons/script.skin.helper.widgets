@@ -39,7 +39,11 @@ class Songs(object):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "songs"
-        return Favourites(self.addon, self.artutils, self.options).listing()
+        return Favourites(self.addon, self.artutils, self.options).favourites()
+        
+    def favourite(self):
+        '''synonym to favourites'''
+        return self.favourites()
 
     def recommended(self):
         ''' get recommended songs - library songs with score higher than 7 '''

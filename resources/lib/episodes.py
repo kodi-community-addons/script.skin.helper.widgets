@@ -45,7 +45,11 @@ class Episodes(object):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "episodes"
-        return Favourites(self.addon, self.artutils, self.options).listing()
+        return Favourites(self.addon, self.artutils, self.options).favourites()
+        
+    def favourite(self):
+        '''synonym to favourites'''
+        return self.favourites()
 
     def recommended(self):
         ''' get recommended episodes - library episodes with score higher than 7 '''
