@@ -46,7 +46,7 @@ class Episodes(object):
         from favourites import Favourites
         self.options["mediafilter"] = "episodes"
         return Favourites(self.addon, self.artutils, self.options).favourites()
-        
+
     def favourite(self):
         '''synonym to favourites'''
         return self.favourites()
@@ -160,15 +160,15 @@ class Episodes(object):
         tvdb = TheTvDb()
         tvdb.days_ahead = 120
         episodes = tvdb.get_kodi_unaired_episodes(False)[:self.options["limit"]]
-        #del tvdb
+        tvdb.close()
         return [self.map_episode_props(episode) for episode in episodes]
 
     def nextaired(self):
         ''' get all next airing episodes for shows in the library - provided by tvdb module'''
         tvdb = TheTvDb()
-        tvdb.days_ahead = 45
+        tvdb.days_ahead = 60
         episodes = tvdb.get_kodi_unaired_episodes(True)
-        #del tvdb
+        tvdb.close()
         return [self.map_episode_props(episode) for episode in episodes]
 
     @staticmethod
@@ -194,7 +194,7 @@ class Episodes(object):
     def map_episode_props(episode_details):
         '''adds some of the optional fields as extra properties for the listitem'''
         extraprops = {}
-        for item in ["network", "airdate", "airdate.label", "airtime", "airdatetime", "airdatetime.label"]:
+        for item in ["network", "airdate", "airdate.label", "airtime", "airdatetime", "airdatetime.label", "airday"]:
             extraprops[item] = episode_details[item]
         extraprops["DBTYPE"] = "episode"
         episode_details["extraproperties"] = extraprops

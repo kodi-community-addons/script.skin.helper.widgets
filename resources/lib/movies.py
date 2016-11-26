@@ -37,6 +37,7 @@ class Movies(object):
             (label_prefix + self.addon.getLocalizedString(32029),
                 "inprogressandrecommended&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + self.addon.getLocalizedString(32048), "random&mediatype=movies&tag=%s" % tag, icon),
+            (label_prefix + self.addon.getLocalizedString(32066), "unwatched&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + self.addon.getLocalizedString(32046), "top250&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + xbmc.getLocalizedString(135),
                 "browsegenres&mediatype=movies&tag=%s" % tag, "DefaultGenres.png")
@@ -216,7 +217,7 @@ class Movies(object):
         for count, genre_movie in enumerate(genre_movies):
             genre_json["art"]["poster.%s" % count] = genre_movie["art"].get("poster", "")
             genre_json["art"]["fanart.%s" % count] = genre_movie["art"].get("fanart", "")
-            if not "fanart" in genre_json["art"]:
+            if "fanart" not in genre_json["art"]:
                 # set genre's primary fanart image to first movie fanart
                 genre_json["art"]["fanart"] = genre_movie["art"].get("fanart", "")
         return genre_json
@@ -244,7 +245,7 @@ class Movies(object):
         from favourites import Favourites
         self.options["mediafilter"] = "movies"
         return Favourites(self.addon, self.artutils, self.options).favourites()
-        
+
     def favourite(self):
         '''synonym to favourites'''
         return self.favourites()

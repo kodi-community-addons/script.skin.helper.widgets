@@ -279,3 +279,7 @@ msgstr ""
 msgctxt "#32065"
 msgid "Recommended artists"
 msgstr ""
+
+msgctxt "#32066"
+msgid "Unwatched movies"
+msgstr ""

@@ -121,7 +121,7 @@ class Main(object):
         else:
             cache_checksum = ""
             for key in sorted(self.options):
-                cache_checksum += "%s.%s" %(key, self.options[key])
+                cache_checksum += "%s.%s" % (key, self.options[key])
         cache = self.cache.get(cache_str, checksum=cache_checksum)
         if cache and not self.options.get("skipcache") == "true":
             log_msg("MEDIATYPE: %s - ACTION: %s -- got items from cache - CHECKSUM: %s"

@@ -249,13 +249,15 @@ Listitem.Season, ListItem.Episode --> season/episode of the episode
 ListItem.TvShowTitle --> Name of the show
 ListItem.Studio --> Network of the show
 ListItem.FirstAired --> Airdate for the episode
-ListItem.Art(fanart, poster etc.) --> Artwork from the TV show
+ListItem.Art(fanart, poster etc.) --> Artwork from the TV show (in Kodi database)
 ListItem.Thumb or Listitem.Art(thumb) --> Episode thumb (if provided by tvdb)
 
 Besides the default Kodi ListItem properties for episodes the following properties will exist:
 
 ListItem.Property(airday) --> The weekday the show will air on the network (e.g. Monday)
 ListItem.Property(airtime) --> The time the show will air on the network (e.g. 8:00 PM)
+ListItem.Property(airdatetime) --> Combination of airdate and airtime
+ListItem.Property(airdatetime.label) --> Combination of airdate, airtime and network
 ________________________________________________________________________________________________________
 
 ##### Next airing episodes
@@ -264,7 +266,7 @@ plugin://script.skin.helper.widgets/?action=nextaired&mediatype=episodes&reload=
 ```
 Provides the next unaired episode for each tvshow in the library which is airing within the next 2 months.
 Difference with the unaired episodes is that it will only show the first airing episode for each show while unaired episodes shows all airing episodes.
-Also, the next airing episodes looks 45 days ahead for airing episodes while the unaired episodes looks 120 days ahead.
+Also, the next airing episodes looks 60 days ahead for airing episodes while the unaired episodes looks 120 days ahead.
 
 For the listitem properties, see the "unaired episodes" plugin path.
 ________________________________________
@@ -292,7 +294,7 @@ ________________________________________________________________________________
 
 
 #### Widget reload properties
-If you need to refresh a widget automatically after the library is changed or after playback stop you can append these to the widget path.
+If you need to refresh a widget automatically after the library is changed, you can append these to the widget path.
 
 For example:
 
@@ -310,3 +312,4 @@ plugin://myvideoplugin/movies/?latest&reload=$INFO[Window(Home).Property(widgetr
 |Window(Home).Property(widgetreload2) | will change every 10 minutes (e.g. for pvr widgets or favourites) |
 
 
+NOTE: these Window properties are provided by script.skin.helper.service
