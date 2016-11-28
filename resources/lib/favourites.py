@@ -37,7 +37,7 @@ class Favourites(object):
         return process_method_on_list(create_main_entry, all_items)
 
     def favourites(self):
-        '''show kodi favourites '''
+        '''show kodi favourites'''
         all_items = []
         media_filter = self.options.get("mediafilter", "")
 
@@ -56,96 +56,119 @@ class Favourites(object):
 
         # Kodi favourites
         for fav in self.artutils.kodidb.favourites():
-            match_found = False
-            if fav.get("windowparameter") and (not media_filter or media_filter == "tvshows"):
+            details = {}
 
-                # check for tvshow
-                if fav["windowparameter"].startswith("videodb://tvshows/titles"):
-                    tvshowid = int(fav["windowparameter"].split("/")[-2])
-                    result = self.artutils.kodidb.tvshow(tvshowid)
-                    if result:
-                        match_found = True
-                        item["file"] = "videodb://tvshows/titles/%s" % item["tvshowid"]
-                        item["isFolder"] = True
-                        all_items.append(result)
+            # try to match with tvshow or album
+            if fav["type"] == "window":
+                details = self.find_window_match(fav, media_filter)
 
-            # apparently only the filename can be used for the search
-            media_path = fav["path"]
-            if "/" in media_path:
-                sep = "/"
-            else:
-                sep = "\\"
-            filename = media_path.split(sep)[-1]
-            filters = [{"operator": "contains", "field": "filename", "value": filename}]
-            # is this a movie?
-            if not match_found and (media_filter or media_filter in ["movies", "media"]):
-                for item in self.artutils.kodidb.movies(filters=filters):
-                    if item['file'] == media_path:
-                        match_found = True
-                        all_items.append(item)
-            # is this an episode ?
-            if not match_found and (not media_filter or media_filter in ["episodes", "media"]):
-                for item in self.artutils.kodidb.movies(filters=filters):
-                    if item['file'] == media_path:
-                        match_found = True
-                        all_items.append(item)
-            # is this a song ?
-            if not match_found and (not media_filter or media_filter in ["songs", "media"]):
-                for item in self.artutils.kodidb.songs(filters=filters):
-                    if item['file'] == media_path:
-                        match_found = True
-                        if self.enable_artwork:
-                            extend_dict(item, self.artutils.get_music_artwork(item["title"], item["artist"][0]))
-                        all_items.append(item)
-            # is this a musicvideo ?
-            if not match_found and (not media_filter or media_filter in ["musicvideos", "media"]):
-                for item in self.artutils.kodidb.musicvideos(filters=filters):
-                    if item['file'] == media_path:
-                        match_found = True
-                        all_items.append(item)
-            # is this an album ?
-            if not match_found and (not media_filter or media_filter in ["albums", "media"]):
-                if "musicdb://albums/" in fav.get("windowparameter", ""):
-                    item = self.artutils.kodidb.album(fav["windowparameter"].replace("musicdb://albums/", ""))
-                    if item:
-                        match_found = True
-                        if self.enable_artwork:
-                            extend_dict(item, self.artutils.get_music_artwork(item["title"], item["artist"][0]))
-                        if self.browse_album:
-                            item["file"] = "musicdb://albums/%s" % item["albumid"]
-                            item["isFolder"] = True
-                        else:
-                            item["file"] = u"plugin://script.skin.helper.service?action=playalbum&albumid=%s" \
-                                % item["albumid"]
-                        all_items.append(item)
+            # try to match with song, movie, musicvideo or episode
+            elif fav["type"] == "media":
+                details = self.find_media_match(fav, media_filter)
+
             # add unknown item in the result...
-            if not match_found and not media_filter:
-                is_folder = False
-                if fav.get("windowparameter"):
-                    media_path = fav.get("windowparameter", "")
-                    is_folder = True
-                elif fav.get("type") == "media":
-                    media_path = fav.get("path")
-                else:
-                    media_path = 'plugin://script.skin.helper.service/?action=launch&path=%s'\
-                        % quote_plus(fav.get("path"))
-                if not fav.get("label"):
-                    fav["label"] = fav.get("title")
-                if not fav.get("title"):
-                    fav["label"] = fav.get("label")
-                item = {
-                    "label": fav.get("label"),
-                    "title": fav.get("title"),
-                    "thumbnail": fav.get("thumbnail"),
-                    "file": media_path,
-                    "type": "favourite"}
-                if ((fav.get("thumbnail").endswith("icon.png") or fav.get("thumbnail").endswith("icon.png")) and
-                        xbmcvfs.exists(fav.get("thumbnail").replace("icon.png", "fanart.jpg"))):
-                    item["art"] = {
-                        "landscape": fav.get("thumbnail"),
-                        "poster": fav.get("thumbnail"),
-                        "fanart": fav.get("thumbnail").replace("icon.png", "fanart.jpg")}
-                    if is_folder:
-                        item["isFolder"] = True
-                all_items.append(item)
+            if not details and not media_filter:
+                details = self.find_other_match(fav)
+
+            # if we have a result, append to the list
+            if details:
+                all_items.append(details)
+
         return all_items
+
+    def find_window_match(self, fav, media_filter):
+        '''try to get a match for tvshow or album favourites listing'''
+        match = {}
+        # check for tvshow
+        if not media_filter or media_filter == "tvshows":
+            if fav["windowparameter"].startswith("videodb://tvshows/titles"):
+                tvshowid = int(fav["windowparameter"].split("/")[-2])
+                result = self.artutils.kodidb.tvshow(tvshowid)
+                if result:
+                    match_found = True
+                    result["file"] = "videodb://tvshows/titles/%s" % tvshowid
+                    result["isFolder"] = True
+                    match = result
+
+        # check for album
+        if not match and (not media_filter or media_filter in ["albums", "media"]):
+            if "musicdb://albums/" in fav["windowparameter"]:
+                result = self.artutils.kodidb.album(fav["windowparameter"].replace("musicdb://albums/", ""))
+                if result:
+                    if self.enable_artwork:
+                        extend_dict(result, self.artutils.get_music_artwork(result["title"], result["artist"][0]))
+                    if self.browse_album:
+                        result["file"] = "musicdb://albums/%s" % result["albumid"]
+                        result["isFolder"] = True
+                    else:
+                        result["file"] = u"plugin://script.skin.helper.service?action=playalbum&albumid=%s" \
+                            % result["albumid"]
+                    match = result
+        return match
+
+    def find_media_match(self, fav, media_filter):
+        ''' try to get a match for movie/episode/song/musicvideo for favourite'''
+        match = {}
+        # apparently only the filepath can be used for the search
+        media_path = fav["path"]
+        if "/" in media_path:
+            sep = "/"
+        else:
+            sep = "\\"
+        filename = media_path.split(sep)[-1]
+        filters = [{"operator": "contains", "field": "filename", "value": filename}]
+        # is this a movie?
+        if not match and (media_filter or media_filter in ["movies", "media"]):
+            for item in self.artutils.kodidb.movies(filters=filters):
+                if item['file'] == fav["path"]:
+                    match = item
+        # is this an episode ?
+        if not match and (not media_filter or media_filter in ["episodes", "media"]):
+            for item in self.artutils.kodidb.movies(filters=filters):
+                if item['file'] == fav["path"]:
+                    match = item
+        # is this a song ?
+        if not match and (not media_filter or media_filter in ["songs", "media"]):
+            for item in self.artutils.kodidb.songs(filters=filters):
+                if item['file'] == fav["path"]:
+                    if self.enable_artwork:
+                        extend_dict(item, self.artutils.get_music_artwork(item["title"], item["artist"][0]))
+                    all_items.append(item)
+        # is this a musicvideo ?
+        if not match and (not media_filter or media_filter in ["musicvideos", "media"]):
+            for item in self.artutils.kodidb.musicvideos(filters=filters):
+                if item['file'] == fav["path"]:
+                    match = item
+        return match
+
+    def find_other_match(self, fav):
+        '''create listitem for any other item in favourites'''
+        item = {}
+        is_folder = False
+        if fav["type"] == "window":
+            media_path = fav["windowparameter"]
+            is_folder = True
+        elif fav["type"] == "media":
+            media_path = fav["path"]
+        else:
+            media_path = 'plugin://script.skin.helper.service/?action=launch&path=%s'\
+                % quote_plus(fav.get("path"))
+        if not fav.get("label"):
+            fav["label"] = fav.get("title")
+        if not fav.get("title"):
+            fav["label"] = fav.get("label")
+        item = {
+            "label": fav.get("label"),
+            "title": fav.get("title"),
+            "thumbnail": fav.get("thumbnail"),
+            "file": media_path,
+            "type": "favourite"}
+        if (fav.get("thumbnail").endswith("icon.png") and
+                xbmcvfs.exists(fav["thumbnail"].replace("icon.png", "fanart.jpg"))):
+            item["art"] = {
+                "landscape": fav["thumbnail"],
+                "poster": fav["thumbnail"],
+                "fanart": fav["thumbnail"].replace("icon.png", "fanart.jpg")}
+        if is_folder:
+            item["isFolder"] = True
+        return item
