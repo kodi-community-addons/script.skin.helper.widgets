@@ -134,10 +134,13 @@ class Main(object):
                     % (media_type, action, cache_checksum))
 
             # dynamically import and load the correct module, class and function
-            media_module = __import__(media_type)
-            media_class = getattr(media_module, media_type.capitalize())(self.addon, self.artutils, self.options)
-            all_items = getattr(media_class, action)()
-            del media_class
+            try:
+                media_module = __import__(media_type)
+                media_class = getattr(media_module, media_type.capitalize())(self.addon, self.artutils, self.options)
+                all_items = getattr(media_class, action)()
+                del media_class
+            except Exception:
+                log_msg("Incorrect widget action or type called !", xbmc.LOGWARNING)
 
             # randomize output if requested by skinner or user
             if self.options.get("randomize", "") == "true":

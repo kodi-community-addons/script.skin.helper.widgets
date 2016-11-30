@@ -82,13 +82,16 @@ class Favourites(object):
         # check for tvshow
         if not media_filter or media_filter == "tvshows":
             if fav["windowparameter"].startswith("videodb://tvshows/titles"):
-                tvshowid = int(fav["windowparameter"].split("/")[-2])
-                result = self.artutils.kodidb.tvshow(tvshowid)
-                if result:
-                    match_found = True
-                    result["file"] = "videodb://tvshows/titles/%s" % tvshowid
-                    result["isFolder"] = True
-                    match = result
+                try:
+                    tvshowid = int(fav["windowparameter"].split("/")[-2])
+                    result = self.artutils.kodidb.tvshow(tvshowid)
+                    if result:
+                        match_found = True
+                        result["file"] = "videodb://tvshows/titles/%s" % tvshowid
+                        result["isFolder"] = True
+                        match = result
+                except Exception:
+                    pass
 
         # check for album
         if not match and (not media_filter or media_filter in ["albums", "media"]):
