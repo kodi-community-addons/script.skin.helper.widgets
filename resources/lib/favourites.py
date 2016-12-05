@@ -32,7 +32,7 @@ class Favourites(object):
              "favourites&mediatype=favourites",
              "DefaultFiles.png"),
             (self.addon.getLocalizedString(32001),
-             "favourites&mediatype=favourite&mediafilter=media",
+             "favourites&mediatype=favourites&mediafilter=media",
              "DefaultMovies.png")]
         return process_method_on_list(create_main_entry, all_items)
 
@@ -113,21 +113,21 @@ class Favourites(object):
         ''' try to get a match for movie/episode/song/musicvideo for favourite'''
         match = {}
         # apparently only the filepath can be used for the search
-        media_path = fav["path"]
-        if "/" in media_path:
+        filename = fav["path"]
+        if "/" in filename:
             sep = "/"
         else:
             sep = "\\"
-        filename = media_path.split(sep)[-1]
-        filters = [{"operator": "contains", "field": "filename", "value": filename}]
+        file_path = filename.split(sep)[-1]
+        filters = [{"operator": "contains", "field": "filename", "value": file_path}]
         # is this a movie?
-        if not match and (media_filter or media_filter in ["movies", "media"]):
+        if not match and (not media_filter or media_filter in ["movies", "media"]):
             for item in self.artutils.kodidb.movies(filters=filters):
                 if item['file'] == fav["path"]:
                     match = item
         # is this an episode ?
         if not match and (not media_filter or media_filter in ["episodes", "media"]):
-            for item in self.artutils.kodidb.movies(filters=filters):
+            for item in self.artutils.kodidb.episodes(filters=filters):
                 if item['file'] == fav["path"]:
                     match = item
         # is this a song ?
@@ -136,7 +136,7 @@ class Favourites(object):
                 if item['file'] == fav["path"]:
                     if self.enable_artwork:
                         extend_dict(item, self.artutils.get_music_artwork(item["title"], item["artist"][0]))
-                    all_items.append(item)
+                    match = item
         # is this a musicvideo ?
         if not match and (not media_filter or media_filter in ["musicvideos", "media"]):
             for item in self.artutils.kodidb.musicvideos(filters=filters):

@@ -140,7 +140,7 @@ class Pvr(object):
         else:
             item["lastplayed"] = ""
         if not item["art"].get("thumb"):
-            item["art"]["thumb"] = channellogo
+            item["art"]["thumb"] = item["channellogo"]
         return item
 
     def process_timer(self, item):
