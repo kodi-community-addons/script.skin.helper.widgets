@@ -1,0 +1,285 @@
+# Kodi language file
+# Addon Name: Skin Helper Widgets
+# Addon id: script.skin.helper.widgets
+# Addon Provider: marcelveldt
+msgid ""
+msgstr ""
+"Project-Id-Version: XBMC-Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: 2014-10-26 17:05+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgctxt "#32000"
+msgid "Favourites"
+msgstr "Preferiti"
+
+msgctxt "#32001"
+msgid "Favourite Media"
+msgstr "Media preferiti"
+
+msgctxt "#32002"
+msgid "Next Episodes"
+msgstr "Prossimi episodi"
+
+msgctxt "#32003"
+msgid "Recommended Movies"
+msgstr "Film raccomandati"
+
+msgctxt "#32004"
+msgid "Recommended Media"
+msgstr "Media raccomandati"
+
+msgctxt "#32005"
+msgid "Recent Media"
+msgstr "Media recenti"
+
+msgctxt "#32006"
+msgid "Similar Movies"
+msgstr "Film similari"
+
+msgctxt "#32007"
+msgid "In progress and Recommended Media"
+msgstr "Media raccomandati in corso"
+
+msgctxt "#32008"
+msgid "Random Episodes"
+msgstr "Episodi casuali"
+
+msgctxt "#32009"
+msgid "Recommended Episodes"
+msgstr "Episodi raccomandati"
+
+msgctxt "#32010"
+msgid "In progress and recommended Episodes"
+msgstr "Episodi in corso e raccomandati"
+
+msgctxt "#32011"
+msgid "In progress Media"
+msgstr "Media in corso"
+
+msgctxt "#32012"
+msgid "Recently added songs"
+msgstr "Brani aggiunti di recente"
+
+msgctxt "#32013"
+msgid "Recently played songs"
+msgstr "Brani riprodotti di recente"
+
+msgctxt "#32014"
+msgid "Similar TV Shows"
+msgstr "Serie TV similari"
+
+msgctxt "#32015"
+msgid "Recommended albums"
+msgstr "Album raccomandati"
+
+msgctxt "#32016"
+msgid "Recommended songs"
+msgstr "Brani raccomandati"
+
+msgctxt "#32017"
+msgid "PVR Channel groups"
+msgstr "Gruppi di Canali PVR"
+
+msgctxt "#32018"
+msgid "Recent recordings"
+msgstr "Registrazioni recenti"
+
+msgctxt "#32019"
+msgid "Next unwatched recordings"
+msgstr "Prossime registrazioni non viste"
+
+msgctxt "#32020"
+msgid "TV Channels"
+msgstr "Canali TV"
+
+msgctxt "#32021"
+msgid "Timers"
+msgstr "Timer"
+
+msgctxt "#32022"
+msgid "Similar Media"
+msgstr "Media similari"
+
+msgctxt "#32023"
+msgid "Widgets"
+msgstr "Widget"
+
+msgctxt "#32024"
+msgid "Enable artwork lookups"
+msgstr "Abilita la ricerca di artwork"
+
+msgctxt "#32025"
+msgid "Show specials in episode widgets"
+msgstr "Mostra speciali nei widget episodi"
+
+msgctxt "#32026"
+msgid "Browse albums instead of playing for album widgets"
+msgstr "Sfoglia gl'album invece di riprodure i widget degli album"
+
+msgctxt "#32027"
+msgid "In-progress episodes"
+msgstr "Episodi in corso"
+
+msgctxt "#32028"
+msgid "In-progress movies"
+msgstr "Film in corso"
+
+msgctxt "#32029"
+msgid "In-progress and recommended movies"
+msgstr "Film in corso e raccomandati"
+
+msgctxt "#32030"
+msgid "TV Channels (with artwork)"
+msgstr "Canali TV (con artwork)"
+
+msgctxt "#32031"
+msgid "Next unwatched recordings (reversed)"
+msgstr "Prossime registrazioni non viste (al rovescio)"
+
+msgctxt "#32032"
+msgid "In-progress and random movies"
+msgstr "Film in corso e casuali"
+
+msgctxt "#32033"
+msgid "Random albums"
+msgstr "Album casuali"
+
+msgctxt "#32034"
+msgid "Random songs"
+msgstr "Brani casuali"
+
+msgctxt "#32035"
+msgid "Hide watched items in video widgets"
+msgstr "Nascondi elementi visti nei widget video"
+
+msgctxt "#32036"
+msgid "Only use in-progress shows in next episodes widget"
+msgstr "Usa solo Serie TV in corso nel widget prossimi episodi"
+
+msgctxt "#32037"
+msgid "Recommended Tv Shows"
+msgstr "Serie TV raccomandate"
+
+msgctxt "#32038"
+msgid "Recently added movies"
+msgstr "Film aggiunti di recente"
+
+msgctxt "#32039"
+msgid "Recently added episodes"
+msgstr "Episodi aggiunti di recente"
+
+msgctxt "#32040"
+msgid "Recently added musicvideos"
+msgstr "Video musicali aggiunti di recente"
+
+msgctxt "#32041"
+msgid "Random Tv Shows"
+msgstr "Serie TV casuali"
+
+msgctxt "#32042"
+msgid "Unaired episodes"
+msgstr "Episodi non in onda"
+
+msgctxt "#32043"
+msgid "Next airing episodes"
+msgstr "Prossimi episodi in onda"
+
+msgctxt "#32044"
+msgid "In progress TV shows"
+msgstr "Serie TV in corso"
+
+msgctxt "#32045"
+msgid "Recently added TV shows"
+msgstr "Serie TV aggiunte di recente"
+
+msgctxt "#32046"
+msgid "IMDB Top 250 movies in library"
+msgstr "IMDB Top 250 film in libreria"
+
+msgctxt "#32047"
+msgid "IMDB Top 250 Tv shows in library"
+msgstr "IMDB Top 250 Serie TV in libreria"
+
+msgctxt "#32048"
+msgid "Random movies"
+msgstr "Film casuali"
+
+msgctxt "#32049"
+msgid "In progress and random Episodes"
+msgstr "Episodi in corso e casuali"
+
+msgctxt "#32050"
+msgid "Group items in recent episodes widget"
+msgstr "Raggruppare gli elementi nel widget di episodi recenti"
+
+msgctxt "#32051"
+msgid "Browse TV Show"
+msgstr "Sfoglia Serie TV"
+
+msgctxt "#32052"
+msgid "Browse Season"
+msgstr "Sfoglia stagione"
+
+msgctxt "#32053"
+msgid "Default number of items to show in widget"
+msgstr "Numero predefinito di elementi da vedere nel widget"
+
+msgctxt "#32054"
+msgid "PVR"
+msgstr "PVR"
+
+msgctxt "#32055"
+msgid "Similar songs"
+msgstr "Brani similari"
+
+msgctxt "#32056"
+msgid "Similar albums"
+msgstr "Album similari"
+
+msgctxt "#32057"
+msgid "Mixed Media"
+msgstr "Media misti"
+
+msgctxt "#32058"
+msgid "Movies and Tvshows in IMDB Top250"
+msgstr "Film e Serie TV nella IMDB Top250"
+
+msgctxt "#32059"
+msgid "Random media"
+msgstr "Media casuali"
+
+msgctxt "#32060"
+msgid "In progress and Random media"
+msgstr "Media in corso e casuali"
+
+msgctxt "#32061"
+msgid "In progress music videos"
+msgstr "Video musicali in corso"
+
+msgctxt "#32062"
+msgid "Random music videos"
+msgstr "Video musicali casuali"
+
+msgctxt "#32063"
+msgid "Recently added artists"
+msgstr "Artisti aggiunti di recente"
+
+msgctxt "#32064"
+msgid "Random artists"
+msgstr "Artisti casuali"
+
+msgctxt "#32065"
+msgid "Recommended artists"
+msgstr "Artisti raccomandati"
+
+msgctxt "#32066"
+msgid "Unwatched movies"
+msgstr "Film non visti"
