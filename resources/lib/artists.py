@@ -26,10 +26,10 @@ class Artists(object):
     def listing(self):
         '''main listing with all our artist nodes'''
         all_items = [
-            (self.addon.getLocalizedString(32063), "recent&mediatype=artists", "Defaultartists.png"),
-            (self.addon.getLocalizedString(32065), "recommended&mediatype=artists", "Defaultartists.png"),
-            (self.addon.getLocalizedString(32064), "random&mediatype=artists", "Defaultartists.png"),
-            (xbmc.getLocalizedString(10134), "favourites&mediatype=artists", "Defaultartists.png")
+            (self.addon.getLocalizedString(32063), "recent&mediatype=artists", "DefaultMusicArtists.png"),
+            (self.addon.getLocalizedString(32065), "recommended&mediatype=artists", "DefaultMusicArtists.png"),
+            (self.addon.getLocalizedString(32064), "random&mediatype=artists", "DefaultMusicArtists.png"),
+            (xbmc.getLocalizedString(10134), "favourites&mediatype=artists", "DefaultMusicArtists.png")
         ]
         return process_method_on_list(create_main_entry, all_items)
 

@@ -26,12 +26,12 @@ class Songs(object):
     def listing(self):
         '''main listing with all our song nodes'''
         all_items = [
-            (self.addon.getLocalizedString(32013), "recentplayed&mediatype=songs", "DefaultSongs.png"),
-            (self.addon.getLocalizedString(32012), "recent&mediatype=songs", "DefaultSongs.png"),
-            (self.addon.getLocalizedString(32016), "recommended&mediatype=songs", "DefaultSongs.png"),
-            (self.addon.getLocalizedString(32055), "similar&mediatype=songs", "DefaultSongs.png"),
-            (self.addon.getLocalizedString(32034), "random&mediatype=songs", "DefaultSongs.png"),
-            (xbmc.getLocalizedString(10134), "favourites&mediatype=songs", "DefaultAlbums.png")
+            (self.addon.getLocalizedString(32013), "recentplayed&mediatype=songs", "DefaultMusicSongs.png"),
+            (self.addon.getLocalizedString(32012), "recent&mediatype=songs", "DefaultMusicSongs.png"),
+            (self.addon.getLocalizedString(32016), "recommended&mediatype=songs", "DefaultMusicSongs.png"),
+            (self.addon.getLocalizedString(32055), "similar&mediatype=songs", "DefaultMusicSongs.png"),
+            (self.addon.getLocalizedString(32034), "random&mediatype=songs", "DefaultMusicSongs.png"),
+            (xbmc.getLocalizedString(10134), "favourites&mediatype=songs", "DefaultMusicAlbums.png")
         ]
         return process_method_on_list(create_main_entry, all_items)
 

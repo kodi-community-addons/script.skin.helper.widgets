@@ -30,7 +30,7 @@ class Favourites(object):
         all_items = [
             (xbmc.getLocalizedString(10134),
              "favourites&mediatype=favourites",
-             "DefaultFiles.png"),
+             "DefaultFile.png"),
             (self.addon.getLocalizedString(32001),
              "favourites&mediatype=favourites&mediafilter=media",
              "DefaultMovies.png")]
