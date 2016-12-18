@@ -75,8 +75,10 @@ class Pvr(object):
 
             # sort the list so we return the list with the oldest unwatched first
             # if reversed we return the newest first
-            reversedsort = self.options.get("reversed", "") == "true"
-            all_items = sorted(all_items, key=itemgetter('endtime'), reverse=reversedsort)
+            if self.options.get("reversed", "") == "true":
+                all_items = sorted(all_items, key=itemgetter('endtime'), reverse=False)
+            else:
+                all_items = sorted(all_items, key=itemgetter('endtime'), reverse=True)
             # return result including artwork...
             return process_method_on_list(self.process_recording, all_items)
         return all_items
