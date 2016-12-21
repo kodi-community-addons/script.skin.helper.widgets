@@ -94,6 +94,8 @@ class Main(object):
 
         # set the widget settings as options
         options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
+        if self.addon.getSetting("hide_watched_recent") == "true" and "recent" in options.get("action",""):
+            options["hide_watched"] = True
         options["next_inprogress_only"] = self.addon.getSetting("nextup_inprogressonly") == "true"
         options["episodes_enable_specials"] = self.addon.getSetting("episodes_enable_specials") == "true"
         options["group_episodes"] = self.addon.getSetting("episodes_grouping") == "true"

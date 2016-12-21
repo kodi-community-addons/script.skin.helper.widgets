@@ -2,7 +2,8 @@
 <settings>
     <!-- common-->
     <category label="32163">
-        <setting id="hide_watched" type="bool" label="32035" default="true"/>
+        <setting id="hide_watched" type="bool" label="32035" default="false"/>
+        <setting id="hide_watched_recent" type="bool" label="32067" default="true"/>
         <setting id="default_limit" type="number" label="32053" default="25"/>
     </category>
     <!-- episodes -->
