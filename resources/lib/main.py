@@ -109,7 +109,6 @@ class Main(object):
         '''display the listing for the provided action and mediatype'''
         media_type = self.options["mediatype"]
         action = self.options["action"]
-        reload = self.options.get("reload", "")
         # set widget content type
         xbmcplugin.setContent(ADDON_HANDLE, media_type)
 

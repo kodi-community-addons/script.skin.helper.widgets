@@ -171,7 +171,7 @@ class Episodes(object):
         episodes = tvdb.get_kodi_unaired_episodes(True)
         tvdb.close()
         return [self.map_episode_props(episode) for episode in episodes]
-        
+
     def airingtoday(self):
         ''' get next airing episodes within 24hrs - provided by tvdb module'''
         return self.nextaired(1)

@@ -86,7 +86,6 @@ class Favourites(object):
                     tvshowid = int(fav["windowparameter"].split("/")[-2])
                     result = self.artutils.kodidb.tvshow(tvshowid)
                     if result:
-                        match_found = True
                         result["file"] = "videodb://tvshows/titles/%s" % tvshowid
                         result["isFolder"] = True
                         match = result
@@ -144,7 +143,8 @@ class Favourites(object):
                     match = item
         return match
 
-    def find_other_match(self, fav):
+    @staticmethod
+    def find_other_match(fav):
         '''create listitem for any other item in favourites'''
         item = {}
         is_folder = False
