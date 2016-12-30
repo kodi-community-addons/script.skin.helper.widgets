@@ -166,19 +166,29 @@ class Tvshows(object):
         filters = []
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        fields = "imdbnumber"
+        if KODI_VERSION > 17:
+            fields.append("uniqueid")
         all_tvshows = self.artutils.kodidb.get_json(
-            'VideoLibrary.GetTvShows', fields=["imdbnumber"],
-            returntype="tvshows", filters=filters)
+            'VideoLibrary.GetTvShows', fields=fields, returntype="tvshows", filters=filters)
         top_250 = self.artutils.imdb.get_top250_db()
         for tvshow in all_tvshows:
-            if tvshow["imdbnumber"] and not tvshow["imdbnumber"].startswith("tt"):
+            # grab imdbid
+            imdbnumber = tvshow["imdbnumber"]
+            if not imdbnumber and "uniqueid" in tvshow:
+                for value in tvshow["uniqueid"]:
+                    if value.startswith("tt"):
+                        imdbnumber = value
+            if imdbnumber and not imdbnumber.startswith("tt"):
                 # we have a tvdb id
-                tvdb_info = self.thetvdb.get_series(tvshow["imdbnumber"])
+                tvdb_info = self.thetvdb.get_series(imdbnumber)
                 if tvdb_info:
-                    tvshow["imdbnumber"] = tvdb_info["imdbnumber"]
-            if tvshow["imdbnumber"] in top_250:
+                    imdbnumber = tvdb_info["imdbnumber"]
+                else:
+                    imdbnumber = None
+            if imdbnumber and imdbnumber in top_250:
                 tvshow_full = self.artutils.kodidb.tvshow(tvshow["tvshowid"])
-                tvshow_full["top250_rank"] = int(top_250[tvshow["imdbnumber"]])
+                tvshow_full["top250_rank"] = int(top_250[imdbnumber])
                 all_items.append(tvshow_full)
         tvshows = sorted(all_items, key=itemgetter("top250_rank"))[:self.options["limit"]]
         return process_method_on_list(self.process_tvshow, tvshows)
@@ -261,7 +271,7 @@ class Tvshows(object):
         from favourites import Favourites
         self.options["mediafilter"] = "tvshows"
         return Favourites(self.addon, self.artutils, self.options).favourites()
-        
+
     def favourite(self):
         '''synonym to favourites'''
         return self.favourites()

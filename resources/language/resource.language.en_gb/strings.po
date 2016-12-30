@@ -287,3 +287,7 @@ msgstr ""
 msgctxt "#32067"
 msgid "Hide watched items in recent items listings"
 msgstr ""
+
+msgctxt "#32068"
+msgid "Episodes airing today"
+msgstr ""

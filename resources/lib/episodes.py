@@ -37,6 +37,7 @@ class Episodes(object):
             (self.addon.getLocalizedString(32008), "random&mediatype=episodes", "DefaultTvShows.png"),
             (self.addon.getLocalizedString(32042), "unaired&mediatype=episodes", "DefaultTvShows.png"),
             (self.addon.getLocalizedString(32043), "nextaired&mediatype=episodes", "DefaultTvShows.png"),
+            (self.addon.getLocalizedString(32068), "airingtoday&mediatype=episodes", "DefaultTvShows.png"),
             (xbmc.getLocalizedString(10134), "favourites&mediatype=episodes", "DefaultMovies.png")
         ]
         return process_method_on_list(create_main_entry, all_items)
@@ -163,13 +164,17 @@ class Episodes(object):
         tvdb.close()
         return [self.map_episode_props(episode) for episode in episodes]
 
-    def nextaired(self):
+    def nextaired(self, days_ahead=60):
         ''' get all next airing episodes for shows in the library - provided by tvdb module'''
         tvdb = TheTvDb()
-        tvdb.days_ahead = 60
+        tvdb.days_ahead = days_ahead
         episodes = tvdb.get_kodi_unaired_episodes(True)
         tvdb.close()
         return [self.map_episode_props(episode) for episode in episodes]
+        
+    def airingtoday(self):
+        ''' get next airing episodes within 24hrs - provided by tvdb module'''
+        return self.nextaired(1)
 
     @staticmethod
     def create_grouped_entry(tvshow_episodes):

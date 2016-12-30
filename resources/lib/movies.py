@@ -7,7 +7,7 @@
     all movies widgets provided by the script
 '''
 
-from utils import create_main_entry
+from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
 from artutils import kodi_constants, process_method_on_list
 import xbmc
@@ -177,14 +177,21 @@ class Movies(object):
         filters = []
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        fields = "imdbnumber"
+        if KODI_VERSION > 17:
+            fields.append("uniqueid")
         all_movies = self.artutils.kodidb.get_json(
-            'VideoLibrary.GetMovies', fields=["imdbnumber"],
-            returntype="movies", filters=filters)
+            'VideoLibrary.GetMovies', fields=fields, returntype="movies", filters=filters)
         top_250 = self.artutils.imdb.get_top250_db()
         for movie in all_movies:
-            if movie["imdbnumber"] in top_250:
+            imdbnumber = movie["imdbnumber"]
+            if not imdbnumber and "uniqueid" in movie:
+                for value in movie["uniqueid"]:
+                    if value.startswith("tt"):
+                        imdbnumber = value
+            if imdbnumber and imdbnumber in top_250:
                 movie = self.artutils.kodidb.movie(movie["movieid"])
-                movie["top250_rank"] = int(top_250[movie["imdbnumber"]])
+                movie["top250_rank"] = int(top_250[imdbnumber])
                 all_items.append(movie)
         return sorted(all_items, key=itemgetter("top250_rank"))[:self.options["limit"]]
 
