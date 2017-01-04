@@ -177,8 +177,8 @@ class Movies(object):
         filters = []
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        fields = "imdbnumber"
-        if KODI_VERSION > 17:
+        fields = ["imdbnumber"]
+        if KODI_VERSION > 16:
             fields.append("uniqueid")
         all_movies = self.artutils.kodidb.get_json(
             'VideoLibrary.GetMovies', fields=fields, returntype="movies", filters=filters)
