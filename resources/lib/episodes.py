@@ -173,8 +173,8 @@ class Episodes(object):
         return [self.map_episode_props(episode) for episode in episodes]
 
     def airingtoday(self):
-        ''' get next airing episodes within 24hrs - provided by tvdb module'''
-        return self.nextaired(1)
+        ''' get today airing episodes - provided by tvdb module'''
+        return self.nextaired(0)
 
     @staticmethod
     def create_grouped_entry(tvshow_episodes):
