@@ -80,10 +80,10 @@ class Main(object):
 
         # prefer reload param for the mediatype
         if "mediatype" in options:
+            alt_reload = self.win.getProperty("widgetreload-%s" % options["mediatype"])
             if options["mediatype"] == "favourites" or "favourite" in options["action"]:
                 options["skipcache"] = "true"
-            elif options["mediatype"] in ["movies", "episodes", "musicvideos", "songs"]:
-                alt_reload = self.win.getProperty("widgetreload-%s" % options["mediatype"])
+            elif alt_reload:
                 options["reload"] = alt_reload
             if not options.get("action") and options["mediatype"] == "favourites":
                 options["action"] = "favourites"
