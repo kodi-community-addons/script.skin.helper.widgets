@@ -103,7 +103,7 @@ class Episodes(object):
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_DATEADDED, filters=filters,
+        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_RANDOM, filters=filters,
                                              limits=(0, self.options["limit"]))
 
     def inprogress(self):
