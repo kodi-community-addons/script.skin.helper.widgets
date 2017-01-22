@@ -312,4 +312,3 @@ plugin://myvideoplugin/movies/?latest&reload=$INFO[Window(Home).Property(widgetr
 |Window(Home).Property(widgetreload2) | will change every 10 minutes (e.g. for pvr widgets or favourites) |
 
 
-NOTE: these Window properties are provided by script.skin.helper.service
