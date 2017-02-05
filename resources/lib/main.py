@@ -8,7 +8,7 @@
 '''
 
 import urlparse
-from utils import log_msg, ADDON_ID, create_main_entry
+from utils import log_msg, log_exception, ADDON_ID, create_main_entry
 from simplecache import SimpleCache
 import xbmcplugin
 import xbmc
@@ -94,7 +94,7 @@ class Main(object):
 
         # set the widget settings as options
         options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
-        if self.addon.getSetting("hide_watched_recent") == "true" and "recent" in options.get("action",""):
+        if self.addon.getSetting("hide_watched_recent") == "true" and "recent" in options.get("action", ""):
             options["hide_watched"] = True
         options["next_inprogress_only"] = self.addon.getSetting("nextup_inprogressonly") == "true"
         options["episodes_enable_specials"] = self.addon.getSetting("episodes_enable_specials") == "true"
@@ -140,8 +140,10 @@ class Main(object):
                 media_class = getattr(media_module, media_type.capitalize())(self.addon, self.artutils, self.options)
                 all_items = getattr(media_class, action)()
                 del media_class
-            except Exception:
-                log_msg("Incorrect widget action or type called !", xbmc.LOGWARNING)
+            except AttributeError:
+                log_exception(__name__, "Incorrect widget action or type called")
+            except Exception as exc:
+                log_exception(__name__, exc)
 
             # randomize output if requested by skinner or user
             if self.options.get("randomize", "") == "true":
