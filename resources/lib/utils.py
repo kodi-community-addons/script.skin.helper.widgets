@@ -9,6 +9,7 @@
 
 import xbmc
 from traceback import format_exc
+import sys
 
 ADDON_ID = "script.skin.helper.widgets"
 KODI_VERSION = int(xbmc.getInfoLabel("System.BuildVersion").split(".")[0])
