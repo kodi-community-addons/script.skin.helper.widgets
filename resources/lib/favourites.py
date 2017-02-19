@@ -98,7 +98,7 @@ class Favourites(object):
                 result = self.artutils.kodidb.album(fav["windowparameter"].replace("musicdb://albums/", ""))
                 if result:
                     if self.enable_artwork:
-                        extend_dict(result, self.artutils.get_music_artwork(result["title"], result["artist"][0]))
+                        extend_dict(result, self.artutils.get_music_artwork(result["label"], result["artist"][0]))
                     if self.browse_album:
                         result["file"] = "musicdb://albums/%s" % result["albumid"]
                         result["isFolder"] = True
