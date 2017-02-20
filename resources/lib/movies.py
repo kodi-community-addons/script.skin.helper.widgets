@@ -9,16 +9,16 @@
 
 from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
-from artutils import kodi_constants, process_method_on_list
+from metadatautils import kodi_constants, process_method_on_list
 import xbmc
 
 
 class Movies(object):
     '''all movie widgets provided by the script'''
 
-    def __init__(self, addon, artutils, options):
+    def __init__(self, addon, metadatautils, options):
         '''Initializations pass our common classes and the widget options as arguments'''
-        self.artutils = artutils
+        self.metadatautils = metadatautils
         self.addon = addon
         self.options = options
 
@@ -53,7 +53,7 @@ class Movies(object):
     def tags(self):
         '''get tags listing'''
         all_items = []
-        for item in self.artutils.kodidb.files("videodb://movies/tags"):
+        for item in self.metadatautils.kodidb.files("videodb://movies/tags"):
             details = (item["label"], "listing&mediatype=movies&tag=%s" % item["label"], "DefaultTags.png")
             all_items.append(create_main_entry(details))
         return all_items
@@ -65,7 +65,7 @@ class Movies(object):
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.artutils.kodidb.movies(sort=kodi_constants.SORT_RATING, filters=filters,
+        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RATING, filters=filters,
                                            limits=(0, self.options["limit"]))
 
     def recent(self):
@@ -75,7 +75,7 @@ class Movies(object):
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.artutils.kodidb.movies(sort=kodi_constants.SORT_DATEADDED, filters=filters,
+        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_DATEADDED, filters=filters,
                                            limits=(0, self.options["limit"]))
 
     def random(self):
@@ -85,7 +85,7 @@ class Movies(object):
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.artutils.kodidb.movies(sort=kodi_constants.SORT_RANDOM, filters=filters,
+        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RANDOM, filters=filters,
                                            limits=(0, self.options["limit"]))
 
     def inprogress(self):
@@ -93,7 +93,7 @@ class Movies(object):
         filters = [kodi_constants.FILTER_INPROGRESS]
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.artutils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
+        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
                                            limits=(0, self.options["limit"]))
 
     def unwatched(self):
@@ -101,7 +101,7 @@ class Movies(object):
         filters = [kodi_constants.FILTER_UNWATCHED]
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.artutils.kodidb.movies(sort=kodi_constants.SORT_TITLE, filters=filters,
+        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_TITLE, filters=filters,
                                            limits=(0, self.options["limit"]))
 
     def similar(self):
@@ -114,7 +114,7 @@ class Movies(object):
         ref_movie = None
         if imdb_id:
             # get movie by imdbid
-            ref_movie = self.artutils.kodidb.movie_by_imdbid(imdb_id)
+            ref_movie = self.metadatautils.kodidb.movie_by_imdbid(imdb_id)
         if not ref_movie:
             # just get a random watched movie
             ref_movie = self.get_random_watched_movie()
@@ -140,7 +140,7 @@ class Movies(object):
         all_items = []
         if not genre:
             # get a random genre if no genre provided
-            genres = self.artutils.kodidb.genres("movie")
+            genres = self.metadatautils.kodidb.genres("movie")
             if genres:
                 genre = genres[0]["label"]
         if genre:
@@ -180,9 +180,9 @@ class Movies(object):
         fields = ["imdbnumber"]
         if KODI_VERSION > 16:
             fields.append("uniqueid")
-        all_movies = self.artutils.kodidb.get_json(
+        all_movies = self.metadatautils.kodidb.get_json(
             'VideoLibrary.GetMovies', fields=fields, returntype="movies", filters=filters)
-        top_250 = self.artutils.imdb.get_top250_db()
+        top_250 = self.metadatautils.imdb.get_top250_db()
         for movie in all_movies:
             imdbnumber = movie["imdbnumber"]
             if not imdbnumber and "uniqueid" in movie:
@@ -190,7 +190,7 @@ class Movies(object):
                     if value.startswith("tt"):
                         imdbnumber = value
             if imdbnumber and imdbnumber in top_250:
-                movie = self.artutils.kodidb.movie(movie["movieid"])
+                movie = self.metadatautils.kodidb.movie(movie["movieid"])
                 movie["top250_rank"] = int(top_250[imdbnumber])
                 all_items.append(movie)
         return sorted(all_items, key=itemgetter("top250_rank"))[:self.options["limit"]]
@@ -200,9 +200,9 @@ class Movies(object):
             special entry which can be used to create custom genre listings
             returns each genre with poster/fanart artwork properties from 5
             random movies in the genre.
-            TODO: get auto generated collage pictures from skinhelper's artutils ?
+            TODO: get auto generated collage pictures from skinhelper's metadatautils ?
         '''
-        all_genres = self.artutils.kodidb.genres("movie")
+        all_genres = self.metadatautils.kodidb.genres("movie")
         return process_method_on_list(self.get_genre_artwork, all_genres)
 
     def get_genre_artwork(self, genre_json):
@@ -231,7 +231,7 @@ class Movies(object):
 
     def get_random_watched_movie(self):
         '''gets a random watched movie from kodi_constants.'''
-        movies = self.artutils.kodidb.movies(sort=kodi_constants.SORT_RANDOM,
+        movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RANDOM,
                                              filters=[kodi_constants.FILTER_WATCHED], limits=(0, 1))
         if movies:
             return movies[0]
@@ -245,13 +245,13 @@ class Movies(object):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         if hide_watched:
             filters.append(kodi_constants.FILTER_UNWATCHED)
-        return self.artutils.kodidb.movies(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0, limit))
+        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0, limit))
 
     def favourites(self):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "movies"
-        return Favourites(self.addon, self.artutils, self.options).favourites()
+        return Favourites(self.addon, self.metadatautils, self.options).favourites()
 
     def favourite(self):
         '''synonym to favourites'''

@@ -9,7 +9,7 @@
 
 from utils import create_main_entry
 from operator import itemgetter
-from artutils import kodi_constants, process_method_on_list, TheTvDb
+from metadatautils import kodi_constants, process_method_on_list, TheTvDb
 import xbmc
 
 
@@ -19,10 +19,10 @@ class Episodes(object):
     kodidb = None
     addon = None
 
-    def __init__(self, addon, artutils, options):
+    def __init__(self, addon, metadatautils, options):
         '''Initialization'''
         self.addon = addon
-        self.artutils = artutils
+        self.metadatautils = metadatautils
         self.options = options
 
     def listing(self):
@@ -46,7 +46,7 @@ class Episodes(object):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "episodes"
-        return Favourites(self.addon, self.artutils, self.options).favourites()
+        return Favourites(self.addon, self.metadatautils, self.options).favourites()
 
     def favourite(self):
         '''synonym to favourites'''
@@ -57,7 +57,7 @@ class Episodes(object):
         filters = [kodi_constants.FILTER_RATING]
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
-        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_RATING, filters=filters,
+        return self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_RATING, filters=filters,
                                              limits=(0, self.options["limit"]))
 
     def recent(self):
@@ -71,7 +71,7 @@ class Episodes(object):
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         while unique_count < self.options["limit"]:
-            recent_episodes = self.artutils.kodidb.episodes(
+            recent_episodes = self.metadatautils.kodidb.episodes(
                 sort=kodi_constants.SORT_DATEADDED, filters=filters, limits=(
                     total_count, self.options["limit"] + total_count))
             if not self.options["group_episodes"]:
@@ -103,7 +103,7 @@ class Episodes(object):
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_RANDOM, filters=filters,
+        return self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_RANDOM, filters=filters,
                                              limits=(0, self.options["limit"]))
 
     def inprogress(self):
@@ -111,7 +111,7 @@ class Episodes(object):
         filters = [kodi_constants.FILTER_INPROGRESS]
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.artutils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
+        return self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
                                              limits=(0, self.options["limit"]))
 
     def inprogressandrecommended(self):
@@ -140,7 +140,7 @@ class Episodes(object):
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
-        all_shows = self.artutils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
+        all_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
                                                  limits=(0, self.options["limit"]))
         return process_method_on_list(self.get_next_episode_for_show, [d['tvshowid'] for d in all_shows])
 
@@ -149,7 +149,7 @@ class Episodes(object):
         filters = [kodi_constants.FILTER_UNWATCHED]
         if not self.options["episodes_enable_specials"]:
             filters.append({"field": "season", "operator": "greaterthan", "value": "0"})
-        json_episodes = self.artutils.kodidb.episodes(sort=kodi_constants.SORT_EPISODE, filters=filters,
+        json_episodes = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_EPISODE, filters=filters,
                                                       limits=(0, 1), tvshowid=show_id)
         if json_episodes:
             return json_episodes[0]

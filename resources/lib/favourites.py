@@ -7,7 +7,7 @@
     all favourites widgets provided by the script
 '''
 
-from artutils import extend_dict, process_method_on_list
+from metadatautils import extend_dict, process_method_on_list
 from utils import create_main_entry
 import xbmc
 import xbmcvfs
@@ -17,9 +17,9 @@ from urllib import quote_plus
 class Favourites(object):
     '''all favourites widgets provided by the script'''
 
-    def __init__(self, addon, artutils, options):
+    def __init__(self, addon, metadatautils, options):
         '''Initializations pass our common classes and the widget options as arguments'''
-        self.artutils = artutils
+        self.metadatautils = metadatautils
         self.addon = addon
         self.options = options
         self.enable_artwork = self.addon.getSetting("music_enable_artwork") == "true"
@@ -45,17 +45,17 @@ class Favourites(object):
         if xbmc.getCondVisibility("System.HasAddon(plugin.video.emby) + Skin.HasSetting(SmartShortcuts.emby)"):
             if media_filter in ["media", "movies"]:
                 filters = [{"operator": "contains", "field": "tag", "value": "Favorite movies"}]
-                all_items += self.artutils.kodidb.movies(filters=filters)
+                all_items += self.metadatautils.kodidb.movies(filters=filters)
 
             if media_filter in ["media", "tvshows"]:
                 filters = [{"operator": "contains", "field": "tag", "value": "Favorite tvshows"}]
-                for item in self.artutils.kodidb.tvshows(filters=filters):
+                for item in self.metadatautils.kodidb.tvshows(filters=filters):
                     item["file"] = "videodb://tvshows/titles/%s" % item["tvshowid"]
                     item["isFolder"] = True
                     all_items.append(item)
 
         # Kodi favourites
-        for fav in self.artutils.kodidb.favourites():
+        for fav in self.metadatautils.kodidb.favourites():
             details = {}
 
             # try to match with tvshow or album
@@ -84,7 +84,7 @@ class Favourites(object):
             if fav["windowparameter"].startswith("videodb://tvshows/titles"):
                 try:
                     tvshowid = int(fav["windowparameter"].split("/")[-2])
-                    result = self.artutils.kodidb.tvshow(tvshowid)
+                    result = self.metadatautils.kodidb.tvshow(tvshowid)
                     if result:
                         result["file"] = "videodb://tvshows/titles/%s" % tvshowid
                         result["isFolder"] = True
@@ -95,10 +95,10 @@ class Favourites(object):
         # check for album
         if not match and (not media_filter or media_filter in ["albums", "media"]):
             if "musicdb://albums/" in fav["windowparameter"]:
-                result = self.artutils.kodidb.album(fav["windowparameter"].replace("musicdb://albums/", ""))
+                result = self.metadatautils.kodidb.album(fav["windowparameter"].replace("musicdb://albums/", ""))
                 if result:
                     if self.enable_artwork:
-                        extend_dict(result, self.artutils.get_music_artwork(result["label"], result["artist"][0]))
+                        extend_dict(result, self.metadatautils.get_music_artwork(result["label"], result["artist"][0]))
                     if self.browse_album:
                         result["file"] = "musicdb://albums/%s" % result["albumid"]
                         result["isFolder"] = True
@@ -121,24 +121,24 @@ class Favourites(object):
         filters = [{"operator": "contains", "field": "filename", "value": file_path}]
         # is this a movie?
         if not match and (not media_filter or media_filter in ["movies", "media"]):
-            for item in self.artutils.kodidb.movies(filters=filters):
+            for item in self.metadatautils.kodidb.movies(filters=filters):
                 if item['file'] == fav["path"]:
                     match = item
         # is this an episode ?
         if not match and (not media_filter or media_filter in ["episodes", "media"]):
-            for item in self.artutils.kodidb.episodes(filters=filters):
+            for item in self.metadatautils.kodidb.episodes(filters=filters):
                 if item['file'] == fav["path"]:
                     match = item
         # is this a song ?
         if not match and (not media_filter or media_filter in ["songs", "media"]):
-            for item in self.artutils.kodidb.songs(filters=filters):
+            for item in self.metadatautils.kodidb.songs(filters=filters):
                 if item['file'] == fav["path"]:
                     if self.enable_artwork:
-                        extend_dict(item, self.artutils.get_music_artwork(item["title"], item["artist"][0]))
+                        extend_dict(item, self.metadatautils.get_music_artwork(item["title"], item["artist"][0]))
                     match = item
         # is this a musicvideo ?
         if not match and (not media_filter or media_filter in ["musicvideos", "media"]):
-            for item in self.artutils.kodidb.musicvideos(filters=filters):
+            for item in self.metadatautils.kodidb.musicvideos(filters=filters):
                 if item['file'] == fav["path"]:
                     match = item
         return match

@@ -9,7 +9,7 @@
 
 from utils import create_main_entry
 from operator import itemgetter
-from artutils import extend_dict, process_method_on_list, get_clean_image
+from metadatautils import extend_dict, process_method_on_list, get_clean_image
 import xbmc
 from urllib import quote_plus
 
@@ -17,9 +17,9 @@ from urllib import quote_plus
 class Pvr(object):
     '''all channel widgets provided by the script'''
 
-    def __init__(self, addon, artutils, options):
+    def __init__(self, addon, metadatautils, options):
         '''Initializations pass our common classes and the widget options as arguments'''
-        self.artutils = artutils
+        self.metadatautils = metadatautils
         self.addon = addon
         self.options = options
         self.enable_artwork = self.addon.getSetting("pvr_enable_artwork") == "true"
@@ -48,7 +48,7 @@ class Pvr(object):
         ''' get all channels '''
         all_items = []
         if xbmc.getCondVisibility("Pvr.HasTVChannels"):
-            all_items = self.artutils.kodidb.channels(limits=(0, self.options["limit"]))
+            all_items = self.metadatautils.kodidb.channels(limits=(0, self.options["limit"]))
             all_items = process_method_on_list(self.process_channel, all_items)
         return all_items
 
@@ -58,7 +58,7 @@ class Pvr(object):
         all_titles = []
         if xbmc.getCondVisibility("Pvr.HasTVChannels"):
             # Get a list of all the unwatched tv recordings
-            recordings = self.artutils.kodidb.recordings()
+            recordings = self.metadatautils.kodidb.recordings()
             recordings = sorted(recordings, key=itemgetter('endtime'))[:self.options["limit"]]
             pvr_backend = xbmc.getInfoLabel("Pvr.BackendName").decode("utf-8")
             for item in recordings:
@@ -91,7 +91,7 @@ class Pvr(object):
         '''get pvr timers'''
         all_items = []
         if xbmc.getCondVisibility("Pvr.HasTVChannels"):
-            all_items = sorted(self.artutils.kodidb.timers(), key=itemgetter('starttime'))
+            all_items = sorted(self.metadatautils.kodidb.timers(), key=itemgetter('starttime'))
             all_items = process_method_on_list(self.process_timer, all_items)
         return all_items
 
@@ -109,7 +109,7 @@ class Pvr(object):
             del item["firstaired"]
             # append artwork
             if self.enable_artwork:
-                extend_dict(item, self.artutils.get_pvr_artwork(item["title"], channelname, item["genre"]))
+                extend_dict(item, self.metadatautils.get_pvr_artwork(item["title"], channelname, item["genre"]))
         else:
             # channel without epg
             item = channeldata
@@ -121,7 +121,7 @@ class Pvr(object):
         item["label"] = channelname
         item["channelid"] = channeldata["channelid"]
         if not channellogo:
-            channellogo = self.artutils.get_channellogo(channelname).get("ChannelLogo", "")
+            channellogo = self.metadatautils.get_channellogo(channelname).get("ChannelLogo", "")
         if channellogo:
             item["art"] = {"thumb": channellogo}
         item["channellogo"] = channellogo
@@ -131,9 +131,9 @@ class Pvr(object):
     def process_recording(self, item):
         '''transform the json received from kodi into something we can use'''
         if self.enable_artwork:
-            extend_dict(item, self.artutils.get_pvr_artwork(item["title"], item["channel"]))
+            extend_dict(item, self.metadatautils.get_pvr_artwork(item["title"], item["channel"]))
         item["type"] = "recording"
-        item["channellogo"] = self.artutils.get_channellogo(item["channel"])
+        item["channellogo"] = self.metadatautils.get_channellogo(item["channel"])
         item["file"] = u"plugin://script.skin.helper.service?action=playrecording&recordingid=%s"\
             % (item["recordingid"])
         item["dateadded"] = item["endtime"].split(" ")[0]
@@ -149,14 +149,14 @@ class Pvr(object):
         '''transform the json received from kodi into something we can use'''
         item["file"] = "plugin://script.skin.helper.service/?action=launch&path=" + \
             quote_plus("ReplaceWindow(tvtimers),return")
-        channel_details = self.artutils.kodidb.channel(item["channelid"])
+        channel_details = self.metadatautils.kodidb.channel(item["channelid"])
         channelname = channel_details["label"]
         item["channel"] = channelname
         item["plot"] = item.get("summary", "")
         item["type"] = "recording"
         item["isFolder"] = False
         if self.enable_artwork:
-            extend_dict(item, self.artutils.get_pvr_artwork(item["title"], item["channel"]))
+            extend_dict(item, self.metadatautils.get_pvr_artwork(item["title"], item["channel"]))
         item["type"] = "recording"
-        item["channellogo"] = self.artutils.get_channellogo(item["channel"])
+        item["channellogo"] = self.metadatautils.get_channellogo(item["channel"])
         return item

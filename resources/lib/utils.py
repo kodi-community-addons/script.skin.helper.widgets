@@ -10,6 +10,7 @@
 import xbmc
 from traceback import format_exc
 import sys
+import urllib
 
 ADDON_ID = "script.skin.helper.widgets"
 KODI_VERSION = int(xbmc.getInfoLabel("System.BuildVersion").split(".")[0])
@@ -43,3 +44,12 @@ def create_main_entry(item):
         "type": "file",
         "IsPlayable": "false"
     }
+
+    
+def urlencode(text):
+    '''helper to urlencode a (unicode) string'''
+    if isinstance(text, unicode):
+        text = text.encode("utf-8")
+    blah = urllib.urlencode({'blahblahblah': text})
+    blah = blah[13:]
+    return blah

@@ -9,7 +9,7 @@
 
 from utils import create_main_entry
 from operator import itemgetter
-from artutils import process_method_on_list
+from metadatautils import process_method_on_list
 from movies import Movies
 from tvshows import Tvshows
 from songs import Songs
@@ -22,17 +22,17 @@ import random
 class Media(object):
     '''all media (mixed) widgets provided by the script'''
 
-    def __init__(self, addon, artutils, options):
+    def __init__(self, addon, metadatautils, options):
         '''Initializations pass our common classes and the widget options as arguments'''
-        self.artutils = artutils
+        self.metadatautils = metadatautils
         self.addon = addon
         self.options = options
-        self.movies = Movies(self.addon, self.artutils, self.options)
-        self.tvshows = Tvshows(self.addon, self.artutils, self.options)
-        self.songs = Songs(self.addon, self.artutils, self.options)
-        self.albums = Albums(self.addon, self.artutils, self.options)
-        self.pvr = Pvr(self.addon, self.artutils, self.options)
-        self.episodes = Episodes(self.addon, self.artutils, self.options)
+        self.movies = Movies(self.addon, self.metadatautils, self.options)
+        self.tvshows = Tvshows(self.addon, self.metadatautils, self.options)
+        self.songs = Songs(self.addon, self.metadatautils, self.options)
+        self.albums = Albums(self.addon, self.metadatautils, self.options)
+        self.pvr = Pvr(self.addon, self.metadatautils, self.options)
+        self.episodes = Episodes(self.addon, self.metadatautils, self.options)
 
     def listing(self):
         '''main listing with all our movie nodes'''
@@ -120,7 +120,7 @@ class Media(object):
         '''get favourite media'''
         from favourites import Favourites
         self.options["mediafilter"] = "media"
-        return Favourites(self.addon, self.artutils, self.options).favourites()
+        return Favourites(self.addon, self.metadatautils, self.options).favourites()
 
     def favourite(self):
         '''synonym to favourites'''

@@ -8,7 +8,7 @@
 '''
 
 from utils import create_main_entry
-from artutils import kodi_constants, process_method_on_list
+from metadatautils import kodi_constants, process_method_on_list
 import xbmc
 
 
@@ -18,10 +18,10 @@ class Musicvideos(object):
     kodidb = None
     addon = None
 
-    def __init__(self, addon, artutils, options):
+    def __init__(self, addon, metadatautils, options):
         '''Initialization'''
         self.addon = addon
-        self.artutils = artutils
+        self.metadatautils = metadatautils
         self.options = options
 
     def listing(self):
@@ -42,14 +42,14 @@ class Musicvideos(object):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "musicvideos"
-        return Favourites(self.addon, self.artutils, self.options).favourites()
+        return Favourites(self.addon, self.metadatautils, self.options).favourites()
 
     def recommended(self):
         ''' get recommended musicvideos - library musicvideos with score higher than 7 '''
         filters = [kodi_constants.FILTER_RATING]
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
-        return self.artutils.kodidb.musicvideos(sort=kodi_constants.SORT_RATING, filters=filters,
+        return self.metadatautils.kodidb.musicvideos(sort=kodi_constants.SORT_RATING, filters=filters,
                                                 limits=(0, self.options["limit"]))
 
     def recent(self):
@@ -57,7 +57,7 @@ class Musicvideos(object):
         filters = []
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
-        return self.artutils.kodidb.musicvideos(sort=kodi_constants.SORT_DATEADDED, filters=filters,
+        return self.metadatautils.kodidb.musicvideos(sort=kodi_constants.SORT_DATEADDED, filters=filters,
                                                 limits=(0, self.options["limit"]))
 
     def random(self):
@@ -65,10 +65,10 @@ class Musicvideos(object):
         filters = []
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
-        return self.artutils.kodidb.musicvideos(sort=kodi_constants.SORT_DATEADDED, filters=filters,
+        return self.metadatautils.kodidb.musicvideos(sort=kodi_constants.SORT_DATEADDED, filters=filters,
                                                 limits=(0, self.options["limit"]))
 
     def inprogress(self):
         ''' get in progress musicvideos '''
-        return self.artutils.kodidb.musicvideos(sort=kodi_constants.SORT_LASTPLAYED, filters=[
+        return self.metadatautils.kodidb.musicvideos(sort=kodi_constants.SORT_LASTPLAYED, filters=[
                                                 kodi_constants.FILTER_INPROGRESS], limits=(0, self.options["limit"]))

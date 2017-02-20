@@ -9,16 +9,16 @@
 
 from utils import create_main_entry
 from operator import itemgetter
-from artutils import kodi_constants, extend_dict, process_method_on_list
+from metadatautils import kodi_constants, extend_dict, process_method_on_list
 import xbmc
 
 
 class Songs(object):
     '''all song widgets provided by the script'''
 
-    def __init__(self, addon, artutils, options):
+    def __init__(self, addon, metadatautils, options):
         '''Initializations pass our common classes and the widget options as arguments'''
-        self.artutils = artutils
+        self.metadatautils = metadatautils
         self.addon = addon
         self.options = options
         self.enable_artwork = self.addon.getSetting("music_enable_artwork") == "true"
@@ -39,7 +39,7 @@ class Songs(object):
         '''get favourites'''
         from favourites import Favourites
         self.options["mediafilter"] = "songs"
-        return Favourites(self.addon, self.artutils, self.options).favourites()
+        return Favourites(self.addon, self.metadatautils, self.options).favourites()
 
     def favourite(self):
         '''synonym to favourites'''
@@ -48,13 +48,13 @@ class Songs(object):
     def recommended(self):
         ''' get recommended songs - library songs with score higher than 7 '''
         filters = [kodi_constants.FILTER_RATING_MUSIC]
-        items = self.artutils.kodidb.songs(sort=kodi_constants.SORT_RATING, filters=filters,
+        items = self.metadatautils.kodidb.songs(sort=kodi_constants.SORT_RATING, filters=filters,
                                            limits=(0, self.options["limit"]))
         return process_method_on_list(self.process_song, items)
 
     def recent(self):
         ''' get recently added songs '''
-        items = self.artutils.kodidb.get_json(
+        items = self.metadatautils.kodidb.get_json(
             "AudioLibrary.GetRecentlyAddedSongs",
             filters=[],
             fields=kodi_constants.FIELDS_SONGS,
@@ -66,13 +66,13 @@ class Songs(object):
 
     def random(self):
         ''' get random songs '''
-        items = self.artutils.kodidb.songs(sort=kodi_constants.SORT_RANDOM, filters=[],
+        items = self.metadatautils.kodidb.songs(sort=kodi_constants.SORT_RANDOM, filters=[],
                                            limits=(0, self.options["limit"]))
         return process_method_on_list(self.process_song, items)
 
     def recentplayed(self):
         ''' get in progress songs '''
-        items = self.artutils.kodidb.songs(sort=kodi_constants.SORT_LASTPLAYED, filters=[],
+        items = self.metadatautils.kodidb.songs(sort=kodi_constants.SORT_LASTPLAYED, filters=[],
                                            limits=(0, self.options["limit"]))
         return process_method_on_list(self.process_song, items)
 
@@ -101,7 +101,7 @@ class Songs(object):
 
     def get_random_played_song(self):
         '''gets a random played song from kodi_constants.'''
-        songs = self.artutils.kodidb.songs(sort=kodi_constants.SORT_RANDOM,
+        songs = self.metadatautils.kodidb.songs(sort=kodi_constants.SORT_RANDOM,
                                            filters=[kodi_constants.FILTER_WATCHED], limits=(0, 1))
         if songs:
             return songs[0]
@@ -111,11 +111,11 @@ class Songs(object):
     def get_genre_songs(self, genre, limit=100):
         '''helper method to get all songs in a specific genre'''
         filters = [{"operator": "contains", "field": "genre", "value": genre}]
-        return self.artutils.kodidb.songs(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0, limit))
+        return self.metadatautils.kodidb.songs(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0, limit))
 
     def process_song(self, item):
         '''additional actions on a song item'''
         if self.enable_artwork:
-            extend_dict(item, self.artutils.get_music_artwork(item["artist"][0],
+            extend_dict(item, self.metadatautils.get_music_artwork(item["artist"][0],
                                                               item["album"], item["title"], str(item["disc"])))
         return item
