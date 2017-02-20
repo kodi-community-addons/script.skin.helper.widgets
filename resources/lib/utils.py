@@ -45,7 +45,7 @@ def create_main_entry(item):
         "IsPlayable": "false"
     }
 
-    
+
 def urlencode(text):
     '''helper to urlencode a (unicode) string'''
     if isinstance(text, unicode):

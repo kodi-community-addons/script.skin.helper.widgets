@@ -160,13 +160,13 @@ class Favourites(object):
             fav["label"] = fav.get("title")
         if not fav.get("title"):
             fav["label"] = fav.get("label")
-        
+
         thumb = fav.get("thumbnail")
         fanart = ""
         if "plugin://" in fav["path"]:
             # get fanart and thumb for addons
             addon = fav["path"].split("plugin://")[1].split("/")[0]
-            if not (xbmcvfs.exists(thumb) | xbmc.skinHasImage(thumb)):
+            if not (xbmcvfs.exists(thumb) or xbmc.skinHasImage(thumb)):
                 if xbmcvfs.exists("special://home/addons/%s/icon.png" % addon):
                     thumb = "special://home/addons/%s/icon.png" % addon
             if xbmcvfs.exists("special://home/addons/%s/fanart.jpg" % addon):
@@ -183,7 +183,7 @@ class Favourites(object):
                 "landscape": thumb,
                 "poster": thumb,
                 "fanart": fanart}
-            }
+        }
         if is_folder:
             item["isFolder"] = True
         return item

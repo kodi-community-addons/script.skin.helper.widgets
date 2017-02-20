@@ -137,7 +137,9 @@ class Main(object):
             # dynamically import and load the correct module, class and function
             try:
                 media_module = __import__(media_type)
-                media_class = getattr(media_module, media_type.capitalize())(self.addon, self.metadatautils, self.options)
+                media_class = getattr(
+                    media_module,
+                    media_type.capitalize())(self.addon, self.metadatautils, self.options)
                 all_items = getattr(media_class, action)()
                 del media_class
             except AttributeError:
