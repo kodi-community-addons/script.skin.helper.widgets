@@ -26,9 +26,11 @@ class Pvr(object):
 
     def listing(self):
         '''main listing with all our channel nodes'''
+
+        # add generic pvr entries
         all_items = [
-            (self.addon.getLocalizedString(32020),
-             "channels&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]",
+            (self.addon.getLocalizedString(32069),
+             "lastchannels&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]",
              "DefaultAddonPVRClient.png"),
             (self.addon.getLocalizedString(32018),
              "recordings&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]",
@@ -42,13 +44,40 @@ class Pvr(object):
             (self.addon.getLocalizedString(32021),
              "timers&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]",
              "DefaultAddonPVRClient.png")]
+
+        # get all channel groups and create a tv channels entry for each groups
+        for item in self.metadatautils.kodidb.channelgroups():
+            label = "%s: %s" % (self.addon.getLocalizedString(32020), item["label"])
+            widgetpath = "channels&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]"
+            widgetpath += "&channelgroup=%s" % (item["channelgroupid"])
+            all_items.append((label, widgetpath, "DefaultAddonPVRClient.png"))
+
         return process_method_on_list(create_main_entry, all_items)
 
     def channels(self):
         ''' get all channels '''
         all_items = []
+        channelgroupid = self.options.get("channelgroup")
+        if channelgroupid:
+            channelgroupid = int(channelgroupid)
         if xbmc.getCondVisibility("Pvr.HasTVChannels"):
-            all_items = self.metadatautils.kodidb.channels(limits=(0, self.options["limit"]))
+            all_items = self.metadatautils.kodidb.channels(
+                limits=(0, self.options["limit"]),
+                channelgroupid=channelgroupid)
+            all_items = process_method_on_list(self.process_channel, all_items)
+        return all_items
+
+    def lastchannels(self):
+        ''' get last played channels '''
+        all_items = []
+        if xbmc.getCondVisibility("Pvr.HasTVChannels"):
+            # get full channels listing (as there is no way to apply filtering)
+            for channel in self.metadatautils.kodidb.channels():
+                # only add channels to the final list that are actually played once
+                if not channel["lastplayed"].startswith("1970"):
+                    all_items.append(channel)
+            # sort by last played field and apply limit
+            all_items = sorted(all_items, key=itemgetter('lastplayed'), reverse=True)[:self.options["limit"]]
             all_items = process_method_on_list(self.process_channel, all_items)
         return all_items
 
@@ -97,7 +126,7 @@ class Pvr(object):
 
     def process_channel(self, channeldata):
         '''transform the json received from kodi into something we can use'''
-        item = { }
+        item = {}
         channelname = channeldata["label"]
         channellogo = get_clean_image(channeldata['thumbnail'])
         if channeldata.get('broadcastnow'):
