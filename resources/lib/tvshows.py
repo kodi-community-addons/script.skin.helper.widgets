@@ -43,7 +43,7 @@ class Tvshows(object):
             all_items += [
                 (self.addon.getLocalizedString(32014), "similar&mediatype=tvshows", icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=tvshows", icon),
-                (xbmc.getLocalizedString(20459), "tags&mediatype=tvshows", icon)
+                (xbmc.getLocalizedString(20459), "tagslisting&mediatype=tvshows", icon)
             ]
         if tag:
             # add episode nodes with tag filter
@@ -58,7 +58,7 @@ class Tvshows(object):
                     tag, icon)]
         return process_method_on_list(create_main_entry, all_items)
 
-    def tags(self):
+    def tagslisting(self):
         '''get tags listing'''
         all_items = []
         for item in self.metadatautils.kodidb.files("videodb://tvshows/tags"):

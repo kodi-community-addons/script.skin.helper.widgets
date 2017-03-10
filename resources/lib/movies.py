@@ -46,11 +46,11 @@ class Movies(object):
             all_items += [
                 (self.addon.getLocalizedString(32006), "similar&mediatype=movies&tag=%s" % tag, icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=movies&tag=%s" % tag, icon),
-                (xbmc.getLocalizedString(20459), "tags&mediatype=movies", icon)
+                (xbmc.getLocalizedString(20459), "tagslisting&mediatype=movies", icon)
             ]
         return process_method_on_list(create_main_entry, all_items)
 
-    def tags(self):
+    def tagslisting(self):
         '''get tags listing'''
         all_items = []
         for item in self.metadatautils.kodidb.files("videodb://movies/tags"):
