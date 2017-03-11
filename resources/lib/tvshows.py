@@ -7,7 +7,7 @@
     all tvshows widgets provided by the script
 '''
 
-from utils import create_main_entry
+from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
 from metadatautils import kodi_constants, process_method_on_list, TheTvDb
 import xbmc

@@ -120,7 +120,11 @@ class Pvr(object):
         '''get pvr timers'''
         all_items = []
         if xbmc.getCondVisibility("Pvr.HasTVChannels"):
-            all_items = sorted(self.metadatautils.kodidb.timers(), key=itemgetter('starttime'))
+            # only add timers which have a broadcast date
+            for timer in self.metadatautils.kodidb.timers():
+                if not timer["starttime"].startswith("1970"):
+                    all_items.append(timer)
+            all_items = sorted(all_items, key=itemgetter('starttime'), reverse=True)[:self.options["limit"]]
             all_items = process_method_on_list(self.process_timer, all_items)
         return all_items
 
@@ -178,8 +182,11 @@ class Pvr(object):
         '''transform the json received from kodi into something we can use'''
         item["file"] = "plugin://script.skin.helper.service/?action=launch&path=" + \
             quote_plus("ReplaceWindow(tvtimers),return")
-        channel_details = self.metadatautils.kodidb.channel(item["channelid"])
-        channelname = channel_details["label"]
+        if not item["channelid"] == -1:
+            channel_details = self.metadatautils.kodidb.channel(item["channelid"])
+            channelname = channel_details["label"]
+        else:
+            channelname = ""
         item["channel"] = channelname
         item["plot"] = item.get("summary", "")
         item["type"] = "recording"
