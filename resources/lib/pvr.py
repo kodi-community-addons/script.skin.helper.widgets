@@ -122,9 +122,10 @@ class Pvr(object):
         if xbmc.getCondVisibility("Pvr.HasTVChannels"):
             # only add timers which have a broadcast date
             for timer in self.metadatautils.kodidb.timers():
-                if not timer["starttime"].startswith("1970"):
-                    all_items.append(timer)
-            all_items = sorted(all_items, key=itemgetter('starttime'), reverse=True)[:self.options["limit"]]
+                if timer["starttime"] and not timer["starttime"].startswith("1970"):
+                    # filter out recurring timer entries
+                    if timer["starttime"] != timer["endtime"]:
+                        all_items.append(timer)
             all_items = process_method_on_list(self.process_timer, all_items)
         return all_items
 
