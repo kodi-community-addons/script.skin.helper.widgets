@@ -72,3 +72,13 @@ class KodiMonitor(xbmc.Monitor):
             self.win.setProperty("widgetreload-%ss" % media_type, timestr)
             if "episode" in media_type:
                 self.win.setProperty("widgetreload-tvshows", timestr)
+                
+    def onSettingsChanged(self):
+        '''called by Kodi when the addon settings are changed'''
+        timestr = time.strftime("%Y%m%d%H%M%S", time.gmtime())
+        self.win.setProperty("widgetreload", timestr)
+        self.win.setProperty("widgetreloadmusic", timestr)
+        self.win.setProperty("widgetreload2", timestr)
+        for media_type in ["episode", "tvshow", "music", "song", "album", "movie"]:
+            self.win.setProperty("widgetreload-%ss" % media_type, timestr)
+        

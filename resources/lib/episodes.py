@@ -22,6 +22,9 @@ class Episodes(object):
         '''Initialization'''
         self.addon = addon
         self.metadatautils = metadatautils
+        options["next_inprogress_only"] = self.addon.getSetting("nextup_inprogressonly") == "true"
+        options["episodes_enable_specials"] = self.addon.getSetting("episodes_enable_specials") == "true"
+        options["group_episodes"] = self.addon.getSetting("episodes_grouping") == "true"
         self.options = options
 
     def listing(self):

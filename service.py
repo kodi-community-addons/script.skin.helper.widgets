@@ -6,7 +6,7 @@
     Main service entry point
 '''
 
-from resources.lib.utils import log_msg
+from resources.lib.utils import log_msg, ADDON_ID
 from resources.lib.kodi_monitor import KodiMonitor
 import xbmc
 import xbmcgui
