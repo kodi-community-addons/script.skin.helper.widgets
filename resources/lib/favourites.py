@@ -58,12 +58,12 @@ class Favourites(object):
         for fav in self.metadatautils.kodidb.favourites():
             details = {}
 
-            # try to match with tvshow, artist or album
-            if fav["type"] == "window":
+            # try to match with tvshow, artist or album in kodi database
+            if fav["type"] == "window" and "plugin://" not in fav["windowparameter"]:
                 details = self.find_window_match(fav, media_filter)
 
-            # try to match with song, movie, musicvideo or episode
-            elif fav["type"] == "media":
+            # try to match with song, movie, musicvideo or episode in kodi database
+            elif fav["type"] == "media" and "plugin://" not in fav["path"]:
                 details = self.find_media_match(fav, media_filter)
 
             # add unknown item in the result...
