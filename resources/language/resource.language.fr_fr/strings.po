@@ -286,7 +286,7 @@ msgstr "Films non vus"
 
 msgctxt "#32067"
 msgid "Hide watched items in recent items listings"
-msgstr "Masquer les éléments vus dans les listes d'articles récents"
+msgstr "Masquer les éléments vus dans les listes des éléments récents"
 
 msgctxt "#32068"
 msgid "Episodes airing today"
