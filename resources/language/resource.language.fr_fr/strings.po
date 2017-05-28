@@ -267,3 +267,31 @@ msgstr "Clips vidéos en cours"
 msgctxt "#32062"
 msgid "Random music videos"
 msgstr "Clips vidéos aléatoires"
+
+msgctxt "#32063"
+msgid "Recently added artists"
+msgstr "Artistes ajoutés récemment"
+
+msgctxt "#32064"
+msgid "Random artists"
+msgstr "Artistes aléatoires"
+
+msgctxt "#32065"
+msgid "Recommended artists"
+msgstr "Artistes recommandés"
+
+msgctxt "#32066"
+msgid "Unwatched movies"
+msgstr "Films non vus"
+
+msgctxt "#32067"
+msgid "Hide watched items in recent items listings"
+msgstr "Masquer les éléments vus dans les listes des éléments récents"
+
+msgctxt "#32068"
+msgid "Episodes airing today"
+msgstr "Episodes diffusés aujourd'hui"
+
+msgctxt "#32069"
+msgid "Recently played TV channels"
+msgstr "Chaînes TV regardées récemment"
