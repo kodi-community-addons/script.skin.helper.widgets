@@ -112,12 +112,16 @@ class Movies(object):
         all_titles = list()
         # lookup movie by imdbid or just pick a random watched movie
         ref_movie = None
+        hide_watched = self.options["hide_watched"]
         if imdb_id:
             # get movie by imdbid
             ref_movie = self.metadatautils.kodidb.movie_by_imdbid(imdb_id)
         if not ref_movie:
             # just get a random watched movie
             ref_movie = self.get_random_watched_movie()
+            # when getting a random movie, it's for a homescreen widget, and
+            # and that means it should hide watched movies
+            self.options["hide_watched"] = True
         if ref_movie:
             # get all movies for the genres in the movie
             genres = ref_movie["genre"]
@@ -132,6 +136,8 @@ class Movies(object):
                         item["num_match"] = len(set(genres).intersection(item["genre"]))
                         all_items.append(item)
                         all_titles.append(item["title"])
+        # restore hide_watched settings
+        hide_watched = self.options["hide_watched"]
         # return the list capped by limit and sorted by number of matching genres then rating
         items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
         return sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
