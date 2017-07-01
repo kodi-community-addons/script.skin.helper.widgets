@@ -132,8 +132,9 @@ class Movies(object):
                         item["num_match"] = len(set(genres).intersection(item["genre"]))
                         all_items.append(item)
                         all_titles.append(item["title"])
-        # return the list capped by limit and sorted by number of matching genres
-        return sorted(all_items, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
+        # return the list capped by limit and sorted by number of matching genres then rating
+        items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
+        return sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
 
 
     def forgenre(self):
@@ -242,6 +243,7 @@ class Movies(object):
 
     def get_genre_movies(self, genre, hide_watched=False, limit=100):
         '''helper method to get all movies in a specific genre'''
+        limit=1000  # similar movies is too inconsisent without a high limit
         filters = [{"operator": "is", "field": "genre", "value": genre}]
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
