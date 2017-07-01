@@ -1,3 +1,11 @@
+## Fork of  marcelveldt's script.skin.helper.widgets
+
+### Changes:
+
+* Similar movies and TV Shows are sorted based on number of matching genres, not rating.  Combined with the genres provided by [DVDNetflixScraper](https://github.com/patrick-klein/DVDNetflixScraper), this provides exceptionally useful recommendations.
+
+* Similar Movies widget will ignore watched titles by default, regardless of global options.
+
 # script.skin.helper.widgets
 Addon for Kodi providing widgets for all kinds of media types
 
