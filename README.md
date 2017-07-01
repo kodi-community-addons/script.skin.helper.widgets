@@ -6,6 +6,8 @@
 
 * Similar Movies widget will ignore watched titles by default, regardless of global options.
 
+* Updated get_next_episode_for_show to return the next unwatched episode AFTER the most recently watched episode.  This replicates LazyTV behavior
+
 # script.skin.helper.widgets
 Addon for Kodi providing widgets for all kinds of media types
 
@@ -247,7 +249,7 @@ plugin://script.skin.helper.widgets/?action=unaired&mediatype=episodes&reload=$I
 ```
 Provides a listing for episodes for tvshows in the Kodi library that are airing within the next 2 months.
 
-All listitem properties should be the same as any other episode listitem, 
+All listitem properties should be the same as any other episode listitem,
 all properties should be correctly filled with the correct info.
 Just treat the widget as any other episode widget and you should have all the details properly set.
 If not, let me know ;-)
@@ -318,5 +320,3 @@ plugin://myvideoplugin/movies/?latest&reload=$INFO[Window(Home).Property(widgetr
 |Window(Home).Property(widgetreload-tvshows) | will change if tvshows content is added/changed in the library |
 |Window(Home).Property(widgetreload-music) | will change if any music content is added/changed in the library or after playback stop of music (in- or outside of library) |
 |Window(Home).Property(widgetreload2) | will change every 10 minutes (e.g. for pvr widgets or favourites) |
-
-
