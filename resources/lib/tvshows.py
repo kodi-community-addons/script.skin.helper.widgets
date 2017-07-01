@@ -138,8 +138,6 @@ class Tvshows(object):
                         all_items.append(item)
                         all_titles.append(item["title"])
         # return the list capped by limit and sorted by rating
-        #tvshows = sorted(all_items, key=itemgetter("rating"), reverse=True)[:self.options["limit"]]
-        #return process_method_on_list(self.process_tvshow, tvshows)
         items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
         tvshows = sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
         return process_method_on_list(self.process_tvshow, tvshows)
@@ -257,6 +255,7 @@ class Tvshows(object):
 
     def get_genre_tvshows(self, genre, hide_watched=False, limit=100):
         '''helper method to get all tvshows in a specific genre'''
+        limit=1000 # similar tvshows is too inconsistent without a high limit
         filters = [{"operator": "is", "field": "genre", "value": genre}]
         if hide_watched:
             filters.append(kodi_constants.FILTER_UNWATCHED)
