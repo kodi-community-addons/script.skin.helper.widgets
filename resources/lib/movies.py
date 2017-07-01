@@ -104,13 +104,13 @@ class Movies(object):
         return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_TITLE, filters=filters,
                                            limits=(0, self.options["limit"]))
 
+
     def similar(self):
         ''' get similar movies for given imdbid or just from random watched title if no imdbid'''
         imdb_id = self.options.get("imdbid", "")
         all_items = []
         all_titles = list()
         # lookup movie by imdbid or just pick a random watched movie
-
         ref_movie = None
         if imdb_id:
             # get movie by imdbid
@@ -129,10 +129,12 @@ class Movies(object):
                     # prevent duplicates so skip reference movie and titles already in the list
                     if not item["title"] in all_titles and not item["title"] == similar_title:
                         item["extraproperties"] = {"similartitle": similar_title, "originalpath": item["file"]}
+                        item["num_match"] = len(set(genres).intersection(item["genre"]))
                         all_items.append(item)
                         all_titles.append(item["title"])
-        # return the list capped by limit and sorted by rating
-        return sorted(all_items, key=itemgetter("rating"), reverse=True)[:self.options["limit"]]
+        # return the list capped by limit and sorted by number of matching genres
+        return sorted(all_items, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
+
 
     def forgenre(self):
         ''' get top rated movies for given genre'''
