@@ -15,7 +15,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import sys
-from metadatautils import MetadataUtils, process_method_on_list
+from metadatautils import MetadataUtils
 
 ADDON_HANDLE = int(sys.argv[1])
 
@@ -27,7 +27,7 @@ class Main(object):
         ''' Initialization '''
 
         self.metadatautils = MetadataUtils()
-        self.cache = SimpleCache()
+        self.cache = self.metadatautils.cache
         self.addon = xbmcaddon.Addon(ADDON_ID)
         self.win = xbmcgui.Window(10000)
         self.options = self.get_options()
@@ -50,7 +50,6 @@ class Main(object):
     def close(self):
         '''Cleanup Kodi Cpython instances'''
         self.metadatautils.close()
-        self.cache.close()
         del self.addon
         del self.win
         log_msg("MainModule exited")
@@ -152,12 +151,12 @@ class Main(object):
                 all_items = sorted(all_items, key=lambda k: random.random())
 
             # prepare listitems and store in cache
-            all_items = process_method_on_list(self.metadatautils.kodidb.prepare_listitem, all_items)
+            all_items = self.metadatautils.process_method_on_list(self.metadatautils.kodidb.prepare_listitem, all_items)
             self.cache.set(cache_str, all_items, checksum=cache_checksum)
 
         # fill that listing...
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
-        all_items = process_method_on_list(self.metadatautils.kodidb.create_listitem, all_items)
+        all_items = self.metadatautils.process_method_on_list(self.metadatautils.kodidb.create_listitem, all_items)
         xbmcplugin.addDirectoryItems(ADDON_HANDLE, all_items, len(all_items))
 
         # end directory listing
@@ -199,8 +198,8 @@ class Main(object):
         all_items.append((xbmc.getLocalizedString(10134), "favouriteslisting", "DefaultAddonAlbumInfo.png"))
 
         # process the listitems and display listing
-        all_items = process_method_on_list(create_main_entry, all_items)
-        all_items = process_method_on_list(self.metadatautils.kodidb.prepare_listitem, all_items)
-        all_items = process_method_on_list(self.metadatautils.kodidb.create_listitem, all_items)
+        all_items = self.metadatautils.process_method_on_list(create_main_entry, all_items)
+        all_items = self.metadatautils.process_method_on_list(self.metadatautils.kodidb.prepare_listitem, all_items)
+        all_items = self.metadatautils.process_method_on_list(self.metadatautils.kodidb.create_listitem, all_items)
         xbmcplugin.addDirectoryItems(ADDON_HANDLE, all_items, len(all_items))
         xbmcplugin.endOfDirectory(handle=ADDON_HANDLE)

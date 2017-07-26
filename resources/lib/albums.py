@@ -9,7 +9,7 @@
 
 from utils import create_main_entry
 from operator import itemgetter
-from metadatautils import kodi_constants, extend_dict, process_method_on_list
+from metadatautils import kodi_constants
 import xbmc
 
 
@@ -34,7 +34,7 @@ class Albums(object):
             (self.addon.getLocalizedString(32033), "random&mediatype=albums", "DefaultMusicAlbums.png"),
             (xbmc.getLocalizedString(10134), "favourites&mediatype=albums", "DefaultMusicAlbums.png")
         ]
-        return process_method_on_list(create_main_entry, all_items)
+        return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def favourites(self):
         '''get favourites'''
@@ -46,25 +46,25 @@ class Albums(object):
         ''' get recommended albums - library albums with sorted by rating '''
         all_items = self.metadatautils.kodidb.albums(sort=kodi_constants.SORT_RATING,
                                                 filters=[], limits=(0, self.options["limit"]))
-        return process_method_on_list(self.process_album, all_items)
+        return self.metadatautils.process_method_on_list(self.process_album, all_items)
 
     def recent(self):
         ''' get recently added albums '''
         all_items = self.metadatautils.kodidb.albums(sort=kodi_constants.SORT_DATEADDED, filters=[],
                                                 limits=(0, self.options["limit"]))
-        return process_method_on_list(self.process_album, all_items)
+        return self.metadatautils.process_method_on_list(self.process_album, all_items)
 
     def random(self):
         ''' get random albums '''
         all_items = self.metadatautils.kodidb.albums(sort=kodi_constants.SORT_RANDOM, filters=[],
                                                 limits=(0, self.options["limit"]))
-        return process_method_on_list(self.process_album, all_items)
+        return self.metadatautils.process_method_on_list(self.process_album, all_items)
 
     def recentplayed(self):
         ''' get in progress albums '''
         all_items = self.metadatautils.kodidb.albums(sort=kodi_constants.SORT_LASTPLAYED, filters=[],
                                                 limits=(0, self.options["limit"]))
-        return process_method_on_list(self.process_album, all_items)
+        return self.metadatautils.process_method_on_list(self.process_album, all_items)
 
     def similar(self):
         ''' get similar albums for recent played album'''
@@ -89,7 +89,7 @@ class Albums(object):
                         all_titles.append(item["title"])
         # return the list capped by limit and sorted by rating
         all_items = sorted(all_items, key=itemgetter("rating"), reverse=True)[:self.options["limit"]]
-        return process_method_on_list(self.process_album, all_items)
+        return self.metadatautils.process_method_on_list(self.process_album, all_items)
 
     def get_random_played_album(self):
         '''gets a random played album from kodi.'''
@@ -117,7 +117,7 @@ class Albums(object):
     def process_album(self, item):
         '''transform the json received from kodi into something we can use'''
         if self.enable_artwork:
-            extend_dict(item, self.metadatautils.get_music_artwork(item["artist"][0], item["title"]))
+            self.metadatautils.extend_dict(item, self.metadatautils.get_music_artwork(item["artist"][0], item["title"]))
         if self.browse_album:
             item["file"] = "musicdb://albums/%s" % item["albumid"]
             item["isFolder"] = True

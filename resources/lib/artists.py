@@ -8,7 +8,7 @@
 '''
 
 from utils import create_main_entry
-from metadatautils import kodi_constants, extend_dict, process_method_on_list
+from metadatautils import kodi_constants
 import xbmc
 
 
@@ -30,7 +30,7 @@ class Artists(object):
             (self.addon.getLocalizedString(32064), "random&mediatype=artists", "DefaultMusicArtists.png"),
             (xbmc.getLocalizedString(10134), "favourites&mediatype=artists", "DefaultMusicArtists.png")
         ]
-        return process_method_on_list(create_main_entry, all_items)
+        return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def favourites(self):
         '''get favourites'''
@@ -42,24 +42,24 @@ class Artists(object):
         ''' get recommended artists - library artists sorted by rating '''
         all_items = self.metadatautils.kodidb.artists(sort=kodi_constants.SORT_RATING,
                                                 filters=[], limits=(0, self.options["limit"]))
-        return process_method_on_list(self.process_artist, all_items)
+        return self.metadatautils.process_method_on_list(self.process_artist, all_items)
 
     def recent(self):
         ''' get recently added artists '''
         all_items = self.metadatautils.kodidb.artists(sort=kodi_constants.SORT_DATEADDED, filters=[],
                                                 limits=(0, self.options["limit"]))
-        return process_method_on_list(self.process_artist, all_items)
+        return self.metadatautils.process_method_on_list(self.process_artist, all_items)
 
     def random(self):
         ''' get random artists '''
         all_items = self.metadatautils.kodidb.artists(sort=kodi_constants.SORT_RANDOM, filters=[],
                                                 limits=(0, self.options["limit"]))
-        return process_method_on_list(self.process_artist, all_items)
+        return self.metadatautils.process_method_on_list(self.process_artist, all_items)
 
     def process_artist(self, item):
         '''transform the json received from kodi into something we can use'''
         if self.enable_artwork:
-            extend_dict(item, self.metadatautils.get_music_artwork(item["label"][0]))
+            self.metadatautils.extend_dict(item, self.metadatautils.get_music_artwork(item["label"][0]))
         item["file"] = "musicdb://artists/%s" % item["artistid"]
         item["isFolder"] = True
         return item

@@ -8,7 +8,7 @@
 '''
 
 from utils import create_main_entry
-from metadatautils import kodi_constants, process_method_on_list
+from metadatautils import kodi_constants
 import xbmc
 
 
@@ -36,7 +36,7 @@ class Musicvideos(object):
                 tag, "DefaultTvShows.png"),
             (xbmc.getLocalizedString(10134), "favourites&mediatype=musicvideos&tag=%s" %
                 tag, "DefaultMovies.png")]
-        return process_method_on_list(create_main_entry, all_items)
+        return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def favourites(self):
         '''get favourites'''
