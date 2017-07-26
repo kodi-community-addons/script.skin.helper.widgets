@@ -9,7 +9,6 @@
 
 from utils import create_main_entry
 from operator import itemgetter
-from metadatautils import process_method_on_list
 from movies import Movies
 from tvshows import Tvshows
 from songs import Songs
@@ -47,7 +46,7 @@ class Media(object):
             (self.addon.getLocalizedString(32058), "top250&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32001), "favourites&mediatype=media", "DefaultMovies.png")
         ]
-        return process_method_on_list(create_main_entry, all_items)
+        return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def recommended(self):
         ''' get recommended media '''

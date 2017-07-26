@@ -9,7 +9,7 @@
 
 from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
-from metadatautils import kodi_constants, process_method_on_list
+from metadatautils import kodi_constants
 import xbmc
 
 
@@ -48,7 +48,7 @@ class Movies(object):
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=movies&tag=%s" % tag, icon),
                 (xbmc.getLocalizedString(20459), "tagslisting&mediatype=movies", icon)
             ]
-        return process_method_on_list(create_main_entry, all_items)
+        return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def tagslisting(self):
         '''get tags listing'''
@@ -212,7 +212,7 @@ class Movies(object):
             TODO: get auto generated collage pictures from skinhelper's metadatautils ?
         '''
         all_genres = self.metadatautils.kodidb.genres("movie")
-        return process_method_on_list(self.get_genre_artwork, all_genres)
+        return self.metadatautils.process_method_on_list(self.get_genre_artwork, all_genres)
 
     def get_genre_artwork(self, genre_json):
         '''helper method for browsegenres'''

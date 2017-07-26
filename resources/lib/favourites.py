@@ -7,7 +7,6 @@
     all favourites widgets provided by the script
 '''
 
-from metadatautils import extend_dict, process_method_on_list
 from utils import create_main_entry
 import xbmc
 import xbmcvfs
@@ -34,7 +33,7 @@ class Favourites(object):
             (self.addon.getLocalizedString(32001),
              "favourites&mediatype=favourites&mediafilter=media",
              "DefaultMovies.png")]
-        return process_method_on_list(create_main_entry, all_items)
+        return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def favourites(self):
         '''show kodi favourites'''
@@ -102,7 +101,7 @@ class Favourites(object):
                 result = self.metadatautils.kodidb.album(albumid)
                 if result and result.get("albumid"):
                     if self.enable_artwork:
-                        extend_dict(result, self.metadatautils.get_music_artwork(result["artist"][0], result["label"]))
+                        self.metadatautils.extend_dict(result, self.metadatautils.get_music_artwork(result["artist"][0], result["label"]))
                     if self.browse_album:
                         result["file"] = "musicdb://albums/%s" % result["albumid"]
                         result["isFolder"] = True
@@ -118,7 +117,7 @@ class Favourites(object):
                 result = self.metadatautils.kodidb.artist(artistid)
                 if result and result.get("artistid"):
                     if self.enable_artwork:
-                        extend_dict(result, self.metadatautils.get_music_artwork(result["label"], ""))
+                        self.metadatautils.extend_dict(result, self.metadatautils.get_music_artwork(result["label"], ""))
                     result["file"] = "musicdb://artists/%s" % result["artistid"]
                     result["isFolder"] = True
                     match = result
@@ -150,7 +149,7 @@ class Favourites(object):
             for item in self.metadatautils.kodidb.songs(filters=filters):
                 if item['file'] == fav["path"]:
                     if self.enable_artwork:
-                        extend_dict(item, self.metadatautils.get_music_artwork(item["title"], item["artist"][0]))
+                        self.metadatautils.extend_dict(item, self.metadatautils.get_music_artwork(item["title"], item["artist"][0]))
                     match = item
         # is this a musicvideo ?
         if not match and (not media_filter or media_filter in ["musicvideos", "media"]):

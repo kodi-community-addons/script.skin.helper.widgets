@@ -9,7 +9,7 @@
 
 from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
-from metadatautils import kodi_constants, process_method_on_list, TheTvDb
+from metadatautils import kodi_constants
 import xbmc
 
 
@@ -21,7 +21,6 @@ class Tvshows(object):
         self.metadatautils = metadatautils
         self.addon = addon
         self.options = options
-        self.thetvdb = TheTvDb()
 
     def listing(self):
         '''main listing with all our tvshow nodes'''
@@ -56,7 +55,7 @@ class Tvshows(object):
                     tag, icon),
                 (label_prefix + self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s" %
                     tag, icon)]
-        return process_method_on_list(create_main_entry, all_items)
+        return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def tagslisting(self):
         '''get tags listing'''
@@ -76,7 +75,7 @@ class Tvshows(object):
         tvshows = self.metadatautils.kodidb.tvshows(
             sort=kodi_constants.SORT_RATING, filters=filters, limits=(
                 0, self.options["limit"]))
-        return process_method_on_list(self.process_tvshow, tvshows)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def recent(self):
         ''' get recently added tvshows '''
@@ -88,7 +87,7 @@ class Tvshows(object):
         tvshows = self.metadatautils.kodidb.tvshows(
             sort=kodi_constants.SORT_DATEADDED, filters=filters, limits=(
                 0, self.options["limit"]))
-        return process_method_on_list(self.process_tvshow, tvshows)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def random(self):
         ''' get random tvshows '''
@@ -98,7 +97,7 @@ class Tvshows(object):
         tvshows = self.metadatautils.kodidb.tvshows(
             sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(
                 0, self.options["limit"]))
-        return process_method_on_list(self.process_tvshow, tvshows)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def inprogress(self):
         ''' get in progress tvshows '''
@@ -108,7 +107,7 @@ class Tvshows(object):
         tvshows = self.metadatautils.kodidb.tvshows(
             sort=kodi_constants.SORT_LASTPLAYED, filters=filters, limits=(
                 0, self.options["limit"]))
-        return process_method_on_list(self.process_tvshow, tvshows)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def similar(self):
         ''' get similar tvshows for given imdbid or just from random watched title if no imdbid'''
@@ -140,7 +139,7 @@ class Tvshows(object):
         # return the list capped by limit and sorted by rating
         items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
         tvshows = sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
-        return process_method_on_list(self.process_tvshow, tvshows)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
 
     def forgenre(self):
@@ -161,7 +160,7 @@ class Tvshows(object):
 
         # return the list sorted by rating
         tvshows = sorted(all_items, key=itemgetter("rating"), reverse=True)
-        return process_method_on_list(self.process_tvshow, tvshows)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def top250(self):
         ''' get imdb top250 tvshows in library '''
@@ -184,7 +183,7 @@ class Tvshows(object):
                         imdbnumber = value
             if imdbnumber and not imdbnumber.startswith("tt"):
                 # we have a tvdb id
-                tvdb_info = self.thetvdb.get_series(imdbnumber)
+                tvdb_info = self.metadatautils.thetvdb.get_series(imdbnumber)
                 if tvdb_info:
                     imdbnumber = tvdb_info["imdbnumber"]
                 else:
@@ -194,7 +193,7 @@ class Tvshows(object):
                 tvshow_full["top250_rank"] = int(top_250[imdbnumber])
                 all_items.append(tvshow_full)
         tvshows = sorted(all_items, key=itemgetter("top250_rank"))[:self.options["limit"]]
-        return process_method_on_list(self.process_tvshow, tvshows)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def browsegenres(self):
         '''
@@ -204,7 +203,7 @@ class Tvshows(object):
             TODO: get auto generated collage pictures from skinhelper's metadatautils ?
         '''
         all_genres = self.metadatautils.kodidb.genres("tvshow")
-        return process_method_on_list(self.get_genre_artwork, all_genres)
+        return self.metadatautils.process_method_on_list(self.get_genre_artwork, all_genres)
 
     def get_genre_artwork(self, genre_json):
         '''helper method for browsegenres'''
