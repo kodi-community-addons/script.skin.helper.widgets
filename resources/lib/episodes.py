@@ -186,7 +186,7 @@ class Episodes(object):
                                 return all_episodes[index+i]
                             i += 1
                 return None # this line should never be executed
-            except:
+            except IndexError:
                 return first_unwatched_episode[0]
         else:
             return None

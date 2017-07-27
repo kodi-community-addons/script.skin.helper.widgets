@@ -137,7 +137,7 @@ class Movies(object):
                         all_items.append(item)
                         all_titles.append(item["title"])
         # restore hide_watched settings
-        hide_watched = self.options["hide_watched"]
+        self.options["hide_watched"] = hide_watched
         # return the list capped by limit and sorted by number of matching genres then rating
         items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
         return sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
