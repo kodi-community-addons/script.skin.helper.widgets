@@ -1,13 +1,3 @@
-## Fork of  marcelveldt's script.skin.helper.widgets
-
-### Changes:
-
-* Similar movies and TV Shows are sorted based on number of matching genres, not rating.  Combined with the genres provided by [DVDNetflixScraper](https://github.com/patrick-klein/DVDNetflixScraper), this provides exceptionally useful recommendations.
-
-* Similar Movies widget will ignore watched titles by default, regardless of global options.
-
-* Updated get_next_episode_for_show to return the next unwatched episode AFTER the most recently watched episode.  This replicates LazyTV behavior
-
 # script.skin.helper.widgets
 Addon for Kodi providing widgets for all kinds of media types
 
@@ -27,7 +17,7 @@ Most important/used methods are listed below:
 ```
 plugin://script.skin.helper.widgets/?action=next&mediatype=episodes&reload=$INFO[Window(Home).Property(widgetreload)]
 ```
-Provides a list of the nextup episodes. This can be the first episode in progress from a tv show or the next unwatched from a in progress show.
+Provides a list of the nextup episodes. Searches for next episode after the last played, otherwise returns the first unwatched episode.
 Note: the reload parameter is needed to auto refresh the widget when the content has changed.
 
 ________________________________________________________________________________________________________
@@ -118,7 +108,7 @@ ________________________________________________________________________________
 ```
 plugin://script.skin.helper.widgets/?action=similar&mediatype=movies&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
-This will provide a list with movies that are similar to a random watched movie from the library.
+This will provide a list with unwatched movies that are similar to a random watched movie from the library, sorted by number of matching genres then rating.
 TIP: The listitem provided by this list will have a property "similartitle" which contains the movie from which this list is generated. That way you can create a "Because you watched $INFO[Container.ListItem.Property(originaltitle)]" label....
 Note: You can optionally provide the widgetreload2 parameter if you want to refresh the widget every 10 minutes. If you want to refresh the widget on other circumstances just provide any changing info with the reload parameter, such as the window title or some window Property which you change on X interval.
 
@@ -135,7 +125,7 @@ ________________________________________________________________________________
 ```
 plugin://script.skin.helper.widgets/?action=similarshows&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
-This will provide a list with TV shows that are similar to a random in progress show from the library.
+This will provide a list with TV shows that are similar to a random in progress show from the library, sorted by number of matching genres, then rating.
 TIP: The listitem provided by this list will have a property "similartitle" which contains the movie from which this list is generated. That way you can create a "Because you watched $INFO[Container.ListItem.Property(originaltitle)]" label....
 Note: You can optionally provide the widgetreload2 parameter if you want to refresh the widget every 10 minutes. If you want to refresh the widget on other circumstances just provide any changing info with the reload parameter, such as the window title or some window Property which you change on X interval.
 
