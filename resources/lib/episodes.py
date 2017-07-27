@@ -159,7 +159,7 @@ class Episodes(object):
         '''
         get last played watched episode for show,
         return next unwatched episode after that,
-        unless nothing after that, then revert to vanilla behavior
+        unless nothing after that, then return first episode
         '''
         filters=[]
         if not self.options["episodes_enable_specials"]:
@@ -167,25 +167,27 @@ class Episodes(object):
         last_played_episode = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED,
                                                                  filters=filters+[kodi_constants.FILTER_WATCHED],
                                                                  limits=(0, 1),
-                                                                 tvshowid=show_id)[0]
-        if last_played_episode:
+                                                                 tvshowid=show_id)
+        first_unwatched_episode = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_EPISODE,
+                                                         filters=filters+[kodi_constants.FILTER_UNWATCHED],
+                                                         limits=(0, 1),
+                                                         tvshowid=show_id)
+        if last_played_episode and first_unwatched_episode:
             all_episodes = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_EPISODE,
                                                             filters=filters,
                                                             tvshowid=show_id)
-            all_unwatched = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_EPISODE,
-                                                             filters=filters+[kodi_constants.FILTER_UNWATCHED],
-                                                             tvshowid=show_id)
             try:
                 for index, episode in enumerate(all_episodes):
-                    if episode['title'] == last_played_episode['title']:
+                    # find index of last_played_episode in the list all_episodes
+                    if episode['title'] == last_played_episode[0]['title']:
                         i = 1
-                        while True:  # now hear me out...
+                        while True:  # if there are no unplayed episodes left, 'except' clause is executed
                             if int(all_episodes[index+i]['playcount'])<1:
                                 return all_episodes[index+i]
                             i += 1
-                return all_unwatched[-1]
+                return None # this line should never be executed
             except:
-                return all_unwatched[0]
+                return first_unwatched_episode[0]
         else:
             return None
 
@@ -227,7 +229,7 @@ class Episodes(object):
 
     @staticmethod
     def map_episode_props(episode_details):
-        '''adds some of the optional fields as extra properties for the listitem'''
+        ''''adds some of the optional fields as extra properties for the listitem'''
         extraprops = {}
         for item in ["network", "airdate", "airdate.label", "airtime", "airdatetime", "airdatetime.label", "airday"]:
             extraprops[item] = episode_details[item]
