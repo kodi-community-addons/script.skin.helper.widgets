@@ -133,11 +133,14 @@ class Tvshows(object):
                     # prevent duplicates so skip reference tvshow and titles already in the list
                     if not item["title"] in all_titles and not item["title"] == similar_title:
                         item["extraproperties"] = {"similartitle": similar_title, "originalpath": item["file"]}
+                        item["num_match"] = len(set(genres).intersection(item["genre"]))
                         all_items.append(item)
                         all_titles.append(item["title"])
         # return the list capped by limit and sorted by rating
-        tvshows = sorted(all_items, key=itemgetter("rating"), reverse=True)[:self.options["limit"]]
+        items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
+        tvshows = sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
         return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
+
 
     def forgenre(self):
         ''' get top rated tvshows for given genre'''
@@ -251,6 +254,7 @@ class Tvshows(object):
 
     def get_genre_tvshows(self, genre, hide_watched=False, limit=100):
         '''helper method to get all tvshows in a specific genre'''
+        limit=1000 # similar tvshows is too inconsistent without a high limit
         filters = [{"operator": "is", "field": "genre", "value": genre}]
         if hide_watched:
             filters.append(kodi_constants.FILTER_UNWATCHED)

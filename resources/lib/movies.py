@@ -104,20 +104,24 @@ class Movies(object):
         return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_TITLE, filters=filters,
                                            limits=(0, self.options["limit"]))
 
+
     def similar(self):
         ''' get similar movies for given imdbid or just from random watched title if no imdbid'''
         imdb_id = self.options.get("imdbid", "")
         all_items = []
         all_titles = list()
         # lookup movie by imdbid or just pick a random watched movie
-
         ref_movie = None
+        hide_watched = self.options["hide_watched"]
         if imdb_id:
             # get movie by imdbid
             ref_movie = self.metadatautils.kodidb.movie_by_imdbid(imdb_id)
         if not ref_movie:
             # just get a random watched movie
             ref_movie = self.get_random_watched_movie()
+            # when getting a random movie, it's for a homescreen widget, and
+            # and that means it should hide watched movies
+            self.options["hide_watched"] = True
         if ref_movie:
             # get all movies for the genres in the movie
             genres = ref_movie["genre"]
@@ -129,10 +133,15 @@ class Movies(object):
                     # prevent duplicates so skip reference movie and titles already in the list
                     if not item["title"] in all_titles and not item["title"] == similar_title:
                         item["extraproperties"] = {"similartitle": similar_title, "originalpath": item["file"]}
+                        item["num_match"] = len(set(genres).intersection(item["genre"]))
                         all_items.append(item)
                         all_titles.append(item["title"])
-        # return the list capped by limit and sorted by rating
-        return sorted(all_items, key=itemgetter("rating"), reverse=True)[:self.options["limit"]]
+        # restore hide_watched settings
+        self.options["hide_watched"] = hide_watched
+        # return the list capped by limit and sorted by number of matching genres then rating
+        items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
+        return sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
+
 
     def forgenre(self):
         ''' get top rated movies for given genre'''
@@ -240,6 +249,7 @@ class Movies(object):
 
     def get_genre_movies(self, genre, hide_watched=False, limit=100):
         '''helper method to get all movies in a specific genre'''
+        limit=1000  # similar movies is too inconsisent without a high limit
         filters = [{"operator": "is", "field": "genre", "value": genre}]
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
