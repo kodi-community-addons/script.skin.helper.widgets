@@ -295,3 +295,7 @@ msgstr ""
 msgctxt "#32069"
 msgid "Recently played TV channels"
 msgstr ""
+
+msgctxt "#32070"
+msgid "In progress TV shows and movies"
+msgstr ""
