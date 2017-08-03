@@ -27,7 +27,7 @@ class Main(object):
         ''' Initialization '''
 
         self.metadatautils = MetadataUtils()
-        self.cache = self.metadatautils.cache
+        self.cache = SimpleCache()
         self.addon = xbmcaddon.Addon(ADDON_ID)
         self.win = xbmcgui.Window(10000)
         self.options = self.get_options()
@@ -36,9 +36,8 @@ class Main(object):
         if self.win.getProperty("SkinHelperShutdownRequested"):
             log_msg("Not forfilling request: Kodi is exiting!", xbmc.LOGWARNING)
             xbmcplugin.endOfDirectory(handle=ADDON_HANDLE)
-            return
 
-        if not "mediatype" in self.options or not "action" in self.options:
+        elif not "mediatype" in self.options or not "action" in self.options:
             # we need both mediatype and action, so show the main listing
             self.mainlisting()
         else:
@@ -50,6 +49,7 @@ class Main(object):
     def close(self):
         '''Cleanup Kodi Cpython instances'''
         self.metadatautils.close()
+        self.cache.close()
         del self.addon
         del self.win
         log_msg("MainModule exited")
