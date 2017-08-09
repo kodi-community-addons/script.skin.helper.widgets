@@ -20,6 +20,7 @@ class KodiMonitor(xbmc.Monitor):
     def __init__(self, **kwargs):
         xbmc.Monitor.__init__(self)
         self.win = kwargs.get("win")
+        self.addon = kwargs.get("addon")
 
     def onDatabaseUpdated(self, database):
         '''builtin function for the xbmc.Monitor class'''
@@ -49,7 +50,8 @@ class KodiMonitor(xbmc.Monitor):
 
             if method == "Player.OnStop":
                 if mediatype in ["movie", "episode", "musicvideo"]:
-                    self.refresh_video_widgets(mediatype)
+                    if self.addon.getSetting("aggresive_refresh") == "true":
+                        self.refresh_video_widgets(mediatype)
 
         except Exception as exc:
             log_msg("Exception in KodiMonitor: %s" % exc, xbmc.LOGERROR)
@@ -72,7 +74,7 @@ class KodiMonitor(xbmc.Monitor):
             self.win.setProperty("widgetreload-%ss" % media_type, timestr)
             if "episode" in media_type:
                 self.win.setProperty("widgetreload-tvshows", timestr)
-                
+
     def onSettingsChanged(self):
         '''called by Kodi when the addon settings are changed'''
         timestr = time.strftime("%Y%m%d%H%M%S", time.gmtime())
@@ -81,4 +83,3 @@ class KodiMonitor(xbmc.Monitor):
         self.win.setProperty("widgetreload2", timestr)
         for media_type in ["episode", "tvshow", "music", "song", "album", "movie"]:
             self.win.setProperty("widgetreload-%ss" % media_type, timestr)
-        

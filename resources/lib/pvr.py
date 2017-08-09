@@ -7,7 +7,7 @@
     all PVR widgets provided by the script
 '''
 
-from utils import create_main_entry, log_msg
+from utils import create_main_entry
 from operator import itemgetter
 import xbmc
 from urllib import quote_plus
@@ -106,7 +106,7 @@ class Pvr(object):
                 all_items = sorted(all_items, key=itemgetter('endtime'), reverse=False)
             else:
                 all_items = sorted(all_items, key=itemgetter('endtime'), reverse=True)
-            
+
             # return result including artwork...
             return self.metadatautils.process_method_on_list(self.process_recording, all_items)
         return all_items
@@ -142,7 +142,9 @@ class Pvr(object):
             del item["firstaired"]
             # append artwork
             if self.enable_artwork:
-                self.metadatautils.extend_dict(item, self.metadatautils.get_pvr_artwork(item["title"], channelname, item["genre"]))
+                self.metadatautils.extend_dict(
+                    item, self.metadatautils.get_pvr_artwork(
+                        item["title"], channelname, item["genre"]))
         else:
             # channel without epg
             item = channeldata

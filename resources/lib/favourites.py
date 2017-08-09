@@ -101,7 +101,9 @@ class Favourites(object):
                 result = self.metadatautils.kodidb.album(albumid)
                 if result and result.get("albumid"):
                     if self.enable_artwork:
-                        self.metadatautils.extend_dict(result, self.metadatautils.get_music_artwork(result["artist"][0], result["label"]))
+                        self.metadatautils.extend_dict(
+                            result, self.metadatautils.get_music_artwork(
+                                result["artist"][0], result["label"]))
                     if self.browse_album:
                         result["file"] = "musicdb://albums/%s" % result["albumid"]
                         result["isFolder"] = True
@@ -117,7 +119,9 @@ class Favourites(object):
                 result = self.metadatautils.kodidb.artist(artistid)
                 if result and result.get("artistid"):
                     if self.enable_artwork:
-                        self.metadatautils.extend_dict(result, self.metadatautils.get_music_artwork(result["label"], ""))
+                        self.metadatautils.extend_dict(
+                            result, self.metadatautils.get_music_artwork(
+                                result["label"], ""))
                     result["file"] = "musicdb://artists/%s" % result["artistid"]
                     result["isFolder"] = True
                     match = result
@@ -149,7 +153,9 @@ class Favourites(object):
             for item in self.metadatautils.kodidb.songs(filters=filters):
                 if item['file'] == fav["path"]:
                     if self.enable_artwork:
-                        self.metadatautils.extend_dict(item, self.metadatautils.get_music_artwork(item["title"], item["artist"][0]))
+                        self.metadatautils.extend_dict(
+                            item, self.metadatautils.get_music_artwork(
+                                item["title"], item["artist"][0]))
                     match = item
         # is this a musicvideo ?
         if not match and (not media_filter or media_filter in ["musicvideos", "media"]):

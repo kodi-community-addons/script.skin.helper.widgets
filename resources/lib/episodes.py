@@ -12,6 +12,7 @@ from operator import itemgetter
 from metadatautils import kodi_constants
 import xbmc
 
+
 class Episodes(object):
     '''all episode widgets provided by the script'''
     options = {}
@@ -60,7 +61,7 @@ class Episodes(object):
         if self.options["hide_watched"]:
             filters.append(kodi_constants.FILTER_UNWATCHED)
         return self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_RATING, filters=filters,
-                                             limits=(0, self.options["limit"]))
+                                                  limits=(0, self.options["limit"]))
 
     def recent(self):
         ''' get recently added episodes '''
@@ -110,7 +111,7 @@ class Episodes(object):
         if self.options.get("path"):
             filters.append({"operator": "startswith", "field": "path", "value": self.options["path"]})
         return self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_RANDOM, filters=filters,
-                                             limits=(0, self.options["limit"]))
+                                                  limits=(0, self.options["limit"]))
 
     def inprogress(self):
         ''' get in progress episodes '''
@@ -120,7 +121,7 @@ class Episodes(object):
         if self.options.get("path"):
             filters.append({"operator": "startswith", "field": "path", "value": self.options["path"]})
         return self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
-                                             limits=(0, self.options["limit"]))
+                                                  limits=(0, self.options["limit"]))
 
     def inprogressandrecommended(self):
         ''' get recommended AND in progress episodes '''
@@ -151,9 +152,9 @@ class Episodes(object):
             filters.append({"operator": "startswith", "field": "path", "value": self.options.get("path")})
         # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
         all_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
-                                                 limits=(0, self.options["limit"]))
-        return self.metadatautils.process_method_on_list(self.get_next_episode_for_show, [d['tvshowid'] for d in all_shows])
-
+                                                      limits=(0, self.options["limit"]))
+        return self.metadatautils.process_method_on_list(self.get_next_episode_for_show, [
+                                                         d['tvshowid'] for d in all_shows])
 
     def get_next_episode_for_show(self, show_id):
         '''
@@ -161,36 +162,35 @@ class Episodes(object):
         return next unwatched episode after that,
         unless nothing after that, then return first episode
         '''
-        filters=[]
+        filters = []
         if not self.options["episodes_enable_specials"]:
             filters.append({"field": "season", "operator": "greaterthan", "value": "0"})
         last_played_episode = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED,
-                                                                 filters=filters+[kodi_constants.FILTER_WATCHED],
+                                                                 filters=filters + [kodi_constants.FILTER_WATCHED],
                                                                  limits=(0, 1),
                                                                  tvshowid=show_id)
-        first_unwatched_episode = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_EPISODE,
-                                                         filters=filters+[kodi_constants.FILTER_UNWATCHED],
-                                                         limits=(0, 1),
-                                                         tvshowid=show_id)
+        first_unwatched_episode = self.metadatautils.kodidb.episodes(
+            sort=kodi_constants.SORT_EPISODE, filters=filters + [kodi_constants.FILTER_UNWATCHED],
+            limits=(0, 1),
+            tvshowid=show_id)
         if last_played_episode and first_unwatched_episode:
             all_episodes = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_EPISODE,
-                                                            filters=filters,
-                                                            tvshowid=show_id)
+                                                              filters=filters,
+                                                              tvshowid=show_id)
             try:
                 for index, episode in enumerate(all_episodes):
                     # find index of last_played_episode in the list all_episodes
                     if episode['title'] == last_played_episode[0]['title']:
                         i = 1
                         while True:  # if there are no unplayed episodes left, 'except' clause is executed
-                            if int(all_episodes[index+i]['playcount'])<1:
-                                return all_episodes[index+i]
+                            if int(all_episodes[index + i]['playcount']) < 1:
+                                return all_episodes[index + i]
                             i += 1
-                return None # this line should never be executed
+                return None  # this line should never be executed
             except IndexError:
                 return first_unwatched_episode[0]
         else:
             return None
-
 
     def unaired(self):
         ''' get all unaired episodes for shows in the library - provided by tvdb module'''
