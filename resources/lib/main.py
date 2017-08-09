@@ -9,7 +9,6 @@
 
 import urlparse
 from utils import log_msg, log_exception, ADDON_ID, create_main_entry
-from simplecache import SimpleCache
 import xbmcplugin
 import xbmc
 import xbmcaddon
@@ -27,7 +26,6 @@ class Main(object):
         ''' Initialization '''
 
         self.metadatautils = MetadataUtils()
-        self.cache = SimpleCache()
         self.addon = xbmcaddon.Addon(ADDON_ID)
         self.win = xbmcgui.Window(10000)
         self.options = self.get_options()
@@ -49,7 +47,6 @@ class Main(object):
     def close(self):
         '''Cleanup Kodi Cpython instances'''
         self.metadatautils.close()
-        self.cache.close()
         del self.addon
         del self.win
         log_msg("MainModule exited")
@@ -112,17 +109,15 @@ class Main(object):
         xbmcplugin.setContent(ADDON_HANDLE, media_type)
 
         # try to get from cache first...
-        # we use a checksum based on the options to make sure the cache is ignored when needed
         all_items = []
         cache_str = "SkinHelper.Widgets.%s.%s" % (media_type, action)
         if not self.win.getProperty("widgetreload2"):
             # at startup we simply accept whatever is in the cache
             cache_checksum = None
         else:
-            cache_checksum = ""
-            for key, value in self.options.items():
-                cache_checksum += "%s.%s" % (key, value)
-        cache = self.cache.get(cache_str, checksum=cache_checksum)
+            # we use a checksum based on the reloadparam to make sure we have the most recent data
+            cache_checksum = self.options.get("reload","")
+        cache = self.metadatautils.cache.get(cache_str, checksum=cache_checksum)
         if cache and not self.options.get("skipcache") == "true":
             log_msg("MEDIATYPE: %s - ACTION: %s -- got items from cache - CHECKSUM: %s"
                     % (media_type, action, cache_checksum))
@@ -152,7 +147,7 @@ class Main(object):
 
             # prepare listitems and store in cache
             all_items = self.metadatautils.process_method_on_list(self.metadatautils.kodidb.prepare_listitem, all_items)
-            self.cache.set(cache_str, all_items, checksum=cache_checksum)
+            self.metadatautils.cache.set(cache_str, all_items, checksum=cache_checksum)
 
         # fill that listing...
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_UNSORTED)
