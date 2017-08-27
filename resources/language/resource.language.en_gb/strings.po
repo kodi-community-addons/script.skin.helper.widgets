@@ -299,3 +299,7 @@ msgstr ""
 msgctxt "#32070"
 msgid "In progress TV shows and movies"
 msgstr ""
+
+msgctxt "#32071"
+msgid "Enable aggresive refresh of widgets"
+msgstr ""
