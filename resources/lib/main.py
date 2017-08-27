@@ -68,7 +68,8 @@ class Main(object):
                 ("songs", "songs"),
                 ("artists", "artists"),
                 ("media", "media"),
-                    ("favourites", "favourites")]:
+                ("favourites", "favourites"), 
+                    ("favorites", "favourites")]:
                 if item[0] in options["action"]:
                     options["mediatype"] = item[1]
                     options["action"] = options["action"].replace(item[1], "").replace(item[0], "")
@@ -106,7 +107,10 @@ class Main(object):
         media_type = self.options["mediatype"]
         action = self.options["action"]
         # set widget content type
-        xbmcplugin.setContent(ADDON_HANDLE, media_type)
+        if media_type in ["favourites", "pvr", "media"]:
+            xbmcplugin.setContent(ADDON_HANDLE, "files")
+        else:
+            xbmcplugin.setContent(ADDON_HANDLE, media_type)
 
         # try to get from cache first...
         all_items = []
@@ -160,6 +164,7 @@ class Main(object):
     def mainlisting(self):
         '''main listing'''
         all_items = []
+        xbmcplugin.setContent(ADDON_HANDLE, "files")
 
         # movie node
         if xbmc.getCondVisibility("Library.HasContent(movies)"):
