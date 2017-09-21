@@ -151,6 +151,9 @@ class Main(object):
 
             # prepare listitems and store in cache
             all_items = self.metadatautils.process_method_on_list(self.metadatautils.kodidb.prepare_listitem, all_items)
+            # add cache_checksum to cache_str (if not empty) to separate "next" and "nextaired" listings coming from different "paths"
+            if cache_checksum:
+                cache_str = cache_str + "." + cache_checksum
             self.metadatautils.cache.set(cache_str, all_items, checksum=cache_checksum)
 
         # fill that listing...
