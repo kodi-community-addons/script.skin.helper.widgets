@@ -274,8 +274,8 @@ ________________________________________
 
 #####Browse Genres
 ```
-plugin://script.skin.helper.widgets/?action=browsegenres&mediatype=movie&limit=1000
-plugin://script.skin.helper.widgets/?action=browsegenres&mediatype=tvshow&limit=1000
+plugin://script.skin.helper.widgets/?action=browsegenres&mediatype=movies&limit=1000
+plugin://script.skin.helper.widgets/?action=browsegenres&mediatype=tvshows&limit=1000
 ```
 Provides the genres listing for movies or tvshows with artwork properties from movies/shows with the genre so you can build custom genre icons.
 
