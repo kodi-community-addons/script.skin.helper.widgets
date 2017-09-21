@@ -218,7 +218,8 @@ class Tvshows(object):
         genre_json["thumbnail"] = genre_json.get("thumbnail",
                                                  "DefaultGenre.png")  # TODO: get icon from resource addon ?
         genre_json["type"] = "genre"
-        genre_tvshows = self.get_genre_tvshows(genre_json["label"], False, 5)
+        sort = kodi_constants.SORT_RANDOM if self.options.get("random") else kodi_constants.SORT_TITLE
+        genre_tvshows = self.get_genre_tvshows(genre_json["label"], False, 5, sort)
         if not genre_tvshows:
             return None
         for count, genre_tvshow in enumerate(genre_tvshows):
@@ -252,7 +253,7 @@ class Tvshows(object):
         else:
             return None
 
-    def get_genre_tvshows(self, genre, hide_watched=False, limit=100):
+    def get_genre_tvshows(self, genre, hide_watched=False, limit=100, sort=kodi_constants.SORT_RANDOM):
         '''helper method to get all tvshows in a specific genre'''
         limit=1000 # similar tvshows is too inconsistent without a high limit
         filters = [{"operator": "is", "field": "genre", "value": genre}]
@@ -260,7 +261,7 @@ class Tvshows(object):
             filters.append(kodi_constants.FILTER_UNWATCHED)
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0, limit))
+        return self.metadatautils.kodidb.tvshows(sort=sort, filters=filters, limits=(0, limit))
 
     @staticmethod
     def process_tvshow(item):

@@ -227,7 +227,8 @@ class Movies(object):
         genre_json["thumbnail"] = genre_json.get("thumbnail",
                                                  "DefaultGenre.png")  # TODO: get icon from resource addon ?
         genre_json["type"] = "genre"
-        genre_movies = self.get_genre_movies(genre_json["label"], False, 5)
+        sort = kodi_constants.SORT_RANDOM if self.options.get("random") else kodi_constants.SORT_TITLE
+        genre_movies = self.get_genre_movies(genre_json["label"], False, 5, sort)
         if not genre_movies:
             return None
         for count, genre_movie in enumerate(genre_movies):
@@ -247,7 +248,7 @@ class Movies(object):
         else:
             return None
 
-    def get_genre_movies(self, genre, hide_watched=False, limit=100):
+    def get_genre_movies(self, genre, hide_watched=False, limit=100, sort=kodi_constants.SORT_RANDOM):
         '''helper method to get all movies in a specific genre'''
         limit=1000  # similar movies is too inconsisent without a high limit
         filters = [{"operator": "is", "field": "genre", "value": genre}]
@@ -255,7 +256,7 @@ class Movies(object):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         if hide_watched:
             filters.append(kodi_constants.FILTER_UNWATCHED)
-        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RANDOM, filters=filters, limits=(0, limit))
+        return self.metadatautils.kodidb.movies(sort=sort, filters=filters, limits=(0, limit))
 
     def favourites(self):
         '''get favourites'''

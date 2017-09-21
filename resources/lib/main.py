@@ -88,6 +88,12 @@ class Main(object):
                 options["action"] = "listing"
             if "listing" in options["action"]:
                 options["skipcache"] = "true"
+            if options["action"] == "browsegenres" and options["mediatype"] == "randommovies":
+                options["mediatype"] = "movies"
+                options["random"] = True
+            elif options["action"] == "browsegenres" and options["mediatype"] == "randomtvshows":
+                options["mediatype"] = "tvshows"
+                options["random"] = True
 
         # set the widget settings as options
         options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
@@ -114,7 +120,8 @@ class Main(object):
 
         # try to get from cache first...
         all_items = []
-        cache_str = "SkinHelper.Widgets.%s.%s" % (media_type, action)
+        cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type, 
+                    action, self.options["limit"], self.options.get("path"), self.options.get("tag"))
         if not self.win.getProperty("widgetreload2"):
             # at startup we simply accept whatever is in the cache
             cache_checksum = None

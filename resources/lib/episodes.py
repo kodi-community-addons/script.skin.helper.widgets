@@ -149,7 +149,7 @@ class Episodes(object):
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         if self.options.get("path"):
-            filters.append({"operator": "startswith", "field": "path", "value": self.options.get("path")})
+            filters.append({"operator": "startswith", "field": "path", "value": self.options["path"]})
         # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
         all_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
                                                       limits=(0, self.options["limit"]))
