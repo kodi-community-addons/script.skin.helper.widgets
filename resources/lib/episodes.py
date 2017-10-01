@@ -215,7 +215,8 @@ class Episodes(object):
         all_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
                                                       limits=(0, self.options["limit"]))
         tvshows_ids = [d['tvshowid'] for d in all_shows]
-        episodes = self.metadatautils.thetvdb.get_kodi_unaired_episodes(False, tvshows_ids)[:self.options["limit"]]
+        episodes = self.metadatautils.thetvdb.get_kodi_unaired_episodes(False, False, tvshows_ids)
+        episodes = episodes[:self.options["limit"]]
         return [self.map_episode_props(episode) for episode in episodes]
 
     def nextaired(self, days_ahead=60):
@@ -234,7 +235,7 @@ class Episodes(object):
         all_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
                                                       limits=(0, self.options["limit"]))
         tvshows_ids = [d['tvshowid'] for d in all_shows]
-        episodes = self.metadatautils.thetvdb.get_kodi_unaired_episodes(True, tvshows_ids)
+        episodes = self.metadatautils.thetvdb.get_kodi_unaired_episodes(True, False, tvshows_ids)
         return [self.map_episode_props(episode) for episode in episodes]
 
     def airingtoday(self):
