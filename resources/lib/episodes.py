@@ -12,7 +12,6 @@ from operator import itemgetter
 from metadatautils import kodi_constants
 import xbmc
 
-
 class Episodes(object):
     '''all episode widgets provided by the script'''
     options = {}
@@ -203,13 +202,40 @@ class Episodes(object):
     def unaired(self):
         ''' get all unaired episodes for shows in the library - provided by tvdb module'''
         self.metadatautils.thetvdb.days_ahead = 120
-        episodes = self.metadatautils.thetvdb.get_kodi_unaired_episodes(False)[:self.options["limit"]]
+
+        filters = [kodi_constants.FILTER_UNWATCHED]
+        if self.options["next_inprogress_only"]:
+            filters = [kodi_constants.FILTER_INPROGRESS]
+        if self.options.get("tag"):
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        if self.options.get("path"):
+            filters.append({"operator": "startswith", "field": "path", "value": self.options["path"]})
+
+        # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
+        all_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
+                                                      limits=(0, self.options["limit"]))
+        tvshows_ids = [d['tvshowid'] for d in all_shows]
+        episodes = self.metadatautils.thetvdb.get_kodi_unaired_episodes(False, False, tvshows_ids)
+        episodes = episodes[:self.options["limit"]]
         return [self.map_episode_props(episode) for episode in episodes]
 
     def nextaired(self, days_ahead=60):
         ''' get all next airing episodes for shows in the library - provided by tvdb module'''
         self.metadatautils.thetvdb.days_ahead = days_ahead
-        episodes = self.metadatautils.thetvdb.get_kodi_unaired_episodes(True)
+
+        filters = [kodi_constants.FILTER_UNWATCHED]
+        if self.options["next_inprogress_only"]:
+            filters = [kodi_constants.FILTER_INPROGRESS]
+        if self.options.get("tag"):
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        if self.options.get("path"):
+            filters.append({"operator": "startswith", "field": "path", "value": self.options["path"]})
+
+        # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
+        all_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
+                                                      limits=(0, self.options["limit"]))
+        tvshows_ids = [d['tvshowid'] for d in all_shows]
+        episodes = self.metadatautils.thetvdb.get_kodi_unaired_episodes(True, False, tvshows_ids)
         return [self.map_episode_props(episode) for episode in episodes]
 
     def airingtoday(self):

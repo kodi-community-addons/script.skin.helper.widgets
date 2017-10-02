@@ -130,14 +130,14 @@ class Main(object):
             cache_checksum = self.options.get("reload","")
         cache = self.metadatautils.cache.get(cache_str, checksum=cache_checksum)
         if cache and not self.options.get("skipcache") == "true":
-            log_msg("MEDIATYPE: %s - ACTION: %s -- got items from cache - CHECKSUM: %s"
-                    % (media_type, action, cache_checksum))
+            log_msg("MEDIATYPE: %s - ACTION: %s - PATH: %s - TAG: %s -- got items from cache - CHECKSUM: %s"
+                    % (media_type, action, self.options.get("path"), self.options.get("tag"), cache_checksum))
             all_items = cache
 
         # Call the correct method to get the content from json when no cache
         if not all_items:
-            log_msg("MEDIATYPE: %s - ACTION: %s -- no cache, quering kodi api to get items - CHECKSUM: %s"
-                    % (media_type, action, cache_checksum))
+            log_msg("MEDIATYPE: %s - ACTION: %s - PATH: %s - TAG: %s -- no cache, quering kodi api to get items - CHECKSUM: %s"
+                    % (media_type, action, self.options.get("path"), self.options.get("tag"), cache_checksum))
 
             # dynamically import and load the correct module, class and function
             try:
