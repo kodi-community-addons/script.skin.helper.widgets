@@ -10,6 +10,7 @@
 from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
 from metadatautils import kodi_constants
+from random import randint
 import xbmc
 
 
@@ -118,7 +119,7 @@ class Movies(object):
             ref_movie = self.metadatautils.kodidb.movie_by_imdbid(imdb_id)
         if not ref_movie:
             # just get a random watched movie
-            ref_movie = self.get_random_watched_movie()
+            ref_movie = self.get_random_recently_watched_movie()
             # when getting a random movie, it's for a homescreen widget, and
             # and that means it should hide watched movies
             self.options["hide_watched"] = True
@@ -245,6 +246,15 @@ class Movies(object):
                                              filters=[kodi_constants.FILTER_WATCHED], limits=(0, 1))
         if movies:
             return movies[0]
+        else:
+            return None
+
+    def get_random_recently_watched_movie(self):
+        '''gets a random recently watched movie from kodi_constants.'''
+        movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
+                                             filters=[kodi_constants.FILTER_WATCHED], limits=(0, 20))
+        if movies:
+            return movies[randint(0,len(movies)-1)]
         else:
             return None
 
