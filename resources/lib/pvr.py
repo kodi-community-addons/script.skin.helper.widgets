@@ -132,7 +132,7 @@ class Pvr(object):
         '''transform the json received from kodi into something we can use'''
         item = {}
         channelname = channeldata["label"]
-        channellogo = self.metadatautils.get_clean_image(channeldata['thumbnail'])
+        channellogo = channeldata['thumbnail']
         if channeldata.get('broadcastnow'):
             # channel with epg data
             item = channeldata['broadcastnow']
@@ -147,7 +147,6 @@ class Pvr(object):
                         item["title"], channelname, item["genre"]))
         else:
             # channel without epg
-            item = channeldata
             item["title"] = xbmc.getLocalizedString(161)
         item["file"] = u"plugin://script.skin.helper.service?action=playchannel&channelid=%s"\
             % (channeldata["channelid"])
