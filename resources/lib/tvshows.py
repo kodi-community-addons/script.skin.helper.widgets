@@ -124,23 +124,26 @@ class Tvshows(object):
             ref_tvshow = self.get_random_watched_tvshow()
         if ref_tvshow:
             # get all tvshows for the genres in the tvshow
-            genres = ref_tvshow["genre"]
-            similar_title = ref_tvshow["title"]
-            for genre in genres:
+            ref_title = ref_tvshow["title"]
+            ref_genres = ref_tvshow["genre"]
+            ref_rating = ref_tvshow["rating"]
+            set_genres = set(ref_genres)
+            for genre in ref_genres:
                 self.options["genre"] = genre
                 genre_tvshows = self.forgenre()
                 for item in genre_tvshows:
                     # prevent duplicates so skip reference tvshow and titles already in the list
-                    if not item["title"] in all_titles and not item["title"] == similar_title:
-                        item["extraproperties"] = {"similartitle": similar_title, "originalpath": item["file"]}
-                        item["num_match"] = len(set(genres).intersection(item["genre"]))
+                    if not item["title"] in all_titles and not item["title"] == ref_title:
+                        item["extraproperties"] = {"similartitle": ref_title, "originalpath": item["file"]}
+                        similarscore = float(len(set_genres.intersection(item["genre"])))
+                        if ref_rating and item["rating"]:
+                            similarscore += 1-abs(ref_rating-item["rating"])/10
+                        item["similarscore"] = similarscore
                         all_items.append(item)
                         all_titles.append(item["title"])
         # return the list capped by limit and sorted by rating
-        items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
-        tvshows = sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
+        tvshows = sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
         return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
-
 
     def forgenre(self):
         ''' get top rated tvshows for given genre'''
