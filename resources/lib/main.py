@@ -102,6 +102,7 @@ class Main(object):
         if self.addon.getSetting("hide_watched_recent") == "true" and "recent" in options.get("action", ""):
             options["hide_watched"] = True
         options["num_recent_similar"] = int(self.addon.getSetting("num_recent_similar"))
+        options["hide_watched_similar"] = self.addon.getSetting("hide_watched_similar") == "true"
         options["next_inprogress_only"] = self.addon.getSetting("nextup_inprogressonly") == "true"
         options["episodes_enable_specials"] = self.addon.getSetting("episodes_enable_specials") == "true"
         options["group_episodes"] = self.addon.getSetting("episodes_grouping") == "true"

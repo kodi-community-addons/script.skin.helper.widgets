@@ -121,27 +121,51 @@ class Movies(object):
             # just get a random watched movie
             ref_movie = self.get_recently_watched_movie()
             # when getting a random movie, it's for a homescreen widget, and
-            # and that means it should hide watched movies
-            self.options["hide_watched"] = True
+            # and that means it should check setting to hide watched
+            if self.options["hide_watched_similar"]:
+	            self.options["hide_watched"] = True
         if ref_movie:
             # get all movies for the genres in the movie
-            genres = ref_movie["genre"]
-            similar_title = ref_movie["title"]
-            for genre in genres:
+            ref_title = ref_movie["title"]
+            ref_genres = ref_movie["genre"]
+            ref_writers = ref_movie["writer"]
+            ref_directors = ref_movie["director"]
+            ref_rating = ref_movie["rating"]
+            ref_setid = ref_movie["setid"]
+            set_genres = set(ref_genres)
+            set_writers = set(ref_writers)
+            set_directors = set(ref_directors)
+            #writer_director_norm = 0.33*float(max(len(ref_writers)+len(ref_directors),1))
+            num_genres = len(ref_genres)
+            num_writers = len(ref_writers)
+            num_directors = len(ref_directors)
+            genre_weight = 5
+            writer_weight = 2
+            director_weight = 2
+            rating_weight = 1
+            set_exp = 1
+            total_weights = float(genre_weight+writer_weight+director_weight+rating_weight)
+            for genre in ref_genres:
                 self.options["genre"] = genre
                 genre_movies = self.forgenre()
                 for item in genre_movies:
                     # prevent duplicates so skip reference movie and titles already in the list
-                    if not item["title"] in all_titles and not item["title"] == similar_title:
-                        item["extraproperties"] = {"similartitle": similar_title, "originalpath": item["file"]}
-                        item["num_match"] = len(set(genres).intersection(item["genre"]))
+                    if not item["title"] in all_titles and not item["title"] == ref_title:
+                        item["extraproperties"] = {"similartitle": ref_title, "originalpath": item["file"]}
+                        genre_score = float(len(set_genres.intersection(item["genre"])))/num_genres
+                    	writer_score = float(len(set_writers.intersection(item["writer"])))/num_writers if num_writers>0 else 0
+                    	director_score = float(len(set_directors.intersection(item["director"])))/num_directors if num_directors>0 else 0
+                    	rating_score = 1-abs(ref_rating-item["rating"])/10 if (ref_rating and item["rating"]) else 0
+                    	similarscore = (genre_score*genre_weight+writer_score*writer_weight+director_score*director_weight+rating_score)/total_weights
+                    	if (ref_setid and ref_setid==item["setid"]):
+                    		similarscore = similarscore**(1/(1+set_exp))
+                    	item["similarscore"] = similarscore
                         all_items.append(item)
                         all_titles.append(item["title"])
         # restore hide_watched settings
         self.options["hide_watched"] = hide_watched
         # return the list capped by limit and sorted by number of matching genres then rating
-        items_by_rating = sorted(all_items, key=itemgetter("rating"), reverse=True)
-        return sorted(items_by_rating, key=itemgetter("num_match"), reverse=True)[:self.options["limit"]]
+        return sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
 
 
     def forgenre(self):

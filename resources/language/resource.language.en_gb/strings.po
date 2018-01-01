@@ -307,3 +307,7 @@ msgstr ""
 msgctxt "#32072"
 msgid "Number of recently watched movies for Similar Movies"
 msgstr ""
+
+msgctxt "#32073"
+msgid "Hide watched items in similar movies widget"
+msgstr ""

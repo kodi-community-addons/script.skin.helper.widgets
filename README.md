@@ -13,7 +13,7 @@ Most important/used methods are listed below:
 
 
 
-#####Next Episodes
+##### Next Episodes
 ```
 plugin://script.skin.helper.widgets/?action=next&mediatype=episodes&reload=$INFO[Window(Home).Property(widgetreload)]
 ```
@@ -22,7 +22,7 @@ Note: the reload parameter is needed to auto refresh the widget when the content
 
 ________________________________________________________________________________________________________
 
-#####Recommended Movies
+##### Recommended Movies
 ```
 plugin://script.skin.helper.widgets/?action=recommended&mediatype=movies&reload=$INFO[Window(Home).Property(widgetreload-movies)]
 ```
@@ -31,7 +31,7 @@ Note: the reload parameter is needed to auto refresh the widget when the content
 
 ________________________________________________________________________________________________________
 
-#####Recommended Media
+##### Recommended Media
 ```
 plugin://script.skin.helper.widgets/?action=recommended&mediatype=media&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -40,7 +40,7 @@ Note: You can optionally provide the reload= parameter if you want to refresh th
 
 ________________________________________________________________________________________________________
 
-#####Recent albums
+##### Recent albums
 ```
 plugin://script.skin.helper.widgets/?action=recent&mediatype=albums&reload=$INFO[Window(Home).Property(widgetreload-music)]
 ```
@@ -50,7 +50,7 @@ Note: You can optionally provide the reload= parameter if you want to refresh th
 Optional argument: browse=true --> will open/browse the album instead of playing it
 ________________________________________________________________________________________________________
 
-#####Recently played albums
+##### Recently played albums
 ```
 plugin://script.skin.helper.widgets/?action=recentplayed&mediatype=albums&reload=$INFO[Window(Home).Property(widgetreload-music)]
 ```
@@ -60,7 +60,7 @@ Note: You can optionally provide the reload= parameter if you want to refresh th
 Optional argument: browse=true --> will open/browse the album instead of playing it
 ________________________________________________________________________________________________________
 
-#####Recommended albums
+##### Recommended albums
 ```
 plugin://script.skin.helper.widgets/?action=recommended&mediatype=albums&reload=$INFO[Window(Home).Property(widgetreload-music)]
 ```
@@ -70,7 +70,7 @@ Note: You can optionally provide the reload= parameter if you want to refresh th
 Optional argument: browse=true --> will open/browse the album instead of playing it
 ________________________________________________________________________________________________________
 
-#####Recent songs
+##### Recent songs
 ```
 plugin://script.skin.helper.widgets/?action=recent&mediatype=songs&reload=$INFO[Window(Home).Property(widgetreload-music)]
 ```
@@ -78,7 +78,7 @@ Provides a list of recently added songs, including the artwork provided by this 
 Note: You can optionally provide the reload= parameter if you want to refresh the widget on library changes.
 ________________________________________________________________________________________________________
 
-#####Recently played songs
+##### Recently played songs
 ```
 plugin://script.skin.helper.widgets/?action=recentplayed&mediatype=songs&reload=$INFO[Window(Home).Property(widgetreload-music)]
 ```
@@ -86,7 +86,7 @@ Provides a list of recently played songs, including the artwork provided by this
 Note: You can optionally provide the reload= parameter if you want to refresh the widget on library changes.
 ________________________________________________________________________________________________________
 
-#####Recommended songs
+##### Recommended songs
 ```
 plugin://script.skin.helper.widgets/?action=recommended&mediatype=songs&reload=$INFO[Window(Home).Property(widgetreload-music)]
 ```
@@ -94,7 +94,7 @@ Provides a list of recommended songs, including the artwork provided by this scr
 Note: You can optionally provide the reload= parameter if you want to refresh the widget on library changes.
 ________________________________________________________________________________________________________
 
-#####Recent Media
+##### Recent Media
 ```
 plugin://script.skin.helper.widgets/?action=recent&mediatype=media&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -104,11 +104,11 @@ Note: You can optionally provide the reload= parameter if you want to refresh th
 
 ________________________________________________________________________________________________________
 
-#####Similar Movies (because you watched...)
+##### Similar Movies (because you watched...)
 ```
 plugin://script.skin.helper.widgets/?action=similar&mediatype=movies&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
-This will provide a list with unwatched movies that are similar to a random recently watched movie from the library, sorted by number of matching genres then rating.
+This will provide a list with unwatched movies that are similar to a random recently watched movie from the library (similarity is based on genres, writers, directors, movie set & rating).
 TIP: The listitem provided by this list will have a property "similartitle" which contains the movie from which this list is generated. That way you can create a "Because you watched $INFO[Container.ListItem.Property(originaltitle)]" label....
 Note: You can optionally provide the widgetreload2 parameter if you want to refresh the widget every 10 minutes. If you want to refresh the widget on other circumstances just provide any changing info with the reload parameter, such as the window title or some window Property which you change on X interval.
 
@@ -121,7 +121,7 @@ plugin://script.skin.helper.widgets/?action=similar&mediatype=movies&imdbid=[IMD
 
 ________________________________________________________________________________________________________
 
-#####Similar Tv Shows (because you watched...)
+##### Similar Tv Shows (because you watched...)
 ```
 plugin://script.skin.helper.widgets/?action=similarshows&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -138,7 +138,7 @@ plugin://script.skin.helper.widgets/?action=similarshows&imdbid=[IMDBID]
 
 ________________________________________________________________________________________________________
 
-#####Similar Media (because you watched...)
+##### Similar Media (because you watched...)
 ```
 plugin://script.skin.helper.widgets/?action=similar&mediatype=media&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -155,7 +155,7 @@ plugin://script.skin.helper.widgets/?action=similarshows&imdbid=[IMDBID]
 
 ________________________________________________________________________________________________________
 
-#####Top rated Movies in genre
+##### Top rated Movies in genre
 ```
 plugin://script.skin.helper.widgets/?action=forgenre&mediatype=movies&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -165,7 +165,7 @@ Note: You can optionally provide the widgetreload2 parameter if you want to refr
 
 ________________________________________________________________________________________________________
 
-#####Top rated tvshows in genre
+##### Top rated tvshows in genre
 ```
 plugin://script.skin.helper.widgets/?action=forgenre&mediatype=tvshows&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -176,7 +176,7 @@ Note: You can optionally provide the widgetreload2 parameter if you want to refr
 ________________________________________________________________________________________________________
 
 
-#####In progress Media
+##### In progress Media
 ```
 plugin://script.skin.helper.widgets/?action=inprogress&mediatype=media&reload=$INFO[Window(Home).Property(widgetreload)]
 ```
@@ -186,7 +186,7 @@ Note: the reload parameter is needed to auto refresh the widget when the content
 
 ________________________________________________________________________________________________________
 
-#####In progress and Recommended Media
+##### In progress and Recommended Media
 ```
 plugin://script.skin.helper.widgets/?action=inprogressandrecommended&mediatype=media&reload=$INFO[Window(Home).Property(widgetreload)]
 ```
@@ -195,7 +195,7 @@ Note: the reload parameter is needed to auto refresh the widget when the content
 
 ________________________________________________________________________________________________________
 
-#####Favourite Media
+##### Favourite Media
 ```
 plugin://script.skin.helper.widgets/?action=favourite&mediatype=media&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -204,7 +204,7 @@ Note: By providing the reload-parameter set to the widgetreload2 property, the w
 
 ________________________________________________________________________________________________________
 
-#####PVR TV Channels widget
+##### PVR TV Channels widget
 ```
 plugin://script.skin.helper.widgets/?action=channels&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -213,7 +213,7 @@ Note: By providing the reload-parameter set to the widgetreload2 property, the w
 
 ________________________________________________________________________________________________________
 
-#####PVR Latest Recordings widget
+##### PVR Latest Recordings widget
 ```
 plugin://script.skin.helper.widgets/?action=recordings&mediatype=pvr&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -223,7 +223,7 @@ Note: By providing the reload-parameter set to the widgetreload2 property, the w
 
 ________________________________________________________________________________________________________
 
-#####Favourites
+##### Favourites
 ```
 plugin://script.skin.helper.widgets/?mediatype=favourites&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
@@ -272,7 +272,7 @@ For the listitem properties, see the "unaired episodes" plugin path.
 ________________________________________
 
 
-#####Browse Genres
+##### Browse Genres
 ```
 plugin://script.skin.helper.widgets/?action=browsegenres&mediatype=movies&limit=1000
 plugin://script.skin.helper.widgets/?action=browsegenres&mediatype=tvshows&limit=1000
