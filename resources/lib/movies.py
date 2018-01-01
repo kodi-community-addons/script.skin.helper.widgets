@@ -123,9 +123,9 @@ class Movies(object):
             # when getting a random movie, it's for a homescreen widget, and
             # and that means it should check setting to hide watched
             if self.options["hide_watched_similar"]:
-	            self.options["hide_watched"] = True
+                self.options["hide_watched"] = True
         if ref_movie:
-            # get all movies for the genres in the movie
+            # define ref movie properties for clarity & speed
             ref_title = ref_movie["title"]
             ref_genres = ref_movie["genre"]
             ref_writers = ref_movie["writer"]
@@ -135,16 +135,10 @@ class Movies(object):
             set_genres = set(ref_genres)
             set_writers = set(ref_writers)
             set_directors = set(ref_directors)
-            #writer_director_norm = 0.33*float(max(len(ref_writers)+len(ref_directors),1))
             num_genres = len(ref_genres)
             num_writers = len(ref_writers)
             num_directors = len(ref_directors)
-            genre_weight = 5
-            writer_weight = 2
-            director_weight = 2
-            rating_weight = 1
-            set_exp = 1
-            total_weights = float(genre_weight+writer_weight+director_weight+rating_weight)
+            # get all movies for the genres in the movie
             for genre in ref_genres:
                 self.options["genre"] = genre
                 genre_movies = self.forgenre()
@@ -153,13 +147,16 @@ class Movies(object):
                     if not item["title"] in all_titles and not item["title"] == ref_title:
                         item["extraproperties"] = {"similartitle": ref_title, "originalpath": item["file"]}
                         genre_score = float(len(set_genres.intersection(item["genre"])))/num_genres
-                    	writer_score = float(len(set_writers.intersection(item["writer"])))/num_writers if num_writers>0 else 0
-                    	director_score = float(len(set_directors.intersection(item["director"])))/num_directors if num_directors>0 else 0
-                    	rating_score = 1-abs(ref_rating-item["rating"])/10 if (ref_rating and item["rating"]) else 0
-                    	similarscore = (genre_score*genre_weight+writer_score*writer_weight+director_score*director_weight+rating_score)/total_weights
-                    	if (ref_setid and ref_setid==item["setid"]):
-                    		similarscore = similarscore**(1/(1+set_exp))
-                    	item["similarscore"] = similarscore
+                        writer_score = 0 if num_writers==0 else \
+                            float(len(set_writers.intersection(item["writer"])))/num_writers
+                        director_score = 0 if num_directors==0 else \
+                            float(len(set_directors.intersection(item["director"])))/num_directors
+                        rating_score = 0 if (not ref_rating) or (not item["rating"]) else \
+                            1-abs(ref_rating-item["rating"])/10
+                        similarscore = .5*genre_score+.2*writer_score+.2*director_score+.1*rating_score
+                        if ref_setid and ref_setid==item["setid"]:
+                            similarscore = similarscore**(1/(1+set_exp))
+                        item["similarscore"] = similarscore
                         all_items.append(item)
                         all_titles.append(item["title"])
         # restore hide_watched settings
