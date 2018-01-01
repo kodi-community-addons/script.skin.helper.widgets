@@ -251,8 +251,9 @@ class Movies(object):
 
     def get_recently_watched_movie(self):
         '''gets a random recently watched movie from kodi_constants.'''
+        num_recent_similar = self.options["num_recent_similar"]
         movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
-                                             filters=[kodi_constants.FILTER_WATCHED], limits=(0, 20))
+                                             filters=[kodi_constants.FILTER_WATCHED], limits=(0, num_recent_similar))
         if movies:
             return movies[randint(0,len(movies)-1)]
         else:
