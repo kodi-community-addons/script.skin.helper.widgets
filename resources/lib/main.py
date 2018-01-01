@@ -94,6 +94,8 @@ class Main(object):
             elif options["action"] == "browsegenres" and options["mediatype"] == "randomtvshows":
                 options["mediatype"] = "tvshows"
                 options["random"] = True
+            if options["action"] == "similar":
+                options["skipcache"] = "true"
 
         # set the widget settings as options
         options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
