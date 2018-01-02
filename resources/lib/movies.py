@@ -127,16 +127,14 @@ class Movies(object):
             # define ref movie properties for clarity & speed
             ref_title = ref_movie["title"]
             ref_genres = ref_movie["genre"]
-            ref_writers = ref_movie["writer"]
             ref_directors = ref_movie["director"]
+            ref_writers = ref_movie["writer"]
             ref_rating = ref_movie["rating"]
             ref_setid = ref_movie["setid"]
+            ref_year = ref_movie["year"]
             set_genres = set(ref_genres)
-            set_writers = set(ref_writers)
             set_directors = set(ref_directors)
-            num_genres = len(ref_genres)
-            num_writers = len(ref_writers)
-            num_directors = len(ref_directors)
+            set_writers = set(ref_writers)
             # get all movies for the genres in the movie
             for genre in ref_genres:
                 self.options["genre"] = genre
@@ -144,18 +142,27 @@ class Movies(object):
                 for item in genre_movies:
                     # prevent duplicates so skip reference movie and titles already in the list
                     if not item["title"] in all_titles and not item["title"] == ref_title:
-                        item["extraproperties"] = {"similartitle": ref_title, "originalpath": item["file"]}
-                        genre_score = float(len(set_genres.intersection(item["genre"])))/num_genres
-                        writer_score = 0 if num_writers==0 else \
-                            float(len(set_writers.intersection(item["writer"])))/num_writers
-                        director_score = 0 if num_directors==0 else \
-                            float(len(set_directors.intersection(item["director"])))/num_directors
+                        genre_score = float(len(set_genres.intersection(item["genre"])))/ \
+                            len(set_genres.union(set(item["genre"])))
+                        director_score = 0 if len(ref_directors)==0 else \
+                            float(len(set_directors.intersection(item["director"])))/ \
+                            len(set_directors.union(set(item["director"])))
+                        writer_score = 0 if len(ref_writers)==0 else \
+                            float(len(set_writers.intersection(item["writer"])))/ \
+                            len(set_writers.union(set(item["writer"])))
                         rating_score = 0 if (not ref_rating) or (not item["rating"]) else \
                             1-abs(ref_rating-item["rating"])/10
-                        similarscore = .5*genre_score + .2*writer_score + .2*director_score + .1*rating_score
+                        year_score = 0 if not ref_year or not item["year"] or abs(ref_year-item["year"])>10 else \
+                            1-abs(ref_year-item["year"])/10
+                        mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"]==item["mpaa"] else 0
+                        similarscore = .5*genre_score + .2*director_score + .1*writer_score + .1*rating_score + \
+                            .05*year_score + .05*mpaa_score
                         if ref_setid and ref_setid==item["setid"]:
-                            similarscore = similarscore**(1/3)
+                            similarscore = similarscore**(1./2)
                         item["similarscore"] = similarscore
+                        #item["extraproperties"] = {"similartitle": ref_title, "originalpath": item["file"]}
+                        item["extraproperties"] = {"similartitle": ref_title+" (%2.f%%)"%(100*similarscore), 
+                            "originalpath": item["file"]}
                         all_items.append(item)
                         all_titles.append(item["title"])
         # restore hide_watched settings
