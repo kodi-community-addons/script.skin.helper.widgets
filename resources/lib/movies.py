@@ -105,26 +105,25 @@ class Movies(object):
         return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_TITLE, filters=filters,
                                            limits=(0, self.options["limit"]))
 
-    def similar(self):
-        ''' get similar movies for given imdbid or just from random watched title if no imdbid'''
-        imdb_id = self.options.get("imdbid", "")
+    def similar(self, imdb_id=None):
+        ''' get similar movies for given imdbid, or from a recently watched title if no imdbid'''
         all_items = []
         all_titles = list()
-        # lookup movie by imdbid or just pick a random watched movie
         ref_movie = None
-        hide_watched = self.options["hide_watched"]
+        hide_watched = False
+        if not imdb_id:
+            # check options if imdb_id argument not given
+            imdb_id = self.options.get("imdbid", "")
         if imdb_id:
-            # get movie by imdbid
+            # get movie from imdb_id if found
             ref_movie = self.metadatautils.kodidb.movie_by_imdbid(imdb_id)
         if not ref_movie:
-            # just get a random watched movie
+            # pick a random recently watched movie (for homescreen widget)
             ref_movie = self.get_recently_watched_movie()
-            # when getting a random movie, it's for a homescreen widget, and
-            # and that means it should check setting to hide watched
-            if self.options["hide_watched_similar"]:
-                self.options["hide_watched"] = True
+            # use hide_watched setting for homescreen widget only
+            hide_watched = self.options["hide_watched_similar"]
         if ref_movie:
-            # define ref movie properties for clarity & speed
+            # define ref_movie properties for clarity & speed
             ref_title = ref_movie["title"]
             ref_genres = ref_movie["genre"]
             ref_directors = ref_movie["director"]
@@ -135,13 +134,14 @@ class Movies(object):
             set_genres = set(ref_genres)
             set_directors = set(ref_directors)
             set_writers = set(ref_writers)
-            # get all movies for the genres in the movie
+            # check every genre for the movie
             for genre in ref_genres:
-                self.options["genre"] = genre
-                genre_movies = self.forgenre()
+                # check every movie for the genre
+                genre_movies = self.forgenre(genre=genre, hide_watched=hide_watched, limit=1000, sort=False)
                 for item in genre_movies:
                     # prevent duplicates so skip reference movie and titles already in the list
                     if not item["title"] in all_titles and not item["title"] == ref_title:
+                        # [feature]_score = (numer of matching [features]) / (number of unique [features] between both)
                         genre_score = float(len(set_genres.intersection(item["genre"])))/ \
                             len(set_genres.union(set(item["genre"])))
                         director_score = 0 if len(ref_directors)==0 else \
@@ -150,43 +150,58 @@ class Movies(object):
                         writer_score = 0 if len(ref_writers)==0 else \
                             float(len(set_writers.intersection(item["writer"])))/ \
                             len(set_writers.union(set(item["writer"])))
+                        # rating_score is "closeness" in rating, scaled to 1
                         rating_score = 0 if (not ref_rating) or (not item["rating"]) else \
                             1-abs(ref_rating-item["rating"])/10
+                        # year_score is "closeness" in release year, scaled to 1 (only for movies in same decade)
                         year_score = 0 if not ref_year or not item["year"] or abs(ref_year-item["year"])>10 else \
                             1-abs(ref_year-item["year"])/10
+                        # mpaa_score gets 1 if same mpaa rating, otherwise 0
                         mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"]==item["mpaa"] else 0
+                        # calculate overall score using weighted average
                         similarscore = .5*genre_score + .2*director_score + .1*writer_score + .1*rating_score + \
                             .05*year_score + .05*mpaa_score
+                        # exponentially scale score for movies in same set
                         if ref_setid and ref_setid==item["setid"]:
                             similarscore = similarscore**(1./2)
+                        # assign score for movie, used for sorting
                         item["similarscore"] = similarscore
-                        #item["extraproperties"] = {"similartitle": ref_title, "originalpath": item["file"]}
-                        item["extraproperties"] = {"similartitle": ref_title+" (%2.f%%)"%(100*similarscore), 
+                        # add extraproperties for skinners
+                        item["extraproperties"] = {"similartitle": ref_title+" (%2.f%%)"%(100*similarscore),
                             "originalpath": item["file"]}
+                        # add items to list
                         all_items.append(item)
                         all_titles.append(item["title"])
-        # restore hide_watched settings
-        self.options["hide_watched"] = hide_watched
         # return the list capped by limit and sorted by number of matching genres then rating
         return sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
 
-    def forgenre(self):
+    def forgenre(self, genre=None, hide_watched=None, limit=None, sort=True):
         ''' get top rated movies for given genre'''
-        genre = self.options.get("genre", "")
-        all_items = []
+        # check options for arguments not provided
         if not genre:
-            # get a random genre if no genre provided
+            genre = self.options.get("genre", "")
+        if not hide_watched:
+            hide_watched = self.options["hide_watched"]
+        if not limit:
+            limit = self.options["limit"]
+        if not genre:
+            # get a random genre if no genre found
             genres = self.metadatautils.kodidb.genres("movie")
             if genres:
                 genre = genres[0]["label"]
+        all_items = []
         if genre:
             # get all movies from the same genre
-            for item in self.get_genre_movies(genre, self.options["hide_watched"], self.options["limit"]):
+            for item in self.get_genre_movies(genre, hide_watched=hide_watched, limit=limit, sort=False):
                 # append original genre as listitem property for later reference by skinner
                 item["extraproperties"] = {"genretitle": genre, "originalpath": item["file"]}
                 all_items.append(item)
-        # return the list sorted by rating
-        return sorted(all_items, key=itemgetter("rating"), reverse=True)
+        if sort:
+            # return the list sorted by rating by default
+            return sorted(all_items, key=itemgetter("rating"), reverse=True)
+        else:
+            # skip sort otherwise (i.e. for similar widget)
+            return all_items
 
     def inprogressandrecommended(self):
         ''' get recommended AND in progress movies '''
@@ -286,13 +301,16 @@ class Movies(object):
 
     def get_genre_movies(self, genre, hide_watched=False, limit=100, sort=kodi_constants.SORT_RANDOM):
         '''helper method to get all movies in a specific genre'''
-        limit=1000  # similar movies is too inconsisent without a high limit
         filters = [{"operator": "is", "field": "genre", "value": genre}]
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         if hide_watched:
             filters.append(kodi_constants.FILTER_UNWATCHED)
-        return self.metadatautils.kodidb.movies(sort=sort, filters=filters, limits=(0, limit))
+        if sort:
+            return self.metadatautils.kodidb.movies(sort=sort, filters=filters, limits=(0, limit))
+        else:
+            # skip sort if set to false to save computer time
+            return self.metadatautils.kodidb.movies(filters=filters, limits=(0, limit))
 
     def favourites(self):
         '''get favourites'''
