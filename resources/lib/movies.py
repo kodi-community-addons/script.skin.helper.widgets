@@ -105,7 +105,6 @@ class Movies(object):
         return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_TITLE, filters=filters,
                                            limits=(0, self.options["limit"]))
 
-
     def similar(self):
         ''' get similar movies for given imdbid or just from random watched title if no imdbid'''
         imdb_id = self.options.get("imdbid", "")
@@ -153,9 +152,9 @@ class Movies(object):
                             float(len(set_directors.intersection(item["director"])))/num_directors
                         rating_score = 0 if (not ref_rating) or (not item["rating"]) else \
                             1-abs(ref_rating-item["rating"])/10
-                        similarscore = .5*genre_score+.2*writer_score+.2*director_score+.1*rating_score
+                        similarscore = .5*genre_score + .2*writer_score + .2*director_score + .1*rating_score
                         if ref_setid and ref_setid==item["setid"]:
-                            similarscore = similarscore**(1/(1+set_exp))
+                            similarscore = similarscore**(1/3)
                         item["similarscore"] = similarscore
                         all_items.append(item)
                         all_titles.append(item["title"])
@@ -163,7 +162,6 @@ class Movies(object):
         self.options["hide_watched"] = hide_watched
         # return the list capped by limit and sorted by number of matching genres then rating
         return sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
-
 
     def forgenre(self):
         ''' get top rated movies for given genre'''
@@ -180,7 +178,6 @@ class Movies(object):
                 # append original genre as listitem property for later reference by skinner
                 item["extraproperties"] = {"genretitle": genre, "originalpath": item["file"]}
                 all_items.append(item)
-
         # return the list sorted by rating
         return sorted(all_items, key=itemgetter("rating"), reverse=True)
 
