@@ -87,7 +87,8 @@ class Movies(object):
                     else:
                         j += 1
             # sort titles and cap at limit
-            similar_movies = sorted(similar_movies, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
+            similar_movies = sorted(similar_movies, key=itemgetter("similarscore"),
+                                                    reverse=True)[:self.options["limit"]]
             # scale score, and rewrite extraproperties for remaining movies
             for movie in similar_movies:
                 movie["recommendedscore"] = (movie["similarscore"]/len(recent_movies))**(1./2)
@@ -324,8 +325,19 @@ class Movies(object):
             # skip sort if set to false to save computer time
             return self.metadatautils.kodidb.movies(filters=filters, limits=(0, limit))
 
-    def get_similarity_score(self, ref_movie, other_movie,
-                                set_genres=None, set_directors=None, set_writers=None, set_cast=None):
+    def favourites(self):
+        '''get favourites'''
+        from favourites import Favourites
+        self.options["mediafilter"] = "movies"
+        return Favourites(self.addon, self.metadatautils, self.options).favourites()
+
+    def favourite(self):
+        '''synonym to favourites'''
+        return self.favourites()
+
+    @staticmethod
+    def get_similarity_score(ref_movie, other_movie, set_genres=None, set_directors=None,
+                                                        set_writers=None, set_cast=None):
         '''
             get a similarity score (0-1) between two movies
             optional parameters should be calculated beforehand if called inside loop
@@ -370,15 +382,5 @@ class Movies(object):
             .1*rating_score + .05*year_score + .025*mpaa_score
         # exponentially scale score for movies in same set
         if ref_movie["setid"] and ref_movie["setid"]==other_movie["setid"]:
-            similarscore = similarscore**(1./2)
+            similarscore **= (1./2)
         return similarscore
-
-    def favourites(self):
-        '''get favourites'''
-        from favourites import Favourites
-        self.options["mediafilter"] = "movies"
-        return Favourites(self.addon, self.metadatautils, self.options).favourites()
-
-    def favourite(self):
-        '''synonym to favourites'''
-        return self.favourites()
