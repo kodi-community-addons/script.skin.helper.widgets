@@ -60,14 +60,47 @@ class Movies(object):
         return all_items
 
     def recommended(self):
-        ''' get recommended movies - library movies with score higher than 7 '''
-        filters = [kodi_constants.FILTER_RATING]
-        if self.options["hide_watched"]:
-            filters.append(kodi_constants.FILTER_UNWATCHED)
-        if self.options.get("tag"):
-            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RATING, filters=filters,
-                                           limits=(0, self.options["limit"]))
+        ''' get recommended movies - library movies with score higher than 7
+        or if using experimental settings - similar with all recently watched '''
+        if self.options["exp_rec_movies"]:
+            # get recently watched movies
+            num_recent_similar = self.options["num_recent_similar"]
+            recent_movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
+                                                            filters=[kodi_constants.FILTER_WATCHED],
+                                                            limits=(0, num_recent_similar))
+            # put all similar movies into a list
+            similar_movies = []
+            for movie in recent_movies:
+                similar_movies += self.similar(ref_movie=movie, hide_watched=True, use_limit=False)
+            # combine entries and add scores
+            for i in range(len(similar_movies)):
+                j = i+1
+                while j < len(similar_movies):
+                    # need to check title & year instead of uniqueid, so multiple versions
+                    # (e.g. theatrical, director's cut) won't get double counted
+                    if (
+                            similar_movies[i]["title"]==similar_movies[j]["title"] and
+                            similar_movies[i]["year"]==similar_movies[j]["year"]
+                        ):
+                        similar_movies[i]["similarscore"] += similar_movies[j]["similarscore"]
+                        similar_movies.pop(j)
+                    else:
+                        j += 1
+            # scale score and rewrite extraproperties
+            for movie in similar_movies:
+                movie["recommendedscore"] = (movie["similarscore"]/len(recent_movies))**(1./len(recent_movies))
+                movie["extraproperties"].pop("similartitle")
+                movie.pop("similarscore")
+            # return the list sorted by score, and capped at limit
+            return sorted(similar_movies, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
+        else:
+            filters = [kodi_constants.FILTER_RATING]
+            if self.options["hide_watched"]:
+                filters.append(kodi_constants.FILTER_UNWATCHED)
+            if self.options.get("tag"):
+                filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+            return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RATING, filters=filters,
+                                               limits=(0, self.options["limit"]))
 
     def recent(self):
         ''' get recently added movies '''
@@ -105,23 +138,23 @@ class Movies(object):
         return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_TITLE, filters=filters,
                                            limits=(0, self.options["limit"]))
 
-    def similar(self, imdb_id=None):
+    def similar(self, ref_movie=None, hide_watched=None, use_limit=True):
         ''' get similar movies for given imdbid, or from a recently watched title if no imdbid'''
-        all_items = []
-        all_titles = list()
-        ref_movie = None
-        hide_watched = False
-        if not imdb_id:
-            # check options if imdb_id argument not given
-            imdb_id = self.options.get("imdbid", "")
+        imdb_id = self.options.get("imdbid", "")
         if imdb_id:
             # get movie from imdb_id if found
             ref_movie = self.metadatautils.kodidb.movie_by_imdbid(imdb_id)
+        if hide_watched==None:
+            # set hide_watched to false if argument not passed
+            # note: may still get overwritten by widget option below
+            hide_watched = False
         if not ref_movie:
             # pick a random recently watched movie (for homescreen widget)
             ref_movie = self.get_recently_watched_movie()
             # use hide_watched setting for homescreen widget only
             hide_watched = self.options["hide_watched_similar"]
+        all_items = []
+        all_titles = list()
         if ref_movie:
             # define ref_movie properties for clarity & speed
             ref_title = ref_movie["title"]
@@ -172,8 +205,12 @@ class Movies(object):
                         # add items to list
                         all_items.append(item)
                         all_titles.append(item["title"])
-        # return the list capped by limit and sorted by number of matching genres then rating
-        return sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
+        # return the list sorted by score, and capped at limit (by default)
+        sorted_list = sorted(all_items, key=itemgetter("similarscore"), reverse=True)
+        if use_limit:
+            return sorted_list[:self.options["limit"]]
+        else:
+            return sorted_list
 
     def forgenre(self, genre=None, hide_watched=None, limit=None, sort=True):
         ''' get top rated movies for given genre'''
