@@ -73,7 +73,7 @@ class Movies(object):
             for movie in recent_movies:
                 similar_movies += self.similar(ref_movie=movie, hide_watched=True, use_limit=False)
             # combine entries and add scores
-            for i in range(len(similar_movies)):
+            for i in xrange(len(similar_movies)):
                 j = i+1
                 while j < len(similar_movies):
                     # need to check title & year instead of uniqueid, so multiple versions
@@ -86,13 +86,15 @@ class Movies(object):
                         similar_movies.pop(j)
                     else:
                         j += 1
-            # scale score and rewrite extraproperties
+            # sort titles and cap at limit
+            similar_movies = sorted(similar_movies, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
+            # scale score, and rewrite extraproperties for remaining movies
             for movie in similar_movies:
-                movie["recommendedscore"] = (movie["similarscore"]/len(recent_movies))**(1./len(recent_movies))
+                movie["recommendedscore"] = (movie["similarscore"]/len(recent_movies))**(1./2)
                 movie["extraproperties"].pop("similartitle")
                 movie.pop("similarscore")
-            # return the list sorted by score, and capped at limit
-            return sorted(similar_movies, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
+            # return the list
+            return similar_movies
         else:
             filters = [kodi_constants.FILTER_RATING]
             if self.options["hide_watched"]:
@@ -156,70 +158,34 @@ class Movies(object):
         all_items = []
         all_titles = list()
         if ref_movie:
-            # define ref_movie properties for clarity & speed
-            ref_title = ref_movie["title"]
-            ref_genres = ref_movie["genre"]
-            ref_directors = ref_movie["director"]
-            ref_writers = ref_movie["writer"]
-            ref_cast = [x["name"] for x in ref_movie["cast"][:5]]
-            ref_rating = ref_movie["rating"]
-            ref_setid = ref_movie["setid"]
-            ref_year = ref_movie["year"]
-            set_genres = set(ref_genres)
-            set_directors = set(ref_directors)
-            set_writers = set(ref_writers)
-            set_cast = set(ref_cast)
+            # define ref_movie sets for clarity & speed
+            set_genres = set(ref_movie["genre"])
+            set_directors = set(ref_movie["director"])
+            set_writers = set(ref_movie["writer"])
+            set_cast = set([x["name"] for x in ref_movie["cast"][:5]])
             # check every genre for the movie
-            for genre in ref_genres:
+            for genre in ref_movie["genre"]:
                 # check every movie for the genre
                 genre_movies = self.forgenre(genre=genre, hide_watched=hide_watched, limit=1000, sort=False)
                 for item in genre_movies:
                     # prevent duplicates so skip reference movie and titles already in the list
-                    if not item["title"] in all_titles and not item["title"] == ref_title:
-                        # [feature]_score = (numer of matching [features]) / (number of unique [features] between both)
-                        genre_score = float(len(set_genres.intersection(item["genre"])))/ \
-                            len(set_genres.union(set(item["genre"])))
-                        director_score = 0 if len(ref_directors)==0 else \
-                            float(len(set_directors.intersection(item["director"])))/ \
-                            len(set_directors.union(set(item["director"])))
-                        writer_score = 0 if len(ref_writers)==0 else \
-                            float(len(set_writers.intersection(item["writer"])))/ \
-                            len(set_writers.union(set(item["writer"])))
-                        if len(ref_cast)==0:
-                            cast_score = 0
-                        else:
-                            item_cast = [x["name"] for x in item["cast"][:5]]
-                            cast_score = 0 if len(ref_cast)==0 else \
-                                float(len(set_cast.intersection(item_cast)))/ \
-                                len(set_cast.union(set(item_cast)))
-                        # rating_score is "closeness" in rating, scaled to 1
-                        rating_score = 0 if (not ref_rating) or (not item["rating"]) else \
-                            1-abs(ref_rating-item["rating"])/10
-                        # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
-                        year_score = 0 if not ref_year or not item["year"] or abs(ref_year-item["year"])>10 else \
-                            1-abs(ref_year-item["year"])/10
-                        # mpaa_score gets 1 if same mpaa rating, otherwise 0
-                        mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"]==item["mpaa"] else 0
-                        # calculate overall score using weighted average
-                        similarscore = .5*genre_score + .15*director_score + .1*writer_score + .05*cast_score + \
-                            .1*rating_score + .05*year_score + .05*mpaa_score
-                        # exponentially scale score for movies in same set
-                        if ref_setid and ref_setid==item["setid"]:
-                            similarscore = similarscore**(1./2)
+                    if not item["title"] in all_titles and not item["title"] == ref_movie["title"]:
                         # assign score for movie, used for sorting
+                        similarscore = self.get_similarity_score(ref_movie, item,
+                            set_genres=set_genres, set_directors=set_directors,
+                            set_writers=set_writers, set_cast=set_cast)
                         item["similarscore"] = similarscore
                         # add extraproperties for skinners
-                        item["extraproperties"] = {"similartitle": ref_title+" (%2.f%%)"%(100*similarscore),
+                        item["extraproperties"] = {"similartitle": ref_movie["title"]+" (%2.f%%)"%(100*similarscore),
                             "originalpath": item["file"]}
                         # add items to list
                         all_items.append(item)
                         all_titles.append(item["title"])
         # return the list sorted by score, and capped at limit (by default)
-        sorted_list = sorted(all_items, key=itemgetter("similarscore"), reverse=True)
         if use_limit:
-            return sorted_list[:self.options["limit"]]
+            return sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
         else:
-            return sorted_list
+            return sorted(all_items, key=itemgetter("similarscore"), reverse=True)
 
     def forgenre(self, genre=None, hide_watched=None, limit=None, sort=True):
         ''' get top rated movies for given genre'''
@@ -357,6 +323,55 @@ class Movies(object):
         else:
             # skip sort if set to false to save computer time
             return self.metadatautils.kodidb.movies(filters=filters, limits=(0, limit))
+
+    def get_similarity_score(self, ref_movie, other_movie,
+                                set_genres=None, set_directors=None, set_writers=None, set_cast=None):
+        '''
+            get a similarity score (0-1) between two movies
+            optional parameters should be calculated beforehand if called inside loop
+        '''
+        # assign arguments not given
+        if not set_genres:
+            set_genres = set(ref_movie["genre"])
+        if not set_directors:
+            set_directors = set(ref_movie["director"])
+        if not set_writers:
+            set_writers = set(ref_movie["writer"])
+        if not set_cast:
+            set_cast = set([x["name"] for x in ref_movie["cast"][:5]])
+        # calculate individual scores for contributing factors
+        # [feature]_score = (numer of matching [features]) / (number of unique [features] between both)
+        genre_score = float(len(set_genres.intersection(other_movie["genre"])))/ \
+            len(set_genres.union(other_movie["genre"]))
+        director_score = 0 if len(set_directors)==0 else \
+            float(len(set_directors.intersection(other_movie["director"])))/ \
+            len(set_directors.union(other_movie["director"]))
+        writer_score = 0 if len(set_writers)==0 else \
+            float(len(set_writers.intersection(other_movie["writer"])))/ \
+            len(set_writers.union(other_movie["writer"]))
+        if len(set_cast)>0:
+            other_cast = set([x["name"] for x in other_movie["cast"][:5]])
+            cast_score = float(len(set_cast.intersection(other_cast)))/ \
+                len(set_cast.union(other_cast))
+        else:
+            cast_score = 0
+        # rating_score is "closeness" in rating, scaled to 1
+        rating_score = 0 if (not ref_movie["rating"]) or (not other_movie["rating"]) else \
+            1-abs(ref_movie["rating"]-other_movie["rating"])/10
+        # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
+        if ref_movie["year"] and other_movie["year"] and abs(ref_movie["year"]-other_movie["year"])<10:
+            year_score = 1-abs(ref_movie["year"]-other_movie["year"])/10
+        else:
+            year_score = 0
+        # mpaa_score gets 1 if same mpaa rating, otherwise 0
+        mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"]==other_movie["mpaa"] else 0
+        # calculate overall score using weighted average
+        similarscore = .5*genre_score + .15*director_score + .125*writer_score + .05*cast_score + \
+            .1*rating_score + .05*year_score + .025*mpaa_score
+        # exponentially scale score for movies in same set
+        if ref_movie["setid"] and ref_movie["setid"]==other_movie["setid"]:
+            similarscore = similarscore**(1./2)
+        return similarscore
 
     def favourites(self):
         '''get favourites'''

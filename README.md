@@ -26,8 +26,9 @@ ________________________________________________________________________________
 ```
 plugin://script.skin.helper.widgets/?action=recommended&mediatype=movies&reload=$INFO[Window(Home).Property(widgetreload-movies)]
 ```
-Provides a list of the in progress movies AND recommended movies based on rating.
-Note: the reload parameter is needed to auto refresh the widget when the content has changed.
+Provides a list of the in-progress movies AND movies sorted by rating.
+An alternate behavior for this widget is available in settings, which finds movies similar to all recently watched movies.  The experimental version is slower, and not recommended for low-power systems.
+Note: the reload parameter is needed to auto refresh the widget when the content has changed (non-experimental version only).
 
 ________________________________________________________________________________________________________
 
@@ -108,11 +109,11 @@ ________________________________________________________________________________
 ```
 plugin://script.skin.helper.widgets/?action=similar&mediatype=movies&reload=$INFO[Window(Home).Property(widgetreload2)]
 ```
-This will provide a list with unwatched movies that are similar to a random recently watched movie from the library (similarity is based on genres, writers, directors, movie set & rating).
+This will provide a list with unwatched movies that are similar to a random recently watched movie from the library (similarity is based on several factors, including matching genres, writers, directors, movie set & rating).
 TIP: The listitem provided by this list will have a property "similartitle" which contains the movie from which this list is generated. That way you can create a "Because you watched $INFO[Container.ListItem.Property(originaltitle)]" label....
 Note: You can optionally provide the widgetreload2 parameter if you want to refresh the widget every 10 minutes. If you want to refresh the widget on other circumstances just provide any changing info with the reload parameter, such as the window title or some window Property which you change on X interval.
 
-The above command will create a similar movies listing based on a random watched movie in the library.
+The above command will create a similar movies listing based on a random recently watched movie in the library.
 If you want to specify the movie to base the request on yourself you can optionally specify the imdb id to the script:
 
 ```
@@ -190,7 +191,7 @@ ________________________________________________________________________________
 ```
 plugin://script.skin.helper.widgets/?action=inprogressandrecommended&mediatype=media&reload=$INFO[Window(Home).Property(widgetreload)]
 ```
-This combines in progress media and recommended media, usefull to prevent an empty widget when no items are in progress.
+This combines in progress media and recommended media, useful to prevent an empty widget when no items are in progress.
 Note: the reload parameter is needed to auto refresh the widget when the content has changed.
 
 ________________________________________________________________________________________________________
