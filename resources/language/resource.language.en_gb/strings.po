@@ -303,3 +303,15 @@ msgstr ""
 msgctxt "#32071"
 msgid "Enable aggresive refresh of widgets"
 msgstr ""
+
+msgctxt "#32072"
+msgid "Number of recently watched movies for similar movies"
+msgstr ""
+
+msgctxt "#32073"
+msgid "Hide watched items in similar movies widget"
+msgstr ""
+
+msgctxt "#32074"
+msgid "Enable experimental recommended movies (Very slow)"
+msgstr ""

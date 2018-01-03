@@ -56,6 +56,21 @@ class Main(object):
 
         options = dict(urlparse.parse_qsl(sys.argv[2].replace('?', '').lower().decode("utf-8")))
 
+        # set the widget settings as options
+        options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
+        if self.addon.getSetting("hide_watched_recent") == "true" and "recent" in options.get("action", ""):
+            options["hide_watched"] = True
+        options["num_recent_similar"] = int(self.addon.getSetting("num_recent_similar"))
+        options["exp_rec_movies"] = self.addon.getSetting("exp_rec_movies") == "true"
+        options["hide_watched_similar"] = self.addon.getSetting("hide_watched_similar") == "true"
+        options["next_inprogress_only"] = self.addon.getSetting("nextup_inprogressonly") == "true"
+        options["episodes_enable_specials"] = self.addon.getSetting("episodes_enable_specials") == "true"
+        options["group_episodes"] = self.addon.getSetting("episodes_grouping") == "true"
+        if "limit" in options:
+            options["limit"] = int(options["limit"])
+        else:
+            options["limit"] = int(self.addon.getSetting("default_limit"))
+
         if not "mediatype" in options and "action" in options:
             # get the mediatype and action from the path (for backwards compatability with old style paths)
             for item in [
@@ -68,7 +83,7 @@ class Main(object):
                 ("songs", "songs"),
                 ("artists", "artists"),
                 ("media", "media"),
-                ("favourites", "favourites"), 
+                ("favourites", "favourites"),
                     ("favorites", "favourites")]:
                 if item[0] in options["action"]:
                     options["mediatype"] = item[1]
@@ -94,18 +109,11 @@ class Main(object):
             elif options["action"] == "browsegenres" and options["mediatype"] == "randomtvshows":
                 options["mediatype"] = "tvshows"
                 options["random"] = True
+            if options["action"] == "similar":
+                options["skipcache"] = "true"
+            elif options["action"] == "recommended" and options["exp_rec_movies"]:
+                options["skipcache"] = "true"
 
-        # set the widget settings as options
-        options["hide_watched"] = self.addon.getSetting("hide_watched") == "true"
-        if self.addon.getSetting("hide_watched_recent") == "true" and "recent" in options.get("action", ""):
-            options["hide_watched"] = True
-        options["next_inprogress_only"] = self.addon.getSetting("nextup_inprogressonly") == "true"
-        options["episodes_enable_specials"] = self.addon.getSetting("episodes_enable_specials") == "true"
-        options["group_episodes"] = self.addon.getSetting("episodes_grouping") == "true"
-        if "limit" in options:
-            options["limit"] = int(options["limit"])
-        else:
-            options["limit"] = int(self.addon.getSetting("default_limit"))
         return options
 
     def show_widget_listing(self):
@@ -120,7 +128,7 @@ class Main(object):
 
         # try to get from cache first...
         all_items = []
-        cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type, 
+        cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
                     action, self.options["limit"], self.options.get("path"), self.options.get("tag"))
         if not self.win.getProperty("widgetreload2"):
             # at startup we simply accept whatever is in the cache
