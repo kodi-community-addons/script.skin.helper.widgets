@@ -141,7 +141,7 @@ class Movies(object):
     def similar(self, ref_movie=None, hide_watched=None, use_limit=True):
         ''' get similar movies for given imdbid, or from a recently watched title if no imdbid'''
         imdb_id = self.options.get("imdbid", "")
-        if imdb_id:
+        if not ref_movie and imdb_id:
             # get movie from imdb_id if found
             ref_movie = self.metadatautils.kodidb.movie_by_imdbid(imdb_id)
         if hide_watched==None:
@@ -161,12 +161,14 @@ class Movies(object):
             ref_genres = ref_movie["genre"]
             ref_directors = ref_movie["director"]
             ref_writers = ref_movie["writer"]
+            ref_cast = [x["name"] for x in ref_movie["cast"][:5]]
             ref_rating = ref_movie["rating"]
             ref_setid = ref_movie["setid"]
             ref_year = ref_movie["year"]
             set_genres = set(ref_genres)
             set_directors = set(ref_directors)
             set_writers = set(ref_writers)
+            set_cast = set(ref_cast)
             # check every genre for the movie
             for genre in ref_genres:
                 # check every movie for the genre
@@ -183,17 +185,24 @@ class Movies(object):
                         writer_score = 0 if len(ref_writers)==0 else \
                             float(len(set_writers.intersection(item["writer"])))/ \
                             len(set_writers.union(set(item["writer"])))
+                        if len(ref_cast)==0:
+                            cast_score = 0
+                        else:
+                            item_cast = [x["name"] for x in item["cast"][:5]]
+                            cast_score = 0 if len(ref_cast)==0 else \
+                                float(len(set_cast.intersection(item_cast)))/ \
+                                len(set_cast.union(set(item_cast)))
                         # rating_score is "closeness" in rating, scaled to 1
                         rating_score = 0 if (not ref_rating) or (not item["rating"]) else \
                             1-abs(ref_rating-item["rating"])/10
-                        # year_score is "closeness" in release year, scaled to 1 (only for movies in same decade)
+                        # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
                         year_score = 0 if not ref_year or not item["year"] or abs(ref_year-item["year"])>10 else \
                             1-abs(ref_year-item["year"])/10
                         # mpaa_score gets 1 if same mpaa rating, otherwise 0
                         mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"]==item["mpaa"] else 0
                         # calculate overall score using weighted average
-                        similarscore = .5*genre_score + .2*director_score + .1*writer_score + .1*rating_score + \
-                            .05*year_score + .05*mpaa_score
+                        similarscore = .5*genre_score + .15*director_score + .1*writer_score + .05*cast_score + \
+                            .1*rating_score + .05*year_score + .05*mpaa_score
                         # exponentially scale score for movies in same set
                         if ref_setid and ref_setid==item["setid"]:
                             similarscore = similarscore**(1./2)
