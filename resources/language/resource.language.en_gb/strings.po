@@ -301,17 +301,17 @@ msgid "In progress TV shows and movies"
 msgstr ""
 
 msgctxt "#32071"
-msgid "Enable aggresive refresh of widgets"
+msgid "Enable aggressive refresh of widgets"
 msgstr ""
 
 msgctxt "#32072"
-msgid "Number of recently watched movies for similar movies"
+msgid "Number of recently watched items for similar widgets"
 msgstr ""
 
 msgctxt "#32073"
-msgid "Hide watched items in similar movies widget"
+msgid "Hide watched items in similar widgets"
 msgstr ""
 
 msgctxt "#32074"
-msgid "Enable experimental recommended movies"
+msgid "Enable experimental recommended widgets"
 msgstr ""

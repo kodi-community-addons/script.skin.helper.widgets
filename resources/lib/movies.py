@@ -62,7 +62,7 @@ class Movies(object):
     def recommended(self):
         ''' get recommended movies - library movies with score higher than 7
         or if using experimental settings - similar with all recently watched '''
-        if self.options["exp_rec_movies"]:
+        if self.options["exp_recommended"]:
             # get recently watched movies
             num_recent_similar = self.options["num_recent_similar"]
             ref_movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,

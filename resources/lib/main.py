@@ -61,7 +61,7 @@ class Main(object):
         if self.addon.getSetting("hide_watched_recent") == "true" and "recent" in options.get("action", ""):
             options["hide_watched"] = True
         options["num_recent_similar"] = int(self.addon.getSetting("num_recent_similar"))
-        options["exp_rec_movies"] = self.addon.getSetting("exp_rec_movies") == "true"
+        options["exp_recommended"] = self.addon.getSetting("exp_recommended") == "true"
         options["hide_watched_similar"] = self.addon.getSetting("hide_watched_similar") == "true"
         options["next_inprogress_only"] = self.addon.getSetting("nextup_inprogressonly") == "true"
         options["episodes_enable_specials"] = self.addon.getSetting("episodes_enable_specials") == "true"
@@ -111,7 +111,7 @@ class Main(object):
                 options["random"] = True
             if options["action"] == "similar":
                 options["skipcache"] = "true"
-            elif options["action"] == "recommended" and options["exp_rec_movies"]:
+            elif options["action"] == "recommended" and options["exp_recommended"]:
                 options["skipcache"] = "true"
 
         return options

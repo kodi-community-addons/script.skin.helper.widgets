@@ -9,6 +9,7 @@
 
 from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
+from random import randint
 from metadatautils import kodi_constants
 import xbmc
 
@@ -66,16 +67,38 @@ class Tvshows(object):
         return all_items
 
     def recommended(self):
-        ''' get recommended tvshows - library tvshows with score higher than 7 '''
-        filters = [kodi_constants.FILTER_RATING]
-        if self.options["hide_watched"]:
-            filters.append(kodi_constants.FILTER_UNWATCHED)
-        if self.options.get("tag"):
-            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        tvshows = self.metadatautils.kodidb.tvshows(
-            sort=kodi_constants.SORT_RATING, filters=filters, limits=(
-                0, self.options["limit"]))
-        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
+        ''' get recommended tvshows - library tvshows with score higher than 7
+        or if using experimental settings - similar with all recently watched '''
+        if self.options["exp_recommended"]:
+            # get recently watched movies
+            num_recent_similar = self.options["num_recent_similar"]
+            ref_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
+                                                            filters=[kodi_constants.FILTER_WATCHED],
+                                                            limits=(0, num_recent_similar))
+            # get list of all unwatched movies
+            filters = [kodi_constants.FILTER_UNWATCHED,
+                       {"operator":"false", "field":"inprogress", "value":""}]
+            all_items = self.metadatautils.kodidb.tvshows(filters=filters, filtertype='and')
+            # add scores together for every item
+            for item in all_items:
+                similarscore = 0
+                for ref_show in ref_shows:
+                    similarscore += self.get_similarity_score(ref_show, item)**(1./2)
+                item["recommendedscore"] = similarscore / len(ref_shows)
+            # sort list by score and cap by limit
+            tvshows = sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
+            # return processed show
+            return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
+        else:
+            filters = [kodi_constants.FILTER_RATING]
+            if self.options["hide_watched"]:
+                filters.append(kodi_constants.FILTER_UNWATCHED)
+            if self.options.get("tag"):
+                filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+            tvshows = self.metadatautils.kodidb.tvshows(
+                sort=kodi_constants.SORT_RATING, filters=filters, limits=(
+                    0, self.options["limit"]))
+            return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def recent(self):
         ''' get recently added tvshows '''
@@ -110,40 +133,45 @@ class Tvshows(object):
         return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def similar(self):
-        ''' get similar tvshows for given imdbid or just from random watched title if no imdbid'''
+        ''' get similar shows for given imdbid, or from a recently watched title if no imdbid'''
         imdb_id = self.options.get("imdbid", "")
-        all_items = []
-        all_titles = list()
-        # lookup tvshow by imdbid or just pick a random watched tvshow
-        ref_tvshow = None
+        ref_show = None
         if imdb_id:
-            # get tvshow by imdbid
-            ref_tvshow = self.metadatautils.kodidb.tvshow_by_imdbid(imdb_id)
-        if not ref_tvshow:
-            # just get a random watched tvshow
-            ref_tvshow = self.get_random_watched_tvshow()
-        if ref_tvshow:
-            # get all tvshows for the genres in the tvshow
-            ref_title = ref_tvshow["title"]
-            ref_genres = ref_tvshow["genre"]
-            ref_rating = ref_tvshow["rating"]
-            set_genres = set(ref_genres)
-            for genre in ref_genres:
-                self.options["genre"] = genre
-                genre_tvshows = self.forgenre()
-                for item in genre_tvshows:
-                    # prevent duplicates so skip reference tvshow and titles already in the list
-                    if not item["title"] in all_titles and not item["title"] == ref_title:
-                        item["extraproperties"] = {"similartitle": ref_title, "originalpath": item["file"]}
-                        similarscore = float(len(set_genres.intersection(item["genre"])))
-                        if ref_rating and item["rating"]:
-                            similarscore += 1-abs(ref_rating-item["rating"])/10
-                        item["similarscore"] = similarscore
-                        all_items.append(item)
-                        all_titles.append(item["title"])
-        # return the list capped by limit and sorted by rating
-        tvshows = sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
-        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
+            # get movie from imdb_id if found
+            ref_show = self.metadatautils.kodidb.tvshow_by_imdbid(imdb_id)
+        if not ref_show:
+            # pick a random recently watched tvshow (for homescreen widget)
+            ref_show = self.get_recently_watched_tvshow()
+            # use hide_watched setting for homescreen widget only
+            hide_watched = self.options["hide_watched_similar"]
+        else:
+            # don't hide watched otherwise
+            hide_watched = False
+        if ref_show:
+            # define ref_show sets for clarity & speed
+            set_genres = set(ref_show["genre"])
+            set_cast = set([x["name"] for x in ref_show["cast"][:10]])
+            # create list of all items
+            if hide_watched:
+                filters = [kodi_constants.FILTER_UNWATCHED,
+                           {"operator":"false", "field":"inprogress", "value":""}]
+                all_items = self.metadatautils.kodidb.tvshows(filters=filters, filtertype='and')
+            else:
+                all_items = self.metadatautils.kodidb.tvshows()
+            # get similarity score for all shows
+            for item in all_items:
+                if item["title"]==ref_show["title"] and item["year"]==ref_show["year"]:
+                    # don't rank the reference show
+                    similarscore = 0
+                else:
+                    similarscore = self.get_similarity_score(ref_show, item,
+                        set_genres=set_genres, set_cast=set_cast)
+                item["similarscore"] = similarscore
+                item["extraproperties"] = {"similartitle": ref_show["title"], "originalpath": item["file"]}
+            # sort list by score and cap by limit
+            tvshows = sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
+            # return processed show
+            return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def forgenre(self):
         ''' get top rated tvshows for given genre'''
@@ -160,7 +188,6 @@ class Tvshows(object):
                 # append original genre as listitem property for later reference by skinner
                 item["extraproperties"] = {"genretitle": genre, "originalpath": item["file"]}
                 all_items.append(item)
-
         # return the list sorted by rating
         tvshows = sorted(all_items, key=itemgetter("rating"), reverse=True)
         return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
@@ -248,11 +275,23 @@ class Tvshows(object):
             sort=kodi_constants.SORT_RANDOM,
             filters=filters,
             filtertype="or",
-            limits=(
-                0,
-                1))
+            limits=(0,1))
         if tvshows:
             return tvshows[0]
+        else:
+            return None
+
+    def get_recently_watched_tvshow(self):
+        '''gets a random recently watched or inprogress tvshow from kodi_constants.'''
+        num_recent_similar = self.options["num_recent_similar"]
+        filters = [kodi_constants.FILTER_WATCHED, kodi_constants.FILTER_INPROGRESS]
+        tvshows = self.metadatautils.kodidb.tvshows(
+            sort=kodi_constants.SORT_LASTPLAYED,
+            filters=filters,
+            filtertype="or",
+            limits=(0, num_recent_similar))
+        if tvshows:
+            return tvshows[randint(0,len(tvshows)-1)]
         else:
             return None
 
@@ -282,3 +321,40 @@ class Tvshows(object):
     def favourite(self):
         '''synonym to favourites'''
         return self.favourites()
+
+    @staticmethod
+    def get_similarity_score(ref_show, other_show, set_genres=None, set_cast=None):
+        '''
+            get a similarity score (0-1) between two movies
+            optional parameters should be calculated beforehand if called inside loop
+            TODO: make a database of ratings
+        '''
+        # assign arguments not given
+        if not set_genres:
+            set_genres = set(ref_show["genre"])
+        if not set_cast:
+            set_cast = set([x["name"] for x in ref_show["cast"][:10]])
+        # calculate individual scores for contributing factors
+        # genre_score = (numer of matching genres) / (number of unique genres between both)
+        genre_score = float(len(set_genres.intersection(other_show["genre"])))/ \
+            len(set_genres.union(other_show["genre"]))
+        # cast_score is normalized by fixed amount of 10
+        cast_score = float(len(set_cast.intersection( [x["name"] for x in other_show["cast"][:10]] ))) / 10
+        # rating_score is "closeness" in rating, scaled to 1
+        if ref_show["rating"] and other_show["rating"]:
+            rating_score = 1-abs(ref_show["rating"]-other_show["rating"])/10
+        else:
+            rating_score = 0
+        # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
+        if ref_show["year"] and other_show["year"] and abs(ref_show["year"]-other_show["year"])<10:
+            year_score = 1-abs(ref_show["year"]-other_show["year"])/10
+        else:
+            year_score = 0
+        # studio gets 1 if same studio, otherwise 0
+        studio_score = 1 if ref_show["studio"] and ref_show["studio"]==other_show["studio"] else 0
+        # mpaa_score gets 1 if same mpaa rating, otherwise 0
+        mpaa_score = 1 if ref_show["mpaa"] and ref_show["mpaa"]==other_show["mpaa"] else 0
+        # calculate overall score using weighted average
+        similarscore = .5*genre_score + .15*studio_score + .1*cast_score + \
+            .1*rating_score + .1*year_score + .05*mpaa_score
+        return similarscore

@@ -8,7 +8,7 @@
         <setting id="default_limit" type="number" label="32053" default="25"/>
         <setting id="num_recent_similar" type="number" label="32072" default="8"/>
         <setting id="aggresive_refresh" type="bool" label="32071" default="false"/>
-        <setting id="exp_rec_movies" type="bool" label="32074" default="false"/>
+        <setting id="exp_recommended" type="bool" label="32074" default="false"/>
     </category>
     <!-- episodes -->
     <category label="$LOCALIZE[20360]">
