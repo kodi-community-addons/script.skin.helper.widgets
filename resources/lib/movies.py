@@ -361,15 +361,14 @@ class Movies(object):
         writer_score = 0 if len(set_writers)==0 else \
             float(len(set_writers.intersection(other_movie["writer"])))/ \
             len(set_writers.union(other_movie["writer"]))
-        if len(set_cast)>0:
-            other_cast = set([x["name"] for x in other_movie["cast"][:5]])
-            cast_score = float(len(set_cast.intersection(other_cast)))/ \
-                len(set_cast.union(other_cast))
-        else:
-            cast_score = 0
+        # cast_score is normalized by fixed amount of 5,
+        # so effectively 1 actor in common = 1% of similarscore
+        cast_score = float(len(set_cast.intersection( [x["name"] for x in other_movie["cast"][:5]] ))) / 5
         # rating_score is "closeness" in rating, scaled to 1
-        rating_score = 0 if (not ref_movie["rating"]) or (not other_movie["rating"]) else \
-            1-abs(ref_movie["rating"]-other_movie["rating"])/10
+        if ref_movie["rating"] and other_movie["rating"]:
+            rating_score = 1-abs(ref_movie["rating"]-other_movie["rating"])/10
+        else:
+            rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
         if ref_movie["year"] and other_movie["year"] and abs(ref_movie["year"]-other_movie["year"])<10:
             year_score = 1-abs(ref_movie["year"]-other_movie["year"])/10
