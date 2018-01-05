@@ -27,7 +27,7 @@ ________________________________________________________________________________
 plugin://script.skin.helper.widgets/?action=recommended&mediatype=movies&reload=$INFO[Window(Home).Property(widgetreload-movies)]
 ```
 Provides a list of the in-progress movies AND movies sorted by rating.
-An alternate behavior for this widget is available in settings, which finds movies similar to all recently watched movies.  The experimental version is slower, and not recommended for low-power systems.
+An alternate behavior for this widget is available in settings, which finds movies similar to all recently watched movies.
 Note: the reload parameter is needed to auto refresh the widget when the content has changed (non-experimental version only).
 
 ________________________________________________________________________________________________________

@@ -313,5 +313,5 @@ msgid "Hide watched items in similar movies widget"
 msgstr ""
 
 msgctxt "#32074"
-msgid "Enable experimental recommended movies (Very slow)"
+msgid "Enable experimental recommended movies"
 msgstr ""
