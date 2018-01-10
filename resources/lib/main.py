@@ -124,22 +124,21 @@ class Main(object):
 
         # try to get from cache first...
         all_items = []
-        # if action is similar, use imdbid instead of tag for cache
+        # alter cache_str depending on whether "tag" is available
         if self.options["action"] == "similar":
-            cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
-                        action, self.options["limit"], self.options.get("path"), self.options.get("imdbid", ""))
+            # if action is similar, use imdbid
+            cache_id = self.options.get("imdbid", "")
             # if similar was called without imdbid, skip cache
             if not self.options.get("imdbid", ""):
                 self.options["skipcache"] = "true"
-        # if action is mixed playlist, use playlist labels instead of tag for cache
         elif self.options["action"] == "playlist" and self.options["mediatype"]=="media":
-            cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
-                        action, self.options["limit"], self.options.get("path"),
-                        self.options.get("movie_label")+self.options.get("tv_label"))
-            self.options["skipcache"] = "true"
+            # if action is mixed playlist, use playlist labels
+            cache_id = self.options.get("movie_label")+self.options.get("tv_label")
         else:
-            cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
-                        action, self.options["limit"], self.options.get("path"), self.options.get("tag"))
+            # use tag otherwise
+            cache_id = self.options.get("tag")
+        cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
+                    action, self.options["limit"], self.options.get("path"), cache_id)
         if not self.win.getProperty("widgetreload2"):
             # at startup we simply accept whatever is in the cache
             cache_checksum = None

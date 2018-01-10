@@ -152,7 +152,7 @@ class Movies(object):
             # don't hide watched otherwise
             hide_watched = False
         if ref_movie:
-            # define ref_movie sets for clarity & speed
+            # define ref_movie sets for speed
             set_genres = set(ref_movie["genre"])
             set_directors = set(ref_movie["director"])
             set_writers = set(ref_movie["writer"])
@@ -284,11 +284,10 @@ class Movies(object):
         '''gets a random recently watched movie from kodi_constants.'''
         num_recent_similar = self.options["num_recent_similar"]
         movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
-                                             filters=[kodi_constants.FILTER_WATCHED], limits=(0, num_recent_similar))
+                                             filters=[kodi_constants.FILTER_WATCHED],
+                                             limits=(0, num_recent_similar))
         if movies:
             return movies[randint(0,len(movies)-1)]
-        else:
-            return None
 
     def get_genre_movies(self, genre, hide_watched=False, limit=100, sort=kodi_constants.SORT_RANDOM):
         '''helper method to get all movies in a specific genre'''
@@ -310,12 +309,12 @@ class Movies(object):
         return self.favourites()
 
     def sort_by_recommended(self, all_items):
-        '''sorts movies by recommended score'''
+        ''' sort list of movies by recommended score'''
         # get recently watched movies
         ref_movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
                                                         filters=[kodi_constants.FILTER_WATCHED],
                                                         limits=(0, self.options["num_recent_similar"]))
-        # add scores together for every item
+        # average scores together for every item
         for item in all_items:
             similarscore = 0
             for ref_movie in ref_movies:

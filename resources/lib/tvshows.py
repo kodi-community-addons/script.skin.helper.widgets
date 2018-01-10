@@ -160,7 +160,7 @@ class Tvshows(object):
             # don't hide watched otherwise
             hide_watched = False
         if ref_show:
-            # define ref_show sets for clarity & speed
+            # define ref_show sets for speed
             set_genres = set(ref_show["genre"])
             set_cast = set([x["name"] for x in ref_show["cast"][:10]])
             # create list of all items
@@ -296,16 +296,13 @@ class Tvshows(object):
     def get_recently_watched_tvshow(self):
         '''gets a random recently watched or inprogress tvshow from kodi_constants.'''
         num_recent_similar = self.options["num_recent_similar"]
-        filters = [kodi_constants.FILTER_WATCHED, kodi_constants.FILTER_INPROGRESS]
-        tvshows = self.metadatautils.kodidb.tvshows(
-            sort=kodi_constants.SORT_LASTPLAYED,
-            filters=filters,
-            filtertype="or",
-            limits=(0, num_recent_similar))
+        tvshows += self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
+                                                filters=[kodi_constants.FILTER_WATCHED,
+                                                    kodi_constants.FILTER_INPROGRESS],
+                                                filtertype="or",
+                                                limits=(0, num_recent_similar))
         if tvshows:
             return tvshows[randint(0,len(tvshows)-1)]
-        else:
-            return None
 
     def get_genre_tvshows(self, genre, hide_watched=False, limit=100, sort=kodi_constants.SORT_RANDOM):
         '''helper method to get all tvshows in a specific genre'''
@@ -335,11 +332,12 @@ class Tvshows(object):
         return self.favourites()
 
     def sort_by_recommended(self, all_items):
-        # get recently watched movies
+        ''' sort list of tvshows by recommended score'''
+        # get recently watched tvshows
         ref_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
                                                         filters=[kodi_constants.FILTER_WATCHED],
                                                         limits=(0, self.options["num_recent_similar"]))
-        # add scores together for every item
+        # average scores together for every item
         for item in all_items:
             similarscore = 0
             for ref_show in ref_shows:
@@ -351,7 +349,7 @@ class Tvshows(object):
     @staticmethod
     def get_similarity_score(ref_show, other_show, set_genres=None, set_cast=None):
         '''
-            get a similarity score (0-1) between two movies
+            get a similarity score (0-1) between two shows
             optional parameters should be calculated beforehand if called inside loop
             TODO: make a database of ratings
         '''
