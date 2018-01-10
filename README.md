@@ -295,11 +295,11 @@ ________________________________________________________________________________
 ```
 plugin://script.skin.helper.widgets/?action=playlist&mediatype=movies&tag=[playlistname]
 plugin://script.skin.helper.widgets/?action=playlist&mediatype=tvshows&tag=[playlistname]
+plugin://script.skin.helper.widgets/?action=playlist&mediatype=media&movie_label=[movieplaylistname]&tv_label=[tvplaylistname]
 ```
-Provides the specified playlist with limited number of items, sorted using the experimental recommendation score.  Must replace `&` in playlist name with `[and]`. Playlist names retrieved from `playlistslisting` will already be formatted correctly.
+Provides the specified playlist(s) with limited number of items, sorted by experimental recommendation score.
 
-Supported types: movie, tvshow
-
+Supported types: movie, tvshow, media
 
 ________________________________________________________________________________________________________
 ________________________________________________________________________________________________________

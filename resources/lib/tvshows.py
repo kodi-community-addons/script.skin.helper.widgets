@@ -343,7 +343,7 @@ class Tvshows(object):
         for item in all_items:
             similarscore = 0
             for ref_show in ref_shows:
-                similarscore += self.get_similarity_score(ref_show, item)**(1./2)
+                similarscore += self.get_similarity_score(ref_show, item)
             item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_shows)
         # return sorted list capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
@@ -362,13 +362,13 @@ class Tvshows(object):
             set_cast = set([x["name"] for x in ref_show["cast"][:10]])
         # calculate individual scores for contributing factors
         # genre_score = (numer of matching genres) / (number of unique genres between both)
-        genre_score = float(len(set_genres.intersection(other_show["genre"])))/ \
+        genre_score = float(len(set_genres.intersection(other_show["genre"]))) / \
             len(set_genres.union(other_show["genre"]))
-        # cast_score is normalized by fixed amount of 10
-        cast_score = float(len(set_cast.intersection( [x["name"] for x in other_show["cast"][:10]] ))) / 10
+        # cast_score is normalized by fixed amount of 10, and scaled up nonlinearly
+        cast_score = (float(len(set_cast.intersection( [x["name"] for x in other_show["cast"][:10]] )))/10)**(1./2)
         # rating_score is "closeness" in rating, scaled to 1
-        if ref_show["rating"] and other_show["rating"]:
-            rating_score = 1-abs(ref_show["rating"]-other_show["rating"])/10
+        if ref_show["rating"] and other_show["rating"] and abs(ref_show["rating"]-other_show["rating"])<3:
+            rating_score = 1-abs(ref_show["rating"]-other_show["rating"])/3
         else:
             rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
@@ -381,6 +381,6 @@ class Tvshows(object):
         # mpaa_score gets 1 if same mpaa rating, otherwise 0
         mpaa_score = 1 if ref_show["mpaa"] and ref_show["mpaa"]==other_show["mpaa"] else 0
         # calculate overall score using weighted average
-        similarscore = .5*genre_score + .15*studio_score + .1*cast_score + \
-            .1*rating_score + .1*year_score + .05*mpaa_score
+        similarscore = .7*genre_score + .1*studio_score + .1*cast_score + \
+            .025*rating_score + .05*year_score + .025*mpaa_score
         return similarscore

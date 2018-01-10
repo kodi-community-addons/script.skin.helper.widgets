@@ -315,3 +315,7 @@ msgstr ""
 msgctxt "#32074"
 msgid "Enable experimental recommended widgets"
 msgstr ""
+
+msgctxt "#32075"
+msgid "Playlists (Choose playlist for Movies then TV Shows)"
+msgstr ""

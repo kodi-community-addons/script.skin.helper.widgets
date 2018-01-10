@@ -319,8 +319,7 @@ class Movies(object):
         for item in all_items:
             similarscore = 0
             for ref_movie in ref_movies:
-                similarscore += self.get_similarity_score(ref_movie, item)**(1./2)
-            #item["recommendedscore"] = similarscore / len(ref_movies)
+                similarscore += self.get_similarity_score(ref_movie, item)
             item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_movies)
         # return list sorted by score and capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
@@ -352,9 +351,8 @@ class Movies(object):
         writer_score = 0 if len(set_writers)==0 else \
             float(len(set_writers.intersection(other_movie["writer"])))/ \
             len(set_writers.union(other_movie["writer"]))
-        # cast_score is normalized by fixed amount of 5,
-        # so effectively 1 actor in common = 1% of similarscore
-        cast_score = float(len(set_cast.intersection( [x["name"] for x in other_movie["cast"][:5]] ))) / 5
+        # cast_score is normalized by fixed amount of 5, and scaled up nonlinearly
+        cast_score = (float(len(set_cast.intersection( [x["name"] for x in other_movie["cast"][:5]] )))/5)**(1./2)
         # rating_score is "closeness" in rating, scaled to 1 (0 if greater than 3)
         if ref_movie["rating"] and other_movie["rating"] and abs(ref_movie["rating"]-other_movie["rating"])<3:
             rating_score = 1-abs(ref_movie["rating"]-other_movie["rating"])/3

@@ -131,6 +131,12 @@ class Main(object):
             # if similar was called without imdbid, skip cache
             if not self.options.get("imdbid", ""):
                 self.options["skipcache"] = "true"
+        # if action is mixed playlist, use playlist labels instead of tag for cache
+        elif self.options["action"] == "playlist" and self.options["mediatype"]=="media":
+            cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
+                        action, self.options["limit"], self.options.get("path"),
+                        self.options.get("movie_label")+self.options.get("tv_label"))
+            self.options["skipcache"] = "true"
         else:
             cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
                         action, self.options["limit"], self.options.get("path"), self.options.get("tag"))

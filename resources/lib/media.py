@@ -45,9 +45,44 @@ class Media(object):
             (self.addon.getLocalizedString(32022), "similar&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32059), "random&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32058), "top250&mediatype=media", "DefaultMovies.png"),
-            (self.addon.getLocalizedString(32001), "favourites&mediatype=media", "DefaultMovies.png")
+            (self.addon.getLocalizedString(32001), "favourites&mediatype=media", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32075), "playlistslisting&mediatype=media&movie_label=",
+                "DefaultMovies.png")
         ]
         return self.metadatautils.process_method_on_list(create_main_entry, all_items)
+
+    def playlistslisting(self):
+        '''get tv playlists listing'''
+        movie_label = self.options.get("movie_label")
+        all_items = []
+        for item in self.metadatautils.kodidb.files("special://videoplaylists/"):
+            # replace '&' with [and] -- will get fixed when processed in playlist action
+            label = item["label"].replace('&', '[and]')
+            if movie_label:
+                details = (item["label"], "playlist&mediatype=media&movie_label=%s&tv_label=%s" %
+                    (movie_label, label), "DefaultTvShows.png")
+            else:
+                details = (item["label"], "playlistslisting&mediatype=media&movie_label=%s" % label,
+                    "DefaultMovies.png")
+            all_items.append(create_main_entry(details))
+        return all_items
+
+    def playlist(self):
+        '''get items in both playlists, sorted by recommended score'''
+        movie_label = self.options.get("movie_label").replace('[and]','&')
+        tv_label = self.options.get("tv_label").replace('[and]','&')
+        # get recommended items from movie playlist
+        movies = self.metadatautils.kodidb.movies(filters=
+            [{"operator": "is", "field": "playlist", "value": movie_label}])
+        movies = self.movies.sort_by_recommended(movies)
+        # get recommended items from tvshows playlist
+        tvshows = self.metadatautils.kodidb.tvshows(filters=
+            [{"operator": "is", "field": "playlist", "value": tv_label}])
+        tvshows = self.tvshows.sort_by_recommended(tvshows)
+        tvshows = self.metadatautils.process_method_on_list(self.tvshows.process_tvshow, tvshows)
+        # concatenate and sort by rating
+        all_items = movies+tvshows
+        return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
     def recommended(self):
         ''' get recommended media '''
