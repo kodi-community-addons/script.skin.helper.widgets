@@ -109,10 +109,6 @@ class Main(object):
             elif options["action"] == "browsegenres" and options["mediatype"] == "randomtvshows":
                 options["mediatype"] = "tvshows"
                 options["random"] = True
-            if options["action"] == "similar":
-                options["skipcache"] = "true"
-            elif options["action"] == "recommended" and options["exp_recommended"]:
-                options["skipcache"] = "true"
 
         return options
 
@@ -128,19 +124,29 @@ class Main(object):
 
         # try to get from cache first...
         all_items = []
-        cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
-                    action, self.options["limit"], self.options.get("path"), self.options.get("tag"))
+        # if action is similar, use imdbid instead of tag for cache
+        if self.options["action"] == "similar":
+            cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
+                        action, self.options["limit"], self.options.get("path"), self.options.get("imdbid", ""))
+            # if similar was called without imdbid, skip cache
+            if not self.options.get("imdbid", ""):
+                self.options["skipcache"] = "true"
+        else:
+            cache_str = "SkinHelper.Widgets.%s.%s.%s.%s.%s" % (media_type,
+                        action, self.options["limit"], self.options.get("path"), self.options.get("tag"))
         if not self.win.getProperty("widgetreload2"):
             # at startup we simply accept whatever is in the cache
             cache_checksum = None
         else:
             # we use a checksum based on the reloadparam to make sure we have the most recent data
             cache_checksum = self.options.get("reload","")
-        cache = self.metadatautils.cache.get(cache_str, checksum=cache_checksum)
-        if cache and not self.options.get("skipcache") == "true":
-            log_msg("MEDIATYPE: %s - ACTION: %s - PATH: %s - TAG: %s -- got items from cache - CHECKSUM: %s"
-                    % (media_type, action, self.options.get("path"), self.options.get("tag"), cache_checksum))
-            all_items = cache
+        # only check cache if not "skipcache"
+        if not self.options.get("skipcache") == "true":
+            cache = self.metadatautils.cache.get(cache_str, checksum=cache_checksum)
+            if cache:
+                log_msg("MEDIATYPE: %s - ACTION: %s - PATH: %s - TAG: %s -- got items from cache - CHECKSUM: %s"
+                        % (media_type, action, self.options.get("path"), self.options.get("tag"), cache_checksum))
+                all_items = cache
 
         # Call the correct method to get the content from json when no cache
         if not all_items:
