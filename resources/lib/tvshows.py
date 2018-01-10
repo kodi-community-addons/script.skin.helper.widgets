@@ -43,6 +43,7 @@ class Tvshows(object):
             all_items += [
                 (self.addon.getLocalizedString(32014), "similar&mediatype=tvshows", icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=tvshows", icon),
+                (xbmc.getLocalizedString(136), "playlistslisting&mediatype=tvshows&tag=%s" % tag, icon),
                 (xbmc.getLocalizedString(20459), "tagslisting&mediatype=tvshows", icon)
             ]
         if tag:
@@ -66,29 +67,40 @@ class Tvshows(object):
             all_items.append(create_main_entry(details))
         return all_items
 
+    def playlistslisting(self):
+        '''get playlists listing'''
+        all_items = []
+        for item in self.metadatautils.kodidb.files("special://videoplaylists/"):
+            # replace '&' with [and] -- will get fixed when processed in playlist action
+            tag_label = item["label"].replace('&', '[and]')
+            details = (item["label"], "playlist&mediatype=tvshows&tag=%s" % tag_label, "DefaultTvShows.png")
+            all_items.append(create_main_entry(details))
+        return all_items
+
+    def playlist(self):
+        '''get items in playlist, sorted by recommended score'''
+        # fix amperstand in tag_label
+        tag_label = self.options.get("tag").replace('[and]','&')
+        # get all items in playlist
+        filters = [{"operator": "is", "field": "playlist", "value": tag_label}]
+        all_items = self.metadatautils.kodidb.tvshows(filters=filters)
+        # return list sorted by recommended score
+        all_items = self.sort_by_recommended(all_items)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, all_items)
+
     def recommended(self):
         ''' get recommended tvshows - library tvshows with score higher than 7
         or if using experimental settings - similar with all recently watched '''
         if self.options["exp_recommended"]:
-            # get recently watched movies
-            num_recent_similar = self.options["num_recent_similar"]
-            ref_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
-                                                            filters=[kodi_constants.FILTER_WATCHED],
-                                                            limits=(0, num_recent_similar))
-            # get list of all unwatched movies
+            # get list of all unwatched movies (optionally filtered by tag)
             filters = [kodi_constants.FILTER_UNWATCHED,
                        {"operator":"false", "field":"inprogress", "value":""}]
+            if self.options.get("tag"):
+                filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
             all_items = self.metadatautils.kodidb.tvshows(filters=filters, filtertype='and')
-            # add scores together for every item
-            for item in all_items:
-                similarscore = 0
-                for ref_show in ref_shows:
-                    similarscore += self.get_similarity_score(ref_show, item)**(1./2)
-                item["recommendedscore"] = similarscore / len(ref_shows)
-            # sort list by score and cap by limit
-            tvshows = sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
+            all_items = self.sort_by_recommended(all_items)
             # return processed show
-            return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
+            return self.metadatautils.process_method_on_list(self.process_tvshow, all_items)
         else:
             filters = [kodi_constants.FILTER_RATING]
             if self.options["hide_watched"]:
@@ -321,6 +333,20 @@ class Tvshows(object):
     def favourite(self):
         '''synonym to favourites'''
         return self.favourites()
+
+    def sort_by_recommended(self, all_items):
+        # get recently watched movies
+        ref_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
+                                                        filters=[kodi_constants.FILTER_WATCHED],
+                                                        limits=(0, self.options["num_recent_similar"]))
+        # add scores together for every item
+        for item in all_items:
+            similarscore = 0
+            for ref_show in ref_shows:
+                similarscore += self.get_similarity_score(ref_show, item)**(1./2)
+            item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_shows)
+        # return sorted list capped by limit
+        return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
     @staticmethod
     def get_similarity_score(ref_show, other_show, set_genres=None, set_cast=None):

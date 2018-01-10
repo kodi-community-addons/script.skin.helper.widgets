@@ -47,6 +47,7 @@ class Movies(object):
             all_items += [
                 (self.addon.getLocalizedString(32006), "similar&mediatype=movies&tag=%s" % tag, icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=movies&tag=%s" % tag, icon),
+                (xbmc.getLocalizedString(136), "playlistslisting&mediatype=movies&tag=%s" % tag, icon),
                 (xbmc.getLocalizedString(20459), "tagslisting&mediatype=movies", icon)
             ]
         return self.metadatautils.process_method_on_list(create_main_entry, all_items)
@@ -59,25 +60,37 @@ class Movies(object):
             all_items.append(create_main_entry(details))
         return all_items
 
+    def playlistslisting(self):
+        '''get playlists listing'''
+        all_items = []
+        for item in self.metadatautils.kodidb.files("special://videoplaylists/"):
+            # replace '&' with [and] -- will get fixed when processed in playlist action
+            tag_label = item["label"].replace('&', '[and]')
+            details = (item["label"], "playlist&mediatype=movies&tag=%s" % tag_label, "DefaultMovies.png")
+            all_items.append(create_main_entry(details))
+        return all_items
+
+    def playlist(self):
+        '''get items in playlist, sorted by recommended score'''
+        # fix amperstand in tag_label
+        tag_label = self.options.get("tag").replace('[and]','&')
+        # get all items in playlist
+        filters = [{"operator": "is", "field": "playlist", "value": tag_label}]
+        all_items = self.metadatautils.kodidb.movies(filters=filters)
+        # return list sorted by recommended score
+        return self.sort_by_recommended(all_items)
+
     def recommended(self):
         ''' get recommended movies - library movies with score higher than 7
         or if using experimental settings - similar with all recently watched '''
         if self.options["exp_recommended"]:
-            # get recently watched movies
-            num_recent_similar = self.options["num_recent_similar"]
-            ref_movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
-                                                            filters=[kodi_constants.FILTER_WATCHED],
-                                                            limits=(0, num_recent_similar))
-            # get list of all unwatched movies
-            all_items = self.metadatautils.kodidb.movies(filters=[kodi_constants.FILTER_UNWATCHED])
-            # add scores together for every item
-            for item in all_items:
-                similarscore = 0
-                for ref_movie in ref_movies:
-                    similarscore += self.get_similarity_score(ref_movie, item)**(1./2)
-                item["recommendedscore"] = similarscore / len(ref_movies)
-            # return list sorted by score and capped by limit
-            return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
+            # get list of all unwatched movies (optionally filtered by tag)
+            filters = [kodi_constants.FILTER_UNWATCHED]
+            if self.options.get("tag"):
+                filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+            all_items = self.metadatautils.kodidb.movies(filters=filters)
+            # return list sorted by recommended score
+            return self.sort_by_recommended(all_items)
         else:
             filters = [kodi_constants.FILTER_RATING]
             if self.options["hide_watched"]:
@@ -296,6 +309,22 @@ class Movies(object):
         '''synonym to favourites'''
         return self.favourites()
 
+    def sort_by_recommended(self, all_items):
+        '''sorts movies by recommended score'''
+        # get recently watched movies
+        ref_movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
+                                                        filters=[kodi_constants.FILTER_WATCHED],
+                                                        limits=(0, self.options["num_recent_similar"]))
+        # add scores together for every item
+        for item in all_items:
+            similarscore = 0
+            for ref_movie in ref_movies:
+                similarscore += self.get_similarity_score(ref_movie, item)**(1./2)
+            #item["recommendedscore"] = similarscore / len(ref_movies)
+            item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_movies)
+        # return list sorted by score and capped by limit
+        return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
+
     @staticmethod
     def get_similarity_score(ref_movie, other_movie, set_genres=None, set_directors=None,
                                                         set_writers=None, set_cast=None):
@@ -326,9 +355,9 @@ class Movies(object):
         # cast_score is normalized by fixed amount of 5,
         # so effectively 1 actor in common = 1% of similarscore
         cast_score = float(len(set_cast.intersection( [x["name"] for x in other_movie["cast"][:5]] ))) / 5
-        # rating_score is "closeness" in rating, scaled to 1
-        if ref_movie["rating"] and other_movie["rating"]:
-            rating_score = 1-abs(ref_movie["rating"]-other_movie["rating"])/10
+        # rating_score is "closeness" in rating, scaled to 1 (0 if greater than 3)
+        if ref_movie["rating"] and other_movie["rating"] and abs(ref_movie["rating"]-other_movie["rating"])<3:
+            rating_score = 1-abs(ref_movie["rating"]-other_movie["rating"])/3
         else:
             rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
@@ -340,7 +369,7 @@ class Movies(object):
         mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"]==other_movie["mpaa"] else 0
         # calculate overall score using weighted average
         similarscore = .5*genre_score + .15*director_score + .125*writer_score + .05*cast_score + \
-            .1*rating_score + .05*year_score + .025*mpaa_score
+            .075*rating_score + .075*year_score + .025*mpaa_score
         # exponentially scale score for movies in same set
         if ref_movie["setid"] and ref_movie["setid"]==other_movie["setid"]:
             similarscore **= (1./2)

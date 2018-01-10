@@ -28,7 +28,7 @@ plugin://script.skin.helper.widgets/?action=recommended&mediatype=movies&reload=
 ```
 Provides a list of the in-progress movies AND movies sorted by rating.
 An alternate behavior for this widget is available in settings, which finds movies similar to all recently watched movies.
-Note: the reload parameter is needed to auto refresh the widget when the content has changed (non-experimental version only).
+Note: the reload parameter is needed to auto refresh the widget when the content has changed.
 
 ________________________________________________________________________________________________________
 
@@ -270,7 +270,7 @@ Difference with the unaired episodes is that it will only show the first airing 
 Also, the next airing episodes looks 60 days ahead for airing episodes while the unaired episodes looks 120 days ahead.
 
 For the listitem properties, see the "unaired episodes" plugin path.
-________________________________________
+________________________________________________________________________________________________________
 
 
 ##### Browse Genres
@@ -288,6 +288,17 @@ ListItem.Art(fanart.X) --> fanart for movie/show X (start counting at 0) in the 
 For each genre, only 5 movies/tvshows are retrieved.
 Supported types: movie, tvshow (will return 5 items from the library for each genre)
 If you use randommovie or randomtvshow as type the library items will be randomized
+
+________________________________________________________________________________________________________
+
+##### Playlist
+```
+plugin://script.skin.helper.widgets/?action=playlist&mediatype=movies&tag=[playlistname]
+plugin://script.skin.helper.widgets/?action=playlist&mediatype=tvshows&tag=[playlistname]
+```
+Provides the specified playlist with limited number of items, sorted using the experimental recommendation score.  Must replace `&` in playlist name with `[and]`. Playlist names retrieved from `playlistslisting` will already be formatted correctly.
+
+Supported types: movie, tvshow
 
 
 ________________________________________________________________________________________________________
