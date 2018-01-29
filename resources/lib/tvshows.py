@@ -7,7 +7,7 @@
     all tvshows widgets provided by the script
 '''
 
-from utils import create_main_entry, KODI_VERSION
+from utils import create_main_entry, KODI_VERSION, log_msg
 from operator import itemgetter
 import random
 from metadatautils import kodi_constants
@@ -353,22 +353,48 @@ class Tvshows(object):
         # use recent items if ref_items not given
         if not ref_shows:
             # get recently watched episodes
+            num_recent_similar = self.options["num_recent_similar"]
             episodes = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED,
                                                           filters=[kodi_constants.FILTER_WATCHED],
-                                                          limits=(0, self.options["num_recent_similar"]))
+                                                          limits=(0, 2*num_recent_similar))
             # get tvshows from episodes
-            ref_shows = []
+            tvshows = []
             for episode in episodes:
                 show_title = episode['showtitle']
-                title_filter = [{"field": "title", "operator": "is", "value": "%s" % show_title}]
+                title_filter = [{"field": "title", "operator": "is", "value": show_title}]
                 tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))[0]
-                if tvshow not in ref_shows:
-                    ref_shows.append(tvshow)
+                tvshows.append(tvshow)
+            # combine lists and sort by last played recent
+            ref_shows = sorted(tvshows, key=itemgetter('lastplayed'), reverse=True)
+            # find duplicates and set weights
+            weights = [1]*num_recent_similar
+            i = 1
+            while i < len(ref_shows):
+                j = 0
+                while j < i:
+                    #check for duplicate item
+                    if ref_shows[i]['title'] == ref_shows[j]['title']:
+                        # remove item and increase weight
+                        ref_shows.pop(i)
+                        weights[j] += 0.5
+                        break
+                    else:
+                        j += 1
+                else:
+                    i += 1
+                if sum(weights[:i]) >= num_recent_similar:
+                    break
+            ref_shows = ref_shows[:i]
+            weights = weights[:i]
+        else:
+            weights = [1]*len(ref_shows)
+        log_msg('ref_shows: %s' % [x['title'] for x in ref_shows])
+        log_msg('weights: %s' % weights)
         # average scores together for every item
         for item in all_items:
             similarscore = 0
-            for ref_show in ref_shows:
-                similarscore += self.get_similarity_score(ref_show, item)
+            for index, ref_show in enumerate(ref_shows):
+                similarscore += weights[index] * self.get_similarity_score(ref_show, item)
             item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_shows)
         # return sorted list capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]

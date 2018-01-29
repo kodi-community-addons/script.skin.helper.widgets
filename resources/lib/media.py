@@ -7,7 +7,7 @@
     all media (mixed) widgets provided by the script
 '''
 
-from utils import create_main_entry
+from utils import create_main_entry, log_msg
 from metadatautils import kodi_constants
 from operator import itemgetter
 from movies import Movies
@@ -17,7 +17,7 @@ from pvr import Pvr
 from albums import Albums
 from episodes import Episodes
 import random
-
+import xbmc
 
 class Media(object):
     '''all media (mixed) widgets provided by the script'''
@@ -94,7 +94,7 @@ class Media(object):
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
     def refplaylist(self):
-        '''get items in both playlists, sorted by recommended score'''
+        '''get items similar to items in playlists '''
         movie_label = self.options.get("movie_label").replace('[and]','&')
         tv_label = self.options.get("tv_label").replace('[and]','&')
         ref_movies = self.metadatautils.kodidb.movies(filters=
@@ -114,8 +114,7 @@ class Media(object):
         if self.options["exp_recommended"]:
             # get all unwatched, not in-progess movies & tvshows
             movies = self.metadatautils.kodidb.movies(filters=[kodi_constants.FILTER_UNWATCHED])
-            tvshows = self.metadatautils.kodidb.tvshows(filters=[kodi_constants.FILTER_UNWATCHED,
-                       ])#{"operator":"false", "field":"inprogress", "value":""}])
+            tvshows = self.metadatautils.kodidb.tvshows(filters=[kodi_constants.FILTER_UNWATCHED])
             tvshows = self.metadatautils.process_method_on_list(self.tvshows.process_tvshow, tvshows)
             # return list sorted by recommended score, and capped by limit
             return self.sort_by_recommended(movies+tvshows)
@@ -170,8 +169,7 @@ class Media(object):
                 all_items = self.metadatautils.kodidb.movies(filters=[kodi_constants.FILTER_UNWATCHED])
                 all_items += self.metadatautils.process_method_on_list(
                     self.tvshows.process_tvshow, self.metadatautils.kodidb.tvshows(
-                        filters=[kodi_constants.FILTER_UNWATCHED,
-                            ]))#{"operator":"false", "field":"inprogress", "value":""}]))
+                        filters=[kodi_constants.FILTER_UNWATCHED]))
             else:
                 all_items = self.metadatautils.kodidb.movies()
                 all_items += self.metadatautils.process_method_on_list(
@@ -296,41 +294,58 @@ class Media(object):
             # get recently watched movies
             movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
                                                       filters=[kodi_constants.FILTER_WATCHED],
-                                                      limits=(0, num_recent_similar))
+                                                      limits=(0, 2*num_recent_similar))
             # get recently watched episodes
             episodes = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED,
                                                           filters=[kodi_constants.FILTER_WATCHED],
-                                                          limits=(0, num_recent_similar))
+                                                          limits=(0, 2*num_recent_similar))
             # get tvshows from episodes
             tvshows = []
             for episode in episodes:
                 show_title = episode['showtitle']
-                title_filter = [{"field": "title", "operator": "is", "value": "%s" % show_title}]
+                title_filter = [{"field": "title", "operator": "is", "value": show_title}]
                 tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))[0]
-                tvshow_in_list = False
-                for ref in tvshows:
-                    if show_title == ref['title']:
-                        tvshow_in_list = True
+                tvshows.append(tvshow)
+            # combine lists and sort by last played recent
+            ref_items = sorted(movies + tvshows, key=itemgetter('lastplayed'), reverse=True)
+            # find duplicates and set weights
+            weights = [1]*num_recent_similar
+            i = 1
+            while i < len(ref_items):
+                j = 0
+                while j < i:
+                    #check for duplicate item
+                    if ref_items[i]['title'] == ref_items[j]['title']:
+                        # remove item and increase weight
+                        ref_items.pop(i)
+                        weights[j] += 0.5
                         break
-                if not tvshow_in_list:
-                    tvshows.append(tvshow)
-            # combine lists and get x most recent
-            #ref_items = movies + tvshows
-            ref_items = sorted(movies + tvshows, key=itemgetter('lastplayed'), reverse=True)[:num_recent_similar]
+                    else:
+                        j += 1
+                else:
+                    i += 1
+                if sum(weights[:i]) >= num_recent_similar:
+                    break
+            ref_items = ref_items[:i]
+            weights = weights[:i]
+        else:
+            weights = [1]*len(ref_items)
+        log_msg('ref_items: %s' % [x['title'] for x in ref_items])
+        log_msg('weights: %s' % weights)
         # average scores together for every item
         for item in all_items:
             similarscore = 0
-            for ref_item in ref_items:
+            for index, ref_item in enumerate(ref_items):
                 # add all similarscores for item
                 if ref_item.has_key("uniqueid") and item.has_key("uniqueid"):
                     # use movies method if both items are movies
-                    similarscore += self.movies.get_similarity_score(ref_item, item)
+                    similarscore += weights[index] * self.movies.get_similarity_score(ref_item, item)
                 elif ref_item.has_key("uniqueid") or item.has_key("uniqueid"):
                     # use media method if only one item is a movie
-                    similarscore += self.get_similarity_score(ref_item, item)
+                    similarscore += weights[index] * self.get_similarity_score(ref_item, item)
                 else:
                     # use tvshows method if neither items are movies
-                    similarscore += self.tvshows.get_similarity_score(ref_item, item)
+                    similarscore += weights[index] * self.tvshows.get_similarity_score(ref_item, item)
             # average score and scale down based on playcount
             item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_items)
         # return sorted list capped by limit
