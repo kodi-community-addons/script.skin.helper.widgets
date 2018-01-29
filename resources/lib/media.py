@@ -86,7 +86,7 @@ class Media(object):
             # get all unwatched, not in-progess movies & tvshows
             movies = self.metadatautils.kodidb.movies(filters=[kodi_constants.FILTER_UNWATCHED])
             tvshows = self.metadatautils.kodidb.tvshows(filters=[kodi_constants.FILTER_UNWATCHED,
-                       {"operator":"false", "field":"inprogress", "value":""}])
+                       ])#{"operator":"false", "field":"inprogress", "value":""}])
             tvshows = self.metadatautils.process_method_on_list(self.tvshows.process_tvshow, tvshows)
             # return list sorted by recommended score, and capped by limit
             return self.sort_by_recommended(movies+tvshows)
@@ -142,7 +142,7 @@ class Media(object):
                 all_items += self.metadatautils.process_method_on_list(
                     self.tvshows.process_tvshow, self.metadatautils.kodidb.tvshows(
                         filters=[kodi_constants.FILTER_UNWATCHED,
-                            {"operator":"false", "field":"inprogress", "value":""}]))
+                            ]))#{"operator":"false", "field":"inprogress", "value":""}]))
             else:
                 all_items = self.metadatautils.kodidb.movies()
                 all_items += self.metadatautils.process_method_on_list(
@@ -238,32 +238,60 @@ class Media(object):
 
     def get_recently_watched_item(self):
         ''' get a random recently watched movie or tvshow '''
-        num_recent_similar = (self.options["num_recent_similar"]+1)/2
-        recent_items = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
-                                             filters=[kodi_constants.FILTER_WATCHED],
-                                             limits=(0, num_recent_similar))
-        recent_items += self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
-                                                filters=[kodi_constants.FILTER_WATCHED,
-                                                    kodi_constants.FILTER_INPROGRESS],
-                                                filtertype="or",
-                                                limits=(0, num_recent_similar))
-        if recent_items:
-            return recent_items[random.randint(0,len(recent_items)-1)]
-
-    def sort_by_recommended(self, all_items):
-        ''' sort list of mixed movies/tvshows by recommended score'''
-        # get recently watched items
         num_recent_similar = self.options["num_recent_similar"]
-        all_refs = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
+        # get recently played movies
+        recent_items = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
                                                         filters=[kodi_constants.FILTER_WATCHED],
                                                         limits=(0, num_recent_similar))
-        all_refs += self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
-                                                        filters=[kodi_constants.FILTER_WATCHED],
-                                                        limits=(0, num_recent_similar))
+        # get recently played episodes
+        recent_items += self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED,
+                                                           filters=[kodi_constants.FILTER_WATCHED],
+                                                           limits=(0, num_recent_similar))
+        # sort all by last played, then randomly pick
+        recent_items = sorted(recent_items, key=itemgetter("lastplayed"), reverse=True)[:num_recent_similar]
+        item = random.choice(recent_items)
+        # if item is an episode, get its tvshow
+        if not item.has_key("genre"):
+            show_title = item['showtitle']
+            title_filter = [{"field": "title", "operator": "is", "value": "%s" % show_title}]
+            tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))
+            return tvshow[0]
+        else:
+            return item
+
+    def sort_by_recommended(self, all_items, ref_items=None):
+        ''' sort list of mixed movies/tvshows by recommended score'''
+        # use recent items if ref_items not given
+        if not ref_items:
+            num_recent_similar = self.options["num_recent_similar"]
+            # get recently watched movies
+            movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
+                                                      filters=[kodi_constants.FILTER_WATCHED],
+                                                      limits=(0, num_recent_similar))
+            # get recently watched episodes
+            episodes = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED,
+                                                          filters=[kodi_constants.FILTER_WATCHED],
+                                                          limits=(0, num_recent_similar))
+            # get tvshows from episodes
+            tvshows = []
+            for episode in episodes:
+                show_title = episode['showtitle']
+                title_filter = [{"field": "title", "operator": "is", "value": "%s" % show_title}]
+                tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))[0]
+                tvshow_in_list = False
+                for ref in tvshows:
+                    if show_title == ref['title']:
+                        tvshow_in_list = True
+                        break
+                if not tvshow_in_list:
+                    tvshows.append(tvshow)
+            # combine lists and get x most recent
+            #ref_items = movies + tvshows
+            ref_items = sorted(movies + tvshows, key=itemgetter('lastplayed'), reverse=True)[:num_recent_similar]
         # average scores together for every item
         for item in all_items:
             similarscore = 0
-            for ref_item in all_refs:
+            for ref_item in ref_items:
                 # add all similarscores for item
                 if ref_item.has_key("uniqueid") and item.has_key("uniqueid"):
                     # use movies method if both items are movies
@@ -274,7 +302,8 @@ class Media(object):
                 else:
                     # use tvshows method if neither items are movies
                     similarscore += self.tvshows.get_similarity_score(ref_item, item)
-            item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(all_refs)
+            # average score and scale down based on playcount
+            item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_items)
         # return sorted list capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 

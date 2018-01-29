@@ -9,7 +9,7 @@
 
 from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
-from random import randint
+import random
 from metadatautils import kodi_constants
 import xbmc
 
@@ -93,8 +93,7 @@ class Tvshows(object):
         or if using experimental settings - similar with all recently watched '''
         if self.options["exp_recommended"]:
             # get list of all unwatched movies (optionally filtered by tag)
-            filters = [kodi_constants.FILTER_UNWATCHED,
-                       {"operator":"false", "field":"inprogress", "value":""}]
+            filters = [kodi_constants.FILTER_UNWATCHED]
             if self.options.get("tag"):
                 filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
             all_items = self.metadatautils.kodidb.tvshows(filters=filters, filtertype='and')
@@ -165,9 +164,8 @@ class Tvshows(object):
             set_cast = set([x["name"] for x in ref_show["cast"][:10]])
             # create list of all items
             if hide_watched:
-                filters = [kodi_constants.FILTER_UNWATCHED,
-                           {"operator":"false", "field":"inprogress", "value":""}]
-                all_items = self.metadatautils.kodidb.tvshows(filters=filters, filtertype='and')
+                filters = [kodi_constants.FILTER_UNWATCHED]
+                all_items = self.metadatautils.kodidb.tvshows(filters=filters)
             else:
                 all_items = self.metadatautils.kodidb.tvshows()
             # get similarity score for all shows
@@ -294,15 +292,16 @@ class Tvshows(object):
             return None
 
     def get_recently_watched_tvshow(self):
-        '''gets a random recently watched or inprogress tvshow from kodi_constants.'''
+        ''' returns the tvshow of a recently watched episode '''
         num_recent_similar = self.options["num_recent_similar"]
-        tvshows += self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
-                                                filters=[kodi_constants.FILTER_WATCHED,
-                                                    kodi_constants.FILTER_INPROGRESS],
-                                                filtertype="or",
-                                                limits=(0, num_recent_similar))
-        if tvshows:
-            return tvshows[randint(0,len(tvshows)-1)]
+        episodes = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED,
+                                                      filters=[kodi_constants.FILTER_WATCHED],
+                                                      limits=(0, num_recent_similar))
+        if episodes:
+            show_title = random.choice(episodes)['showtitle']
+            title_filter = [{"field": "title", "operator": "is", "value": "%s" % show_title}]
+            tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))
+            return tvshow[0]
 
     def get_genre_tvshows(self, genre, hide_watched=False, limit=100, sort=kodi_constants.SORT_RANDOM):
         '''helper method to get all tvshows in a specific genre'''
@@ -331,12 +330,22 @@ class Tvshows(object):
         '''synonym to favourites'''
         return self.favourites()
 
-    def sort_by_recommended(self, all_items):
+    def sort_by_recommended(self, all_items, ref_shows=None):
         ''' sort list of tvshows by recommended score'''
-        # get recently watched tvshows
-        ref_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED,
-                                                        filters=[kodi_constants.FILTER_WATCHED],
-                                                        limits=(0, self.options["num_recent_similar"]))
+        # use recent items if ref_items not given
+        if not ref_shows:
+            # get recently watched episodes
+            episodes = self.metadatautils.kodidb.episodes(sort=kodi_constants.SORT_LASTPLAYED,
+                                                          filters=[kodi_constants.FILTER_WATCHED],
+                                                          limits=(0, self.options["num_recent_similar"]))
+            # get tvshows from episodes
+            ref_shows = []
+            for episode in episodes:
+                show_title = episode['showtitle']
+                title_filter = [{"field": "title", "operator": "is", "value": "%s" % show_title}]
+                tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))[0]
+                if tvshow not in ref_shows:
+                    ref_shows.append(tvshow)
         # average scores together for every item
         for item in all_items:
             similarscore = 0
