@@ -342,7 +342,8 @@ class Movies(object):
             set_cast = set([x["name"] for x in ref_movie["cast"][:5]])
         # calculate individual scores for contributing factors
         # [feature]_score = (numer of matching [features]) / (number of unique [features] between both)
-        genre_score = float(len(set_genres.intersection(other_movie["genre"])))/ \
+        genre_score = 0 if len(set_genres)==0 else \
+            float(len(set_genres.intersection(other_movie["genre"])))/ \
             len(set_genres.union(other_movie["genre"]))
         director_score = 0 if len(set_directors)==0 else \
             float(len(set_directors.intersection(other_movie["director"])))/ \

@@ -287,7 +287,8 @@ class Media(object):
         set_cast = set([x["name"] for x in ref_item["cast"][:5]])
         # calculate individual scores for contributing factors
         # genre_score = (numer of matching genres) / (number of unique genres between both)
-        genre_score = float(len(set_genres.intersection(other_item["genre"]))) / \
+        genre_score = 0 if len(set_genres)==0 else \
+            float(len(set_genres.intersection(other_item["genre"]))) / \
             len(set_genres.union(other_item["genre"]))
         # cast_score is normalized by fixed amount of 5, and scaled up nonlinearly
         cast_score = (float(len(set_cast.intersection( [x["name"] for x in other_item["cast"][:5]] )))/5)**(1./2)

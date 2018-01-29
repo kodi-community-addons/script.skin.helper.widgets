@@ -360,7 +360,8 @@ class Tvshows(object):
             set_cast = set([x["name"] for x in ref_show["cast"][:10]])
         # calculate individual scores for contributing factors
         # genre_score = (numer of matching genres) / (number of unique genres between both)
-        genre_score = float(len(set_genres.intersection(other_show["genre"]))) / \
+        genre_score = 0 if len(set_genres)==0 else \
+            float(len(set_genres.intersection(other_show["genre"]))) / \
             len(set_genres.union(other_show["genre"]))
         # cast_score is normalized by fixed amount of 10, and scaled up nonlinearly
         cast_score = (float(len(set_cast.intersection( [x["name"] for x in other_show["cast"][:10]] )))/10)**(1./2)
