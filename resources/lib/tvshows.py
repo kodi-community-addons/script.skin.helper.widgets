@@ -380,6 +380,6 @@ class Tvshows(object):
         # mpaa_score gets 1 if same mpaa rating, otherwise 0
         mpaa_score = 1 if ref_show["mpaa"] and ref_show["mpaa"]==other_show["mpaa"] else 0
         # calculate overall score using weighted average
-        similarscore = .7*genre_score + .1*studio_score + .1*cast_score + \
+        similarscore = .5*genre_score + .05*studio_score + .35*cast_score + \
             .025*rating_score + .05*year_score + .025*mpaa_score
         return similarscore

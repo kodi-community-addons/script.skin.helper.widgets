@@ -280,7 +280,7 @@ class Media(object):
 
     def get_similarity_score(self, ref_item, other_item):
         '''
-            get a similarity score (0-.75) between movie and tvshow
+            get a similarity score (0-.625) between movie and tvshow
         '''
         # get set of genres
         if ref_item.has_key("uniqueid"):
@@ -307,7 +307,7 @@ class Media(object):
         else:
             year_score = 0
         # calculate overall score using weighted average
-        similarscore = .5*genre_score + .1*cast_score + .025*rating_score + .025*year_score
+        similarscore = .5*genre_score + .05*cast_score + .025*rating_score + .05*year_score
         return similarscore
 
     @staticmethod

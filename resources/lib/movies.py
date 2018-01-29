@@ -366,8 +366,8 @@ class Movies(object):
         # mpaa_score gets 1 if same mpaa rating, otherwise 0
         mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"]==other_movie["mpaa"] else 0
         # calculate overall score using weighted average
-        similarscore = .5*genre_score + .15*director_score + .125*writer_score + .05*cast_score + \
-            .075*rating_score + .075*year_score + .025*mpaa_score
+        similarscore = .5*genre_score + .15*director_score + .1*writer_score + .1*cast_score + \
+            .05*rating_score + .075*year_score + .025*mpaa_score
         # exponentially scale score for movies in same set
         if ref_movie["setid"] and ref_movie["setid"]==other_movie["setid"]:
             similarscore **= (1./2)
