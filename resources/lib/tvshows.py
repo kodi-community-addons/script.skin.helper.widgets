@@ -43,7 +43,8 @@ class Tvshows(object):
             all_items += [
                 (self.addon.getLocalizedString(32014), "similar&mediatype=tvshows", icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=tvshows", icon),
-                (xbmc.getLocalizedString(136), "playlistslisting&mediatype=tvshows&tag=%s" % tag, icon),
+                (self.addon.getLocalizedString(32077), "playlistslisting&mediatype=tvshows", icon),
+                (self.addon.getLocalizedString(32076), "playlistslisting&mediatype=tvshows&tag=ref", icon),
                 (xbmc.getLocalizedString(20459), "tagslisting&mediatype=tvshows", icon)
             ]
         if tag:
@@ -73,19 +74,36 @@ class Tvshows(object):
         for item in self.metadatautils.kodidb.files("special://videoplaylists/"):
             # replace '&' with [and] -- will get fixed when processed in playlist action
             tag_label = item["label"].replace('&', '[and]')
-            details = (item["label"], "playlist&mediatype=tvshows&tag=%s" % tag_label, "DefaultTvShows.png")
+            if self.options.get("tag") == 'ref':
+                details = (item["label"], "refplaylist&mediatype=tvshows&tag=%s" % tag_label, "DefaultTvShows.png")
+            else:
+                details = (item["label"], "playlist&mediatype=tvshows&tag=%s" % tag_label, "DefaultTvShows.png")
             all_items.append(create_main_entry(details))
         return all_items
 
     def playlist(self):
         '''get items in playlist, sorted by recommended score'''
-        # fix amperstand in tag_label
+        # fix ampersand in tag_label
         tag_label = self.options.get("tag").replace('[and]','&')
         # get all items in playlist
         filters = [{"operator": "is", "field": "playlist", "value": tag_label}]
         all_items = self.metadatautils.kodidb.tvshows(filters=filters)
         # return list sorted by recommended score
         all_items = self.sort_by_recommended(all_items)
+        return self.metadatautils.process_method_on_list(self.process_tvshow, all_items)
+
+    def refplaylist(self):
+        '''get items similar to items in ref playlist'''
+        # fix ampersand in tag_label
+        tag_label = self.options.get("tag").replace('[and]','&')
+        # get all items in playlist
+        playlist_filter = [{"operator": "is", "field": "playlist", "value": tag_label}]
+        ref_items = self.metadatautils.kodidb.tvshows(filters=playlist_filter)
+        # get all items not in playlist
+        not_playlist_filter = [{"operator": "isnot", "field": "playlist", "value": tag_label}]
+        all_items = self.metadatautils.kodidb.tvshows(filters=not_playlist_filter)
+        # return list sorted by recommended score
+        all_items = self.sort_by_recommended(all_items, ref_items)
         return self.metadatautils.process_method_on_list(self.process_tvshow, all_items)
 
     def recommended(self):

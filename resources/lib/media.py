@@ -47,24 +47,37 @@ class Media(object):
             (self.addon.getLocalizedString(32059), "random&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32058), "top250&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32001), "favourites&mediatype=media", "DefaultMovies.png"),
-            (self.addon.getLocalizedString(32075), "playlistslisting&mediatype=media&movie_label=",
+            (self.addon.getLocalizedString(32075), "playlistslisting&mediatype=media",
+                "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32077), "playlistslisting&mediatype=media&tag=ref",
                 "DefaultMovies.png")
         ]
         return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def playlistslisting(self):
         '''get tv playlists listing'''
+        #TODO: append (Movie playlist) and (TV Show Playlist)
+        #TODO: only show playlists with appropriate type (Movie or TV Show)
         movie_label = self.options.get("movie_label")
+        tag_label = self.options.get("tag")
         all_items = []
         for item in self.metadatautils.kodidb.files("special://videoplaylists/"):
             # replace '&' with [and] -- will get fixed when processed in playlist action
             label = item["label"].replace('&', '[and]')
-            if movie_label:
-                details = (item["label"], "playlist&mediatype=media&movie_label=%s&tv_label=%s" %
-                    (movie_label, label), "DefaultTvShows.png")
+            if tag_label == 'ref':
+                if movie_label:
+                    details = (item["label"], "refplaylist&mediatype=media&movie_label=%s&tv_label=%s" %
+                        (movie_label, label), "DefaultTvShows.png")
+                else:
+                    details = (item["label"], "playlistslisting&mediatype=media&tag=ref&movie_label=%s" % label,
+                        "DefaultMovies.png")
             else:
-                details = (item["label"], "playlistslisting&mediatype=media&movie_label=%s" % label,
-                    "DefaultMovies.png")
+                if movie_label:
+                    details = (item["label"], "playlist&mediatype=media&movie_label=%s&tv_label=%s" %
+                        (movie_label, label), "DefaultTvShows.png")
+                else:
+                    details = (item["label"], "playlistslisting&mediatype=media&movie_label=%s" % label,
+                        "DefaultMovies.png")
             all_items.append(create_main_entry(details))
         return all_items
 
@@ -78,6 +91,22 @@ class Media(object):
             [{"operator": "is", "field": "playlist", "value": tv_label}])
         tvshows = self.metadatautils.process_method_on_list(self.tvshows.process_tvshow, tvshows)
         all_items = self.sort_by_recommended(movies+tvshows)
+        return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
+
+    def refplaylist(self):
+        '''get items in both playlists, sorted by recommended score'''
+        movie_label = self.options.get("movie_label").replace('[and]','&')
+        tv_label = self.options.get("tv_label").replace('[and]','&')
+        ref_movies = self.metadatautils.kodidb.movies(filters=
+            [{"operator": "is", "field": "playlist", "value": movie_label}])
+        ref_tvshows = self.metadatautils.kodidb.tvshows(filters=
+            [{"operator": "is", "field": "playlist", "value": tv_label}])
+        movies = self.metadatautils.kodidb.movies(filters=
+            [{"operator": "isnot", "field": "playlist", "value": movie_label}])
+        tvshows = self.metadatautils.kodidb.tvshows(filters=
+            [{"operator": "isnot", "field": "playlist", "value": tv_label}])
+        tvshows = self.metadatautils.process_method_on_list(self.tvshows.process_tvshow, tvshows)
+        all_items = self.sort_by_recommended(movies+tvshows, ref_movies+ref_tvshows)
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
     def recommended(self):

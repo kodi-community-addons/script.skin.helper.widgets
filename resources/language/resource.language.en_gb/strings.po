@@ -317,5 +317,17 @@ msgid "Enable experimental recommended widgets"
 msgstr ""
 
 msgctxt "#32075"
-msgid "Playlists (Choose playlist for Movies then TV Shows)"
+msgid "Recommended in Playlist (Choose Movies then TV Shows)"
+msgstr ""
+
+msgctxt "#32076"
+msgid "Similar to Playlist"
+msgstr ""
+
+msgctxt "#32077"
+msgid "Similar to Playlist (Choose Movies then TV Shows)"
+msgstr ""
+
+msgctxt "#32077"
+msgid "Recommended in Playlist"
 msgstr ""

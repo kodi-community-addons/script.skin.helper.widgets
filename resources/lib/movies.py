@@ -47,7 +47,8 @@ class Movies(object):
             all_items += [
                 (self.addon.getLocalizedString(32006), "similar&mediatype=movies&tag=%s" % tag, icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=movies&tag=%s" % tag, icon),
-                (xbmc.getLocalizedString(136), "playlistslisting&mediatype=movies&tag=%s" % tag, icon),
+                (self.addon.getLocalizedString(32077), "playlistslisting&mediatype=movies", icon),
+                (self.addon.getLocalizedString(32076), "playlistslisting&mediatype=movies&tag=ref", icon),
                 (xbmc.getLocalizedString(20459), "tagslisting&mediatype=movies", icon)
             ]
         return self.metadatautils.process_method_on_list(create_main_entry, all_items)
@@ -66,7 +67,10 @@ class Movies(object):
         for item in self.metadatautils.kodidb.files("special://videoplaylists/"):
             # replace '&' with [and] -- will get fixed when processed in playlist action
             tag_label = item["label"].replace('&', '[and]')
-            details = (item["label"], "playlist&mediatype=movies&tag=%s" % tag_label, "DefaultMovies.png")
+            if self.options.get("tag") == 'ref':
+                details = (item["label"], "refplaylist&mediatype=movies&tag=%s" % tag_label, "DefaultMovies.png")
+            else:
+                details = (item["label"], "playlist&mediatype=movies&tag=%s" % tag_label, "DefaultMovies.png")
             all_items.append(create_main_entry(details))
         return all_items
 
@@ -79,6 +83,19 @@ class Movies(object):
         all_items = self.metadatautils.kodidb.movies(filters=filters)
         # return list sorted by recommended score
         return self.sort_by_recommended(all_items)
+
+    def refplaylist(self):
+        '''get items similar to items in ref playlist'''
+        # fix amperstand in tag_label
+        tag_label = self.options.get("tag").replace('[and]','&')
+        # get all items in playlist
+        playlist_filter = [{"operator": "is", "field": "playlist", "value": tag_label}]
+        ref_items = self.metadatautils.kodidb.movies(filters=playlist_filter)
+        # get all items not in playlist
+        not_playlist_filter = [{"operator": "isnot", "field": "playlist", "value": tag_label}]
+        all_items = self.metadatautils.kodidb.movies(filters=not_playlist_filter)
+        # return list sorted by recommended score
+        return self.sort_by_recommended(all_items, ref_items)
 
     def recommended(self):
         ''' get recommended movies - library movies with score higher than 7
@@ -308,12 +325,13 @@ class Movies(object):
         '''synonym to favourites'''
         return self.favourites()
 
-    def sort_by_recommended(self, all_items):
+    def sort_by_recommended(self, all_items, ref_movies=None):
         ''' sort list of movies by recommended score'''
-        # get recently watched movies
-        ref_movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
-                                                        filters=[kodi_constants.FILTER_WATCHED],
-                                                        limits=(0, self.options["num_recent_similar"]))
+        if not ref_movies:
+            # get recently watched movies
+            ref_movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
+                                                            filters=[kodi_constants.FILTER_WATCHED],
+                                                            limits=(0, self.options["num_recent_similar"]))
         # average scores together for every item
         for item in all_items:
             similarscore = 0
