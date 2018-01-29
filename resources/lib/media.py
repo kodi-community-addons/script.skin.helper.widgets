@@ -278,12 +278,16 @@ class Media(object):
         # return sorted list capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
-    @staticmethod
-    def get_similarity_score(ref_item, other_item):
+    def get_similarity_score(self, ref_item, other_item):
         '''
             get a similarity score (0-.75) between movie and tvshow
         '''
-        set_genres = set(ref_item["genre"])
+        # get set of genres
+        if ref_item.has_key("uniqueid"):
+            set_genres = set(ref_item["genre"])
+        else:
+            # change genres to movie equivalents if tvshow
+            set_genres = self.convert_tvshow_genres(ref_item["genre"])
         set_cast = set([x["name"] for x in ref_item["cast"][:5]])
         # calculate individual scores for contributing factors
         # genre_score = (numer of matching genres) / (number of unique genres between both)
@@ -305,3 +309,20 @@ class Media(object):
         # calculate overall score using weighted average
         similarscore = .5*genre_score + .1*cast_score + .025*rating_score + .025*year_score
         return similarscore
+
+    @staticmethod
+    def convert_tvshow_genres(genres):
+        ''' converts tvshow genres into movie genre equivalent '''
+        mapped_genres = {'TV Documentaries': 'Documentary',
+                         'TV Sci-Fi & Fantasy': 'Sci-Fi & Fantasy',
+                         'TV Action & Adventure': 'Action & Adventure',
+                         'TV Comedies': 'Comedy',
+                         'TV Mysteries': 'Mystery',
+                         'TV Westerns': 'Westerns',
+                         'TV Dramas': 'Drama',
+                         'TV Crime Dramas': 'Crime Dramas',
+                         }
+        for genre in genres:
+            if mapped_genres.has_key(genre):
+                genre = mapped_genres[genre]
+        return set(genres)
