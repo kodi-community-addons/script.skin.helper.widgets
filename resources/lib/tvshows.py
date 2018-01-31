@@ -43,7 +43,7 @@ class Tvshows(object):
             all_items += [
                 (self.addon.getLocalizedString(32014), "similar&mediatype=tvshows", icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=tvshows", icon),
-                (self.addon.getLocalizedString(32077), "playlistslisting&mediatype=tvshows", icon),
+                (self.addon.getLocalizedString(32078), "playlistslisting&mediatype=tvshows", icon),
                 (self.addon.getLocalizedString(32076), "playlistslisting&mediatype=tvshows&tag=ref", icon),
                 (xbmc.getLocalizedString(20459), "tagslisting&mediatype=tvshows", icon)
             ]

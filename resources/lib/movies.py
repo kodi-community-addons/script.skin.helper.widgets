@@ -47,7 +47,7 @@ class Movies(object):
             all_items += [
                 (self.addon.getLocalizedString(32006), "similar&mediatype=movies&tag=%s" % tag, icon),
                 (xbmc.getLocalizedString(10134), "favourites&mediatype=movies&tag=%s" % tag, icon),
-                (self.addon.getLocalizedString(32077), "playlistslisting&mediatype=movies", icon),
+                (self.addon.getLocalizedString(32078), "playlistslisting&mediatype=movies", icon),
                 (self.addon.getLocalizedString(32076), "playlistslisting&mediatype=movies&tag=ref", icon),
                 (xbmc.getLocalizedString(20459), "tagslisting&mediatype=movies", icon)
             ]
