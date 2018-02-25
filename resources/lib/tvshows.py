@@ -7,12 +7,11 @@
     all tvshows widgets provided by the script
 '''
 
-from utils import create_main_entry, KODI_VERSION, log_msg
 from operator import itemgetter
 import random
-from metadatautils import kodi_constants
 import xbmc
-
+from metadatautils import kodi_constants
+from utils import create_main_entry, KODI_VERSION, log_msg
 
 class Tvshows(object):
     '''all tvshow widgets provided by the script'''
@@ -51,13 +50,13 @@ class Tvshows(object):
             # add episode nodes with tag filter
             all_items += [
                 (label_prefix + self.addon.getLocalizedString(32027), "inprogress&mediatype=episodes&tag=%s" %
-                    tag, icon),
+                 tag, icon),
                 (label_prefix + self.addon.getLocalizedString(32039), "recent&mediatype=episodes&tag=%s" %
-                    tag, icon),
+                 tag, icon),
                 (label_prefix + self.addon.getLocalizedString(32002), "next&mediatype=episodes&tag=%s" %
-                    tag, icon),
+                 tag, icon),
                 (label_prefix + self.addon.getLocalizedString(32008), "random&mediatype=episodes&tag=%s" %
-                    tag, icon)]
+                 tag, icon)]
         return self.metadatautils.process_method_on_list(create_main_entry, all_items)
 
     def tagslisting(self):
@@ -84,7 +83,7 @@ class Tvshows(object):
     def playlist(self):
         '''get items in playlist, sorted by recommended score'''
         # fix ampersand in tag_label
-        tag_label = self.options.get("tag").replace('[and]','&')
+        tag_label = self.options.get("tag").replace('[and]', '&')
         # get all items in playlist
         filters = [{"operator": "is", "field": "playlist", "value": tag_label}]
         all_items = self.metadatautils.kodidb.tvshows(filters=filters)
@@ -95,7 +94,7 @@ class Tvshows(object):
     def refplaylist(self):
         '''get items similar to items in ref playlist'''
         # fix ampersand in tag_label
-        tag_label = self.options.get("tag").replace('[and]','&')
+        tag_label = self.options.get("tag").replace('[and]', '&')
         # get all items in playlist
         playlist_filter = [{"operator": "is", "field": "playlist", "value": tag_label}]
         ref_items = self.metadatautils.kodidb.tvshows(filters=playlist_filter)
@@ -176,30 +175,31 @@ class Tvshows(object):
         else:
             # don't hide watched otherwise
             hide_watched = False
-        if ref_show:
-            # define ref_show sets for speed
-            set_genres = set(ref_show["genre"])
-            set_cast = set([x["name"] for x in ref_show["cast"][:10]])
-            # create list of all items
-            if hide_watched:
-                filters = [kodi_constants.FILTER_UNWATCHED]
-                all_items = self.metadatautils.kodidb.tvshows(filters=filters)
+        if not ref_show:
+            return None
+        # define ref_show sets for speed
+        set_genres = set(ref_show["genre"])
+        set_cast = set([x["name"] for x in ref_show["cast"][:10]])
+        sets = (set_genres, set_cast)
+        # create list of all items
+        if hide_watched:
+            filters = [kodi_constants.FILTER_UNWATCHED]
+            all_items = self.metadatautils.kodidb.tvshows(filters=filters)
+        else:
+            all_items = self.metadatautils.kodidb.tvshows()
+        # get similarity score for all shows
+        for item in all_items:
+            if item["title"] == ref_show["title"] and item["year"] == ref_show["year"]:
+                # don't rank the reference show
+                similarscore = 0
             else:
-                all_items = self.metadatautils.kodidb.tvshows()
-            # get similarity score for all shows
-            for item in all_items:
-                if item["title"]==ref_show["title"] and item["year"]==ref_show["year"]:
-                    # don't rank the reference show
-                    similarscore = 0
-                else:
-                    similarscore = self.get_similarity_score(ref_show, item,
-                        set_genres=set_genres, set_cast=set_cast)
-                item["similarscore"] = similarscore
-                item["extraproperties"] = {"similartitle": ref_show["title"], "originalpath": item["file"]}
-            # sort list by score and cap by limit
-            tvshows = sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
-            # return processed show
-            return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
+                similarscore = self.get_similarity_score(ref_show, item, sets=sets)
+            item["similarscore"] = similarscore
+            item["extraproperties"] = {"similartitle": ref_show["title"], "originalpath": item["file"]}
+        # sort list by score and cap by limit
+        tvshows = sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
+        # return processed show
+        return self.metadatautils.process_method_on_list(self.process_tvshow, tvshows)
 
     def forgenre(self):
         ''' get top rated tvshows for given genre'''
@@ -303,11 +303,10 @@ class Tvshows(object):
             sort=kodi_constants.SORT_RANDOM,
             filters=filters,
             filtertype="or",
-            limits=(0,1))
+            limits=(0, 1))
         if tvshows:
             return tvshows[0]
-        else:
-            return None
+        return None
 
     def get_recently_watched_tvshow(self):
         ''' returns the tvshow of a recently watched episode '''
@@ -320,10 +319,10 @@ class Tvshows(object):
             title_filter = [{"field": "title", "operator": "is", "value": "%s" % show_title}]
             tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))
             return tvshow[0]
+        return None
 
     def get_genre_tvshows(self, genre, hide_watched=False, limit=100, sort=kodi_constants.SORT_RANDOM):
         '''helper method to get all tvshows in a specific genre'''
-        limit=1000 # similar tvshows is too inconsistent without a high limit
         filters = [{"operator": "is", "field": "genre", "value": genre}]
         if hide_watched:
             filters.append(kodi_constants.FILTER_UNWATCHED)
@@ -348,6 +347,16 @@ class Tvshows(object):
         '''synonym to favourites'''
         return self.favourites()
 
+    def get_tvshows_from_episodes(self, episodes):
+        ''' gets associated tvshows from episodes (includes duplicates) '''
+        tvshows = []
+        for episode in episodes:
+            show_title = episode['showtitle']
+            title_filter = [{"field": "title", "operator": "is", "value": show_title}]
+            tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))[0]
+            tvshows.append(tvshow)
+        return tvshows
+
     def sort_by_recommended(self, all_items, ref_shows=None):
         ''' sort list of tvshows by recommended score'''
         # use recent items if ref_items not given
@@ -358,80 +367,84 @@ class Tvshows(object):
                                                           filters=[kodi_constants.FILTER_WATCHED],
                                                           limits=(0, 2*num_recent_similar))
             # get tvshows from episodes
-            tvshows = []
-            for episode in episodes:
-                show_title = episode['showtitle']
-                title_filter = [{"field": "title", "operator": "is", "value": show_title}]
-                tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))[0]
-                tvshows.append(tvshow)
+            tvshows = self.get_tvshows_from_episodes(episodes)
             # combine lists and sort by last played recent
-            ref_shows = sorted(tvshows, key=itemgetter('lastplayed'), reverse=True)
+            items = sorted(tvshows, key=itemgetter('lastplayed'), reverse=True)
             # find duplicates and set weights
-            weights = [1]*num_recent_similar
-            i = 1
-            while i < len(ref_shows):
-                j = 0
-                while j < i:
-                    #check for duplicate item
-                    if ref_shows[i]['title'] == ref_shows[j]['title']:
-                        # remove item and increase weight
-                        ref_shows.pop(i)
-                        weights[j] += 0.5
-                        break
-                    else:
-                        j += 1
+            titles = set()
+            ref_shows = list()
+            weights = dict()
+            weight_sum = 0
+            for item in items:
+                title = item['title']
+                if title in titles:
+                    weights[title] += 0.5
+                    weight_sum += 0.5
                 else:
-                    i += 1
-                if sum(weights[:i]) >= num_recent_similar:
+                    ref_shows.append(item)
+                    titles.add(title)
+                    weights[title] = 1
+                    weight_sum += 1
+                if weight_sum >= num_recent_similar:
                     break
-            ref_shows = ref_shows[:i]
-            weights = weights[:i]
+            del titles, items, weight_sum
         else:
-            weights = [1]*len(ref_shows)
-        log_msg('ref_shows: %s' % [x['title'] for x in ref_shows])
-        log_msg('weights: %s' % weights)
+            # set equal weights for pre-defined ref_shows
+            weights = dict()
+            for item in ref_shows:
+                weights[item['title']] = 1
+        # predefine feature sets
+        ref_sets = dict()
+        for ref_show in ref_shows:
+            title = ref_show['title']
+            set_genres = set(ref_show["genre"])
+            set_cast = set([x["name"] for x in ref_show["cast"][:10]])
+            ref_sets[title] = (set_genres, set_cast)
         # average scores together for every item
         for item in all_items:
             similarscore = 0
-            for index, ref_show in enumerate(ref_shows):
-                similarscore += weights[index] * self.get_similarity_score(ref_show, item)
+            for ref_show in ref_shows:
+                title = ref_show['title']
+                similarscore += weights[title] * self.get_similarity_score(
+                    ref_show, item, sets=ref_sets[title])
             item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_shows)
         # return sorted list capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
     @staticmethod
-    def get_similarity_score(ref_show, other_show, set_genres=None, set_cast=None):
+    def get_similarity_score(ref_show, other_show, sets=None):
         '''
             get a similarity score (0-1) between two shows
             optional parameters should be calculated beforehand if called inside loop
             TODO: make a database of ratings
         '''
         # assign arguments not given
-        if not set_genres:
+        if sets:
+            set_genres, set_cast = sets
+        else:
             set_genres = set(ref_show["genre"])
-        if not set_cast:
             set_cast = set([x["name"] for x in ref_show["cast"][:10]])
         # calculate individual scores for contributing factors
         # genre_score = (numer of matching genres) / (number of unique genres between both)
-        genre_score = 0 if len(set_genres)==0 else \
+        genre_score = 0 if not set_genres else \
             float(len(set_genres.intersection(other_show["genre"]))) / \
             len(set_genres.union(other_show["genre"]))
         # cast_score is normalized by fixed amount of 10, and scaled up nonlinearly
-        cast_score = (float(len(set_cast.intersection( [x["name"] for x in other_show["cast"][:10]] )))/10)**(1./2)
+        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_show["cast"][:10]])))/10)**(1./2)
         # rating_score is "closeness" in rating, scaled to 1
-        if ref_show["rating"] and other_show["rating"] and abs(ref_show["rating"]-other_show["rating"])<3:
+        if ref_show["rating"] and other_show["rating"] and abs(ref_show["rating"]-other_show["rating"]) < 3:
             rating_score = 1-abs(ref_show["rating"]-other_show["rating"])/3
         else:
             rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
-        if ref_show["year"] and other_show["year"] and abs(ref_show["year"]-other_show["year"])<10:
+        if ref_show["year"] and other_show["year"] and abs(ref_show["year"]-other_show["year"]) < 10:
             year_score = 1-abs(ref_show["year"]-other_show["year"])/10
         else:
             year_score = 0
         # studio gets 1 if same studio, otherwise 0
-        studio_score = 1 if ref_show["studio"] and ref_show["studio"]==other_show["studio"] else 0
+        studio_score = 1 if ref_show["studio"] and ref_show["studio"] == other_show["studio"] else 0
         # mpaa_score gets 1 if same mpaa rating, otherwise 0
-        mpaa_score = 1 if ref_show["mpaa"] and ref_show["mpaa"]==other_show["mpaa"] else 0
+        mpaa_score = 1 if ref_show["mpaa"] and ref_show["mpaa"] == other_show["mpaa"] else 0
         # calculate overall score using weighted average
         similarscore = .5*genre_score + .05*studio_score + .35*cast_score + \
             .025*rating_score + .05*year_score + .025*mpaa_score

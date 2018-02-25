@@ -7,11 +7,11 @@
     all movies widgets provided by the script
 '''
 
-from utils import create_main_entry, KODI_VERSION
 from operator import itemgetter
-from metadatautils import kodi_constants
-from random import randint
+import random
 import xbmc
+from metadatautils import kodi_constants
+from utils import create_main_entry, KODI_VERSION
 
 
 class Movies(object):
@@ -36,12 +36,12 @@ class Movies(object):
             (label_prefix + self.addon.getLocalizedString(32038), "recent&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + self.addon.getLocalizedString(32003), "recommended&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + self.addon.getLocalizedString(32029),
-                "inprogressandrecommended&mediatype=movies&tag=%s" % tag, icon),
+             "inprogressandrecommended&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + self.addon.getLocalizedString(32048), "random&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + self.addon.getLocalizedString(32066), "unwatched&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + self.addon.getLocalizedString(32046), "top250&mediatype=movies&tag=%s" % tag, icon),
             (label_prefix + xbmc.getLocalizedString(135),
-                "browsegenres&mediatype=movies&tag=%s" % tag, "DefaultGenres.png")
+             "browsegenres&mediatype=movies&tag=%s" % tag, "DefaultGenres.png")
         ]
         if not tag:
             all_items += [
@@ -77,7 +77,7 @@ class Movies(object):
     def playlist(self):
         '''get items in playlist, sorted by recommended score'''
         # fix amperstand in tag_label
-        tag_label = self.options.get("tag").replace('[and]','&')
+        tag_label = self.options.get("tag").replace('[and]', '&')
         # get all items in playlist
         filters = [{"operator": "is", "field": "playlist", "value": tag_label}]
         all_items = self.metadatautils.kodidb.movies(filters=filters)
@@ -87,7 +87,7 @@ class Movies(object):
     def refplaylist(self):
         '''get items similar to items in ref playlist'''
         # fix amperstand in tag_label
-        tag_label = self.options.get("tag").replace('[and]','&')
+        tag_label = self.options.get("tag").replace('[and]', '&')
         # get all items in playlist
         playlist_filter = [{"operator": "is", "field": "playlist", "value": tag_label}]
         ref_items = self.metadatautils.kodidb.movies(filters=playlist_filter)
@@ -125,7 +125,7 @@ class Movies(object):
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_DATEADDED, filters=filters,
-                                           limits=(0, self.options["limit"]))
+                                                limits=(0, self.options["limit"]))
 
     def random(self):
         ''' get random movies '''
@@ -135,15 +135,16 @@ class Movies(object):
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RANDOM, filters=filters,
-                                           limits=(0, self.options["limit"]))
+                                                limits=(0, self.options["limit"]))
 
     def inprogress(self):
         ''' get in progress movies '''
         filters = [kodi_constants.FILTER_INPROGRESS]
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
-                                           limits=(0, self.options["limit"]))
+        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
+                                                filters=filters,
+                                                limits=(0, self.options["limit"]))
 
     def unwatched(self):
         ''' get unwatched movies '''
@@ -151,7 +152,7 @@ class Movies(object):
         if self.options.get("tag"):
             filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
         return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_TITLE, filters=filters,
-                                           limits=(0, self.options["limit"]))
+                                                limits=(0, self.options["limit"]))
 
     def similar(self):
         ''' get similar movies for given imdbid, or from a recently watched title if no imdbid'''
@@ -168,30 +169,30 @@ class Movies(object):
         else:
             # don't hide watched otherwise
             hide_watched = False
-        if ref_movie:
-            # define ref_movie sets for speed
-            set_genres = set(ref_movie["genre"])
-            set_directors = set(ref_movie["director"])
-            set_writers = set(ref_movie["writer"])
-            set_cast = set([x["name"] for x in ref_movie["cast"][:5]])
-            # create list of all items
-            if hide_watched:
-                all_items = self.metadatautils.kodidb.movies(filters=[kodi_constants.FILTER_UNWATCHED])
+        if not ref_movie:
+            return None
+        # create list of all items
+        if hide_watched:
+            all_items = self.metadatautils.kodidb.movies(filters=[kodi_constants.FILTER_UNWATCHED])
+        else:
+            all_items = self.metadatautils.kodidb.movies()
+        # define ref_movie sets for speed
+        set_genres = set(ref_movie["genre"])
+        set_directors = set(ref_movie["director"])
+        set_writers = set(ref_movie["writer"])
+        set_cast = set([x["name"] for x in ref_movie["cast"][:5]])
+        sets = (set_genres, set_directors, set_writers, set_cast)
+        # get similarity score for all movies
+        for item in all_items:
+            if item["title"] == ref_movie["title"] and item["year"] == ref_movie["year"]:
+                # don't rank the reference movie
+                similarscore = 0
             else:
-                all_items = self.metadatautils.kodidb.movies()
-            # get similarity score for all movies
-            for item in all_items:
-                if item["title"]==ref_movie["title"] and item["year"]==ref_movie["year"]:
-                    # don't rank the reference movie
-                    similarscore = 0
-                else:
-                    similarscore = self.get_similarity_score(ref_movie, item,
-                        set_genres=set_genres, set_directors=set_directors,
-                        set_writers=set_writers, set_cast=set_cast)
-                item["similarscore"] = similarscore
-                item["extraproperties"] = {"similartitle": ref_movie["title"], "originalpath": item["file"]}
-            # return list sorted by score and capped by limit
-            return sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
+                similarscore = self.get_similarity_score(ref_movie, item, sets=sets)
+            item["similarscore"] = similarscore
+            item["extraproperties"] = {"similartitle": ref_movie["title"], "originalpath": item["file"]}
+        # return list sorted by score and capped by limit
+        return sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
 
     def forgenre(self):
         ''' get top rated movies for given genre'''
@@ -200,7 +201,7 @@ class Movies(object):
         genre = self.options.get("genre", "")
         # get a random genre if no genre found
         if not genre:
-            genres = self.metadatautils.kodidb.genres("movie")[0]["label"]
+            genre = self.metadatautils.kodidb.genres("movie")[0]["label"]
         all_items = []
         if genre:
             # get all movies from the same genre
@@ -291,20 +292,21 @@ class Movies(object):
     def get_random_watched_movie(self):
         '''gets a random watched movie from kodi_constants.'''
         movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RANDOM,
-                                             filters=[kodi_constants.FILTER_WATCHED], limits=(0, 1))
+                                                  filters=[kodi_constants.FILTER_WATCHED],
+                                                  limits=(0, 1))
         if movies:
             return movies[0]
-        else:
-            return None
+        return None
 
     def get_recently_watched_movie(self):
         '''gets a random recently watched movie from kodi_constants.'''
         num_recent_similar = self.options["num_recent_similar"]
         movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
-                                             filters=[kodi_constants.FILTER_WATCHED],
-                                             limits=(0, num_recent_similar))
+                                                  filters=[kodi_constants.FILTER_WATCHED],
+                                                  limits=(0, num_recent_similar))
         if movies:
-            return movies[randint(0,len(movies)-1)]
+            return random.choice(movies)
+        return None
 
     def get_genre_movies(self, genre, hide_watched=False, limit=100, sort=kodi_constants.SORT_RANDOM):
         '''helper method to get all movies in a specific genre'''
@@ -330,63 +332,72 @@ class Movies(object):
         if not ref_movies:
             # get recently watched movies
             ref_movies = self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_LASTPLAYED,
-                                                            filters=[kodi_constants.FILTER_WATCHED],
-                                                            limits=(0, self.options["num_recent_similar"]))
+                                                          filters=[kodi_constants.FILTER_WATCHED],
+                                                          limits=(0, self.options["num_recent_similar"]))
+        # predefine feature sets
+        ref_sets = dict()
+        for ref_movie in ref_movies:
+            title = ref_movie['title']
+            set_genres = set(ref_movie["genre"])
+            set_directors = set(ref_movie["director"])
+            set_writers = set(ref_movie["writer"])
+            set_cast = set([x["name"] for x in ref_movie["cast"][:5]])
+            ref_sets[title] = (set_genres, set_directors, set_writers, set_cast)
         # average scores together for every item
         for item in all_items:
             similarscore = 0
             for ref_movie in ref_movies:
-                similarscore += self.get_similarity_score(ref_movie, item)
+                title = ref_movie['title']
+                similarscore += self.get_similarity_score(ref_movie, item, sets=ref_sets[title])
             item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_movies)
         # return list sorted by score and capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
     @staticmethod
-    def get_similarity_score(ref_movie, other_movie, set_genres=None, set_directors=None,
-                                                        set_writers=None, set_cast=None):
+    def get_similarity_score(ref_movie, other_movie, sets=None):
         '''
             get a similarity score (0-1) between two movies
             optional parameters should be calculated beforehand if called inside loop
             TODO: make a database of ratings
         '''
-        # assign arguments not given
-        if not set_genres:
+        if sets:
+            # unpack sets if given
+            set_genres, set_directors, set_writers, set_cast = sets
+        else:
+            # define sets
             set_genres = set(ref_movie["genre"])
-        if not set_directors:
             set_directors = set(ref_movie["director"])
-        if not set_writers:
             set_writers = set(ref_movie["writer"])
-        if not set_cast:
             set_cast = set([x["name"] for x in ref_movie["cast"][:5]])
         # calculate individual scores for contributing factors
         # [feature]_score = (numer of matching [features]) / (number of unique [features] between both)
-        genre_score = 0 if len(set_genres)==0 else \
-            float(len(set_genres.intersection(other_movie["genre"])))/ \
+        genre_score = 0 if not set_genres else \
+            float(len(set_genres.intersection(other_movie["genre"]))) / \
             len(set_genres.union(other_movie["genre"]))
-        director_score = 0 if len(set_directors)==0 else \
-            float(len(set_directors.intersection(other_movie["director"])))/ \
+        director_score = 0 if not set_directors else \
+            float(len(set_directors.intersection(other_movie["director"]))) / \
             len(set_directors.union(other_movie["director"]))
-        writer_score = 0 if len(set_writers)==0 else \
-            float(len(set_writers.intersection(other_movie["writer"])))/ \
+        writer_score = 0 if not set_writers else \
+            float(len(set_writers.intersection(other_movie["writer"]))) / \
             len(set_writers.union(other_movie["writer"]))
         # cast_score is normalized by fixed amount of 5, and scaled up nonlinearly
-        cast_score = (float(len(set_cast.intersection( [x["name"] for x in other_movie["cast"][:5]] )))/5)**(1./2)
+        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_movie["cast"][:5]])))/5)**(1./2)
         # rating_score is "closeness" in rating, scaled to 1 (0 if greater than 3)
-        if ref_movie["rating"] and other_movie["rating"] and abs(ref_movie["rating"]-other_movie["rating"])<3:
-            rating_score = 1-abs(ref_movie["rating"]-other_movie["rating"])/3
+        if ref_movie["rating"] and other_movie["rating"] and abs(ref_movie["rating"]-other_movie["rating"]) < 3:
+            rating_score = 1 - abs(ref_movie["rating"]-other_movie["rating"])/3
         else:
             rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
-        if ref_movie["year"] and other_movie["year"] and abs(ref_movie["year"]-other_movie["year"])<10:
-            year_score = 1-abs(ref_movie["year"]-other_movie["year"])/10
+        if ref_movie["year"] and other_movie["year"] and abs(ref_movie["year"]-other_movie["year"]) < 10:
+            year_score = 1 - abs(ref_movie["year"]-other_movie["year"])/10
         else:
             year_score = 0
         # mpaa_score gets 1 if same mpaa rating, otherwise 0
-        mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"]==other_movie["mpaa"] else 0
+        mpaa_score = 1 if ref_movie["mpaa"] and ref_movie["mpaa"] == other_movie["mpaa"] else 0
         # calculate overall score using weighted average
         similarscore = .5*genre_score + .15*director_score + .1*writer_score + .1*cast_score + \
             .05*rating_score + .075*year_score + .025*mpaa_score
         # exponentially scale score for movies in same set
-        if ref_movie["setid"] and ref_movie["setid"]==other_movie["setid"]:
+        if ref_movie["setid"] and ref_movie["setid"] == other_movie["setid"]:
             similarscore **= (1./2)
         return similarscore

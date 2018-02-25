@@ -7,20 +7,24 @@
     helper methods
 '''
 
-import xbmc
-from traceback import format_exc
 import sys
 import urllib
+from traceback import format_exc
+import xbmc
+import xbmcaddon
 
 ADDON_ID = "script.skin.helper.widgets"
 KODI_VERSION = int(xbmc.getInfoLabel("System.BuildVersion").split(".")[0])
 
 
 def log_msg(msg, loglevel=xbmc.LOGDEBUG):
-    '''log message to kodi log'''
+    ''' log message with addon name and version to kodi log '''
     if isinstance(msg, unicode):
         msg = msg.encode('utf-8')
-    xbmc.log("Skin Helper Widgets --> %s" % msg, level=loglevel)
+    addon = xbmcaddon.Addon(id=ADDON_ID)
+    addon_name = addon.getAddonInfo('name')
+    addon_ver = addon.getAddonInfo('version')
+    xbmc.log("{0} v{1} --> {2}".format(addon_name, addon_ver, msg), level=loglevel)
 
 
 def log_exception(modulename, exceptiondetails):

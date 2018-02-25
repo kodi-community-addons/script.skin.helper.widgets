@@ -7,10 +7,10 @@
     all episodes widgets provided by the script
 '''
 
-from utils import create_main_entry
 from operator import itemgetter
-from metadatautils import kodi_constants
 import xbmc
+from metadatautils import kodi_constants
+from utils import create_main_entry
 
 class Episodes(object):
     '''all episode widgets provided by the script'''
@@ -152,8 +152,8 @@ class Episodes(object):
         # First we get a list of all the inprogress/unwatched TV shows ordered by lastplayed
         all_shows = self.metadatautils.kodidb.tvshows(sort=kodi_constants.SORT_LASTPLAYED, filters=filters,
                                                       limits=(0, self.options["limit"]))
-        return self.metadatautils.process_method_on_list(self.get_next_episode_for_show, [
-                                                         d['tvshowid'] for d in all_shows])
+        return self.metadatautils.process_method_on_list(self.get_next_episode_for_show,
+                                                         [d['tvshowid'] for d in all_shows])
 
     def get_next_episode_for_show(self, show_id):
         '''
@@ -257,9 +257,8 @@ class Episodes(object):
                    xbmc.getLocalizedString(570), firstepisode["dateadded"].split(" ")[0])
             item["extraproperties"] = {"UnWatchedEpisodes": "%s" % len(tvshow_episodes)}
             return item
-        else:
-            # just add the single item
-            return firstepisode
+        # just add the single item
+        return firstepisode
 
     @staticmethod
     def map_episode_props(episode_details):
