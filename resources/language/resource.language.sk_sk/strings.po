@@ -1,1 +1,297 @@
+# Kodi language file
+# Addon Name: Skin Helper Widgets
+# Addon id: script.skin.helper.widgets
+# Addon Provider: marcelveldt
+# Translators:
+# Miro Valec Valko <mvalec@atlas.sk>, 2018
+msgid ""
+msgstr ""
+"Project-Id-Version: XBMC-Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: 2014-10-26 17:05+0000\n"
+"PO-Revision-Date: 2018-05-09 17:49+0200\n"
+"Language-Team: LANGUAGE\n"
+"Language: sk_SK\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: sk_SK\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"Last-Translator: Miro Valko <mvalec@atlas.sk>\n"
+"X-Generator: Poedit 2.0.7\n"
 
+msgctxt "#32000"
+msgid "Favourites"
+msgstr "Obľúbené"
+
+msgctxt "#32001"
+msgid "Favourite Media"
+msgstr "Obľúbené médiá"
+
+msgctxt "#32002"
+msgid "Next Episodes"
+msgstr "Nasledujúce epizódy"
+
+msgctxt "#32003"
+msgid "Recommended Movies"
+msgstr "Doporučené filmy"
+
+msgctxt "#32004"
+msgid "Recommended Media"
+msgstr "Doporučené médiá"
+
+msgctxt "#32005"
+msgid "Recent Media"
+msgstr "Najnovšie médiá"
+
+msgctxt "#32006"
+msgid "Similar Movies"
+msgstr "Podobné filmy"
+
+msgctxt "#32007"
+msgid "In progress and Recommended Media"
+msgstr "Práve sledované a doporučené médiá"
+
+msgctxt "#32008"
+msgid "Random Episodes"
+msgstr "Náhodné epizódy"
+
+msgctxt "#32009"
+msgid "Recommended Episodes"
+msgstr "Doporučené epizódy"
+
+msgctxt "#32010"
+msgid "In progress and recommended Episodes"
+msgstr "Práve sledované a doporučené epizódy"
+
+msgctxt "#32011"
+msgid "In progress Media"
+msgstr "Práve sledované médiá"
+
+msgctxt "#32012"
+msgid "Recently added songs"
+msgstr "Naposledy pridané skladby"
+
+msgctxt "#32013"
+msgid "Recently played songs"
+msgstr "Naposledy hrané skladby"
+
+msgctxt "#32014"
+msgid "Similar TV Shows"
+msgstr "Podobné seriály"
+
+msgctxt "#32015"
+msgid "Recommended albums"
+msgstr "Doporučené albumy"
+
+msgctxt "#32016"
+msgid "Recommended songs"
+msgstr "Doporučené skladby"
+
+msgctxt "#32017"
+msgid "PVR Channel groups"
+msgstr "Skupiny kanálov PVR"
+
+msgctxt "#32018"
+msgid "Recent recordings"
+msgstr "Najnovšie nahrávky"
+
+msgctxt "#32019"
+msgid "Next unwatched recordings"
+msgstr "Ďalšie nevidené nahrávky"
+
+msgctxt "#32020"
+msgid "TV Channels"
+msgstr "TV kanály"
+
+msgctxt "#32021"
+msgid "Timers"
+msgstr "Časovače"
+
+msgctxt "#32022"
+msgid "Similar Media"
+msgstr "Podobné médiá"
+
+msgctxt "#32023"
+msgid "Widgets"
+msgstr "Widgety"
+
+msgctxt "#32024"
+msgid "Enable artwork lookups"
+msgstr "Povoliť hľadanie umeleckej grafiky"
+
+msgctxt "#32025"
+msgid "Show specials in episode widgets"
+msgstr "Zobraziť špeciality vo widgetoch epizód"
+
+msgctxt "#32026"
+msgid "Browse albums instead of playing for album widgets"
+msgstr "Prehliadať albumy namiesto spustenia (pre widgety albumov)"
+
+msgctxt "#32027"
+msgid "In-progress episodes"
+msgstr "Práve sledované epizódy"
+
+msgctxt "#32028"
+msgid "In-progress movies"
+msgstr "Práve sledované filmy"
+
+msgctxt "#32029"
+msgid "In-progress and recommended movies"
+msgstr "Práve sledované a doporučené filmy"
+
+msgctxt "#32030"
+msgid "TV Channels (with artwork)"
+msgstr "TV kanály (s grafikou)"
+
+msgctxt "#32031"
+msgid "Next unwatched recordings (reversed)"
+msgstr "Ďalšie nevidené nahrávky (prehodené)"
+
+msgctxt "#32032"
+msgid "In-progress and random movies"
+msgstr "Práve sledované a náhodné filmy"
+
+msgctxt "#32033"
+msgid "Random albums"
+msgstr "Náhodné albumy"
+
+msgctxt "#32034"
+msgid "Random songs"
+msgstr "Náhodné skladby"
+
+msgctxt "#32035"
+msgid "Hide watched items in video widgets"
+msgstr "Skryť videné položky vo video widgetoch"
+
+msgctxt "#32036"
+msgid "Only use in-progress shows in next episodes widget"
+msgstr "Zobraziť len práve sledované seriály vo widgete nasledujúcich epizód"
+
+msgctxt "#32037"
+msgid "Recommended Tv Shows"
+msgstr "Doporučené seriály"
+
+msgctxt "#32038"
+msgid "Recently added movies"
+msgstr "Naposledy pridané filmy"
+
+msgctxt "#32039"
+msgid "Recently added episodes"
+msgstr "Naposledy pridané epizódy"
+
+msgctxt "#32040"
+msgid "Recently added musicvideos"
+msgstr "Naposledy pridané videoklipy"
+
+msgctxt "#32041"
+msgid "Random Tv Shows"
+msgstr "Náhodné seriály"
+
+msgctxt "#32042"
+msgid "Unaired episodes"
+msgstr "Neodvysielané epizódy"
+
+msgctxt "#32043"
+msgid "Next airing episodes"
+msgstr "Najbližšie vysielané epizódy"
+
+msgctxt "#32044"
+msgid "In progress TV shows"
+msgstr "Sledované seriály"
+
+msgctxt "#32045"
+msgid "Recently added TV shows"
+msgstr "Naposledy pridané seriály"
+
+msgctxt "#32046"
+msgid "IMDB Top 250 movies in library"
+msgstr "Top 250 filmov z knižnici (podľa IMDB)"
+
+msgctxt "#32047"
+msgid "IMDB Top 250 Tv shows in library"
+msgstr "Top 250 seriálov v knižnici (podľa IMDB)"
+
+msgctxt "#32048"
+msgid "Random movies"
+msgstr "Náhodné filmy"
+
+msgctxt "#32049"
+msgid "In progress and random Episodes"
+msgstr "Práve sledované a náhodné epizódy"
+
+msgctxt "#32050"
+msgid "Group items in recent episodes widget"
+msgstr "Zoskupovať položky vo widgete nasledujúcich epizód"
+
+msgctxt "#32051"
+msgid "Browse TV Show"
+msgstr "Prezerať seriály"
+
+msgctxt "#32052"
+msgid "Browse Season"
+msgstr "Prezerať série"
+
+msgctxt "#32053"
+msgid "Default number of items to show in widget"
+msgstr "Predvolený počet položiek vo widgete"
+
+msgctxt "#32054"
+msgid "PVR"
+msgstr "PVR"
+
+msgctxt "#32055"
+msgid "Similar songs"
+msgstr "Podobné skladby"
+
+msgctxt "#32056"
+msgid "Similar albums"
+msgstr "Podobné albumy"
+
+msgctxt "#32057"
+msgid "Mixed Media"
+msgstr "Zmiešané médiá"
+
+msgctxt "#32058"
+msgid "Movies and Tvshows in IMDB Top250"
+msgstr "Filmy a seriály v IMDB Top 250"
+
+msgctxt "#32059"
+msgid "Random media"
+msgstr "Náhodné médiá"
+
+msgctxt "#32060"
+msgid "In progress and Random media"
+msgstr "Práve sledované a náhodné médiá"
+
+msgctxt "#32061"
+msgid "In progress music videos"
+msgstr "Práve sledované hudobné videoklipy"
+
+msgctxt "#32062"
+msgid "Random music videos"
+msgstr "Náhodné videoklipy"
+
+msgctxt "#32063"
+msgid "Recently added artists"
+msgstr "Naposledy pridaní umelci"
+
+msgctxt "#32064"
+msgid "Random artists"
+msgstr "Náhodní umelci"
+
+msgctxt "#32065"
+msgid "Recommended artists"
+msgstr "Doporučení umelci"
+
+msgctxt "#32066"
+msgid "Unwatched movies"
+msgstr "Nevidené filmy"
+
+msgctxt "#32067"
+msgid "Hide watched items in recent items listings"
+msgstr "Skryť videné položky v zoznamoch naposledy pridaných"
+
+msgctxt "#32068"
+msgid "Episodes airing today"
+msgstr "Dnes vysielané epizódy"
