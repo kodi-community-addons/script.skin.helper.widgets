@@ -14,6 +14,7 @@
 
 	<extension point="xbmc.addon.metadata">
 		<summary lang="en">Ready to use widgets for all kind of media types</summary>
+		<summary lang="sk">Podpora pre použitie miniaplikácií pre všetky typy médií</summary>
         <description></description>
 		<language></language>
 		<platform>all</platform>
