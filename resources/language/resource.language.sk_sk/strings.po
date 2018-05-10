@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: XBMC-Addons\n"
 "Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
 "POT-Creation-Date: 2014-10-26 17:05+0000\n"
-"PO-Revision-Date: 2018-05-09 17:49+0200\n"
+"PO-Revision-Date: 2018-05-10 12:28+0200\n"
 "Language-Team: LANGUAGE\n"
 "Language: sk_SK\n"
 "MIME-Version: 1.0\n"
@@ -114,7 +114,7 @@ msgstr "Podobné médiá"
 
 msgctxt "#32023"
 msgid "Widgets"
-msgstr "Widgety"
+msgstr "Miniaplikácie"
 
 msgctxt "#32024"
 msgid "Enable artwork lookups"
@@ -122,11 +122,11 @@ msgstr "Povoliť hľadanie umeleckej grafiky"
 
 msgctxt "#32025"
 msgid "Show specials in episode widgets"
-msgstr "Zobraziť špeciality vo widgetoch epizód"
+msgstr "Zobraziť špeciality v miniaplikáciách epizód"
 
 msgctxt "#32026"
 msgid "Browse albums instead of playing for album widgets"
-msgstr "Prehliadať albumy namiesto spustenia (pre widgety albumov)"
+msgstr "Prehliadať albumy namiesto spustenia (pre miniaplikácie albumov)"
 
 msgctxt "#32027"
 msgid "In-progress episodes"
@@ -162,11 +162,11 @@ msgstr "Náhodné skladby"
 
 msgctxt "#32035"
 msgid "Hide watched items in video widgets"
-msgstr "Skryť videné položky vo video widgetoch"
+msgstr "Skryť videné položky v miniaplikáciách pre video"
 
 msgctxt "#32036"
 msgid "Only use in-progress shows in next episodes widget"
-msgstr "Zobraziť len práve sledované seriály vo widgete nasledujúcich epizód"
+msgstr "Zobraziť len práve sledované seriály v miniaplikácii pre nasledujúce epizódy"
 
 msgctxt "#32037"
 msgid "Recommended Tv Shows"
@@ -222,7 +222,7 @@ msgstr "Práve sledované a náhodné epizódy"
 
 msgctxt "#32050"
 msgid "Group items in recent episodes widget"
-msgstr "Zoskupovať položky vo widgete nasledujúcich epizód"
+msgstr "Zoskupovať položky v miniaplikácii pre nasledujúce epizódy"
 
 msgctxt "#32051"
 msgid "Browse TV Show"
@@ -234,7 +234,7 @@ msgstr "Prezerať série"
 
 msgctxt "#32053"
 msgid "Default number of items to show in widget"
-msgstr "Predvolený počet položiek vo widgete"
+msgstr "Predvolený počet položiek v miniaplikácii"
 
 msgctxt "#32054"
 msgid "PVR"
