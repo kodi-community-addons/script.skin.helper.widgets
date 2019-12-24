@@ -11,7 +11,7 @@ from operator import itemgetter
 import random
 import xbmc
 from metadatautils import kodi_constants
-from utils import create_main_entry, KODI_VERSION
+from resources.lib.utils import create_main_entry, KODI_VERSION
 
 
 class Movies(object):

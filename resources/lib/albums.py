@@ -7,7 +7,7 @@
     all albums widgets provided by the script
 '''
 
-from utils import create_main_entry
+from resources.lib.utils import create_main_entry
 from operator import itemgetter
 from metadatautils import kodi_constants
 import xbmc

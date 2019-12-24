@@ -6,11 +6,11 @@
     episodes.py
     all episodes widgets provided by the script
 '''
-
+import os, sys
 from operator import itemgetter
 import xbmc
 from metadatautils import kodi_constants
-from utils import create_main_entry
+from resources.lib.utils import create_main_entry
 
 class Episodes(object):
     '''all episode widgets provided by the script'''
@@ -97,7 +97,10 @@ class Episodes(object):
                 tvshow_episodes[unique_key].append(episode)
 
         # create our entries and return the result sorted by dateadded
-        all_items = self.metadatautils.process_method_on_list(self.create_grouped_entry, tvshow_episodes.itervalues())
+        if sys.version_info.major == 3:
+            all_items = self.metadatautils.process_method_on_list(self.create_grouped_entry, tvshow_episodes.values())
+        else:
+            all_items = self.metadatautils.process_method_on_list(self.create_grouped_entry, tvshow_episodes.itervalues())
         return sorted(all_items, key=itemgetter("dateadded"), reverse=True)[:self.options["limit"]]
 
     def random(self):
