@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <addon id="script.skin.helper.widgets" name="Skin Helper Service Widgets" version="1.0.41" provider-name="marcelveldt,patrick-klein,wuff">
+    <addon id="script.skin.helper.widgets" name="Skin Helper Service Widgets" version="1.0.42" provider-name="marcelveldt,patrick-klein,wuff">
     <requires>
 	<!-- <import addon="xbmc.python" version="3.0.0"/> -->
         <import addon="xbmc.addon" version="12.0.0"/>
@@ -16,6 +16,9 @@
         <summary lang="en">Ready to use widgets for all kind of media types</summary>
         <description></description>
 	<news>
+Version 1.0.42 (2020-09-13 wuff)
+* replace xbmc.LOGNOTICE with xbmc.LOGINFO as LOGNOTICE was removed
+
 Version 1.0.41 (2020-09-07 wuff)
 * Fix icons
 
