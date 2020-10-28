@@ -10,13 +10,13 @@
 from operator import itemgetter
 import random
 from metadatautils import kodi_constants
-from utils import create_main_entry
-from movies import Movies
-from tvshows import Tvshows
-from songs import Songs
-from pvr import Pvr
-from albums import Albums
-from episodes import Episodes
+from resources.lib.utils import create_main_entry
+from resources.lib.movies import Movies
+from resources.lib.tvshows import Tvshows
+from resources.lib.songs import Songs
+from resources.lib.pvr import Pvr
+from resources.lib.albums import Albums
+from resources.lib.episodes import Episodes
 
 class Media(object):
     '''all media (mixed) widgets provided by the script'''

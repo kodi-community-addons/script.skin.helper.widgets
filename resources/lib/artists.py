@@ -7,7 +7,7 @@
     all artists widgets provided by the script
 '''
 
-from utils import create_main_entry
+from resources.lib.utils import create_main_entry
 from metadatautils import kodi_constants
 import xbmc
 

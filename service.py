@@ -17,7 +17,7 @@ TASK_INTERVAL = 520
 WIN = xbmcgui.Window(10000)
 ADDON = xbmcaddon.Addon(ADDON_ID)
 MONITOR = KodiMonitor(win=WIN, addon=ADDON)
-log_msg('Backgroundservice started', xbmc.LOGNOTICE)
+log_msg('Backgroundservice started', xbmc.LOGINFO)
 
 # keep the kodi monitor alive which processes database updates to refresh widgets
 while not MONITOR.abortRequested():
@@ -35,4 +35,4 @@ while not MONITOR.abortRequested():
 del MONITOR
 del WIN
 del ADDON
-log_msg('Backgroundservice stopped', xbmc.LOGNOTICE)
+log_msg('Backgroundservice stopped', xbmc.LOGINFO)
