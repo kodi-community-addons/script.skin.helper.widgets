@@ -12,7 +12,7 @@ if sys.version_info.major == 3:
     import urllib.parse as urlparse
 else:
     import urlparse
-from traceback import format_exc
+import traceback
 import xbmc
 import xbmcaddon
 
@@ -36,7 +36,7 @@ def log_exception(modulename, exceptiondetails):
     if sys.version_info.major == 3:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-        log_msg("Exception details: Type: %s Value: %s Traceback: %s" % (exc_type.__name__, exc_value, ''.join(line for line in lines)), xbmc.LOGERROR)
+        log_msg("Exception details: Type: %s Value: %s Traceback: %s" % (exc_type.__name__, exc_value, ''.join(line for line in lines)), xbmc.LOGWARNING)
     else:
         log_msg(format_exc(sys.exc_info()), xbmc.LOGWARNING)
         log_msg("Exception in %s ! --> %s" % (modulename, exceptiondetails), xbmc.LOGERROR)

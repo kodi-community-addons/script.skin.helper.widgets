@@ -161,7 +161,7 @@ class Media(object):
         if self.options["exp_recommended"]:
             # get ref item, and check if movie
             ref_item = self.get_recently_watched_item()
-            is_ref_movie = ref_item.has_key("uniqueid")
+            is_ref_movie = ("uniqueid") in ref_item
             # create list of all items
             if self.options["hide_watched_similar"]:
                 all_items = self.metadatautils.kodidb.movies(filters=[kodi_constants.FILTER_UNWATCHED])
@@ -183,7 +183,7 @@ class Media(object):
                 sets = (set_genres, set_directors, set_writers, set_cast)
                 # get similarity score for all items
                 for item in all_items:
-                    if item.has_key("uniqueid"):
+                    if ("uniqueid") in item:
                         # if item is also movie, check if it's the ref_item
                         if item["title"] == ref_item["title"] and item["year"] == ref_item["year"]:
                             # don't rank the reference movie
@@ -205,7 +205,7 @@ class Media(object):
                 sets = (set_genres, set_cast)
                 # get similarity score for all items
                 for item in all_items:
-                    if not item.has_key("uniqueid"):
+                    if not ("uniqueid") in item:
                         # if item is also tvshow, check if it's the ref_item
                         if item["title"] == ref_item["title"] and item["year"] == ref_item["year"]:
                             # don't rank the reference movie
@@ -277,7 +277,7 @@ class Media(object):
         recent_items = sorted(recent_items, key=itemgetter("lastplayed"), reverse=True)[:num_recent_similar]
         item = random.choice(recent_items)
         # if item is an episode, get its tvshow
-        if not item.has_key("genre"):
+        if not ("genre"):
             show_title = item['showtitle']
             title_filter = [{"field": "title", "operator": "is", "value": "%s" % show_title}]
             tvshow = self.metadatautils.kodidb.tvshows(filters=title_filter, limits=(0, 1))
@@ -330,10 +330,10 @@ class Media(object):
             for ref_item in ref_items:
                 title = ref_item['title']
                 # add all similarscores for item
-                if ref_item.has_key("uniqueid") and item.has_key("uniqueid"):
+                if ("uniqueid")in ref_item and ("uniqueid") in item:
                     # use movies method if both items are movies
                     similarscore += weights[title] * self.movies.get_similarity_score(ref_item, item)
-                elif ref_item.has_key("uniqueid") or item.has_key("uniqueid"):
+                elif ("uniqueid")in  ref_item or ("uniqueid") in item:
                     # use media method if only one item is a movie
                     similarscore += weights[title] * self.get_similarity_score(ref_item, item)
                 else:
@@ -349,7 +349,7 @@ class Media(object):
             get a similarity score (0-.625) between movie and tvshow
         '''
         # get set of genres
-        if ref_item.has_key("uniqueid"):
+        if ("uniqueid") in ref_item:
             set_genres = set(ref_item["genre"])
         else:
             # change genres to movie equivalents if tvshow
@@ -389,6 +389,6 @@ class Media(object):
                          'TV Crime Dramas': 'Crime Dramas',
                         }
         for genre in genres:
-            if mapped_genres.has_key(genre):
+            if (genre) in mapped_genres:
                 genre = mapped_genres[genre]
         return set(genres)

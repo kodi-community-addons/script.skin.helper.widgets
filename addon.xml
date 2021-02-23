@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-    <addon id="script.skin.helper.widgets" name="Skin Helper Service Widgets" version="1.0.42" provider-name="marcelveldt,patrick-klein,wuff">
+    <addon id="script.skin.helper.widgets" name="Skin Helper Service Widgets" version="1.0.42" provider-name="marcelveldt and others">
     <requires>
-	<!-- <import addon="xbmc.python" version="3.0.0"/> -->
+		<import addon="xbmc.python" version="3.0.0"/>
         <import addon="xbmc.addon" version="12.0.0"/>
-        <import addon="script.module.metadatautils" version="1.0.0" />
-        <import addon="script.module.simplecache" version="1.0.0"/>
+        <import addon="script.module.metadatautils" version="1.0.31"/>
+        <import addon="script.module.simplecache" version="2.0.2"/>
     </requires>
 
     <extension point="xbmc.python.pluginsource" library="plugin.py">
