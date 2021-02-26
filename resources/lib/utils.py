@@ -12,6 +12,7 @@ if sys.version_info.major == 3:
     import urllib.parse as urlparse
 else:
     import urlparse
+from traceback import format_exc
 import traceback
 import xbmc
 import xbmcaddon
@@ -22,13 +23,7 @@ KODI_VERSION = int(xbmc.getInfoLabel("System.BuildVersion").split(".")[0])
 
 def log_msg(msg, loglevel=xbmc.LOGDEBUG):
     ''' log message with addon name and version to kodi log '''
-    if sys.version_info.major < 3:
-        if isinstance(msg, unicode):
-           msg = msg.encode('utf-8')
-    addon = xbmcaddon.Addon(id=ADDON_ID)
-    addon_name = addon.getAddonInfo('name')
-    addon_ver = addon.getAddonInfo('version')
-    xbmc.log("{0} v{1} --> {2}".format(addon_name, addon_ver, msg), level=loglevel)
+    xbmc.log("%s --> %s" % (ADDON_ID, msg), level=loglevel)
 
 
 def log_exception(modulename, exceptiondetails):
