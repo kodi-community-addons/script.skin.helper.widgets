@@ -260,7 +260,7 @@ class Episodes(object):
             item = firstepisode
             item["type"] = "season"
             item["label"] = "%s %s" % (xbmc.getLocalizedString(20373), firstepisode["season"])
-            item["plot"] = u"[B]%s[/B] • %s %s[CR]%s: %s"\
+            item["plot"] = "[B]%s[/B] • %s %s[CR]%s: %s"\
                 % (item["label"], len(tvshow_episodes), xbmc.getLocalizedString(20387),
                    xbmc.getLocalizedString(570), firstepisode["dateadded"].split(" ")[0])
             item["extraproperties"] = {"UnWatchedEpisodes": "%s" % len(tvshow_episodes)}

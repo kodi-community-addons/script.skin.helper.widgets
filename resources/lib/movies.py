@@ -98,24 +98,14 @@ class Movies(object):
         return self.sort_by_recommended(all_items, ref_items)
 
     def recommended(self):
-        ''' get recommended movies - library movies with score higher than 7
-        or if using experimental settings - similar with all recently watched '''
-        if self.options["exp_recommended"]:
-            # get list of all unwatched movies (optionally filtered by tag)
-            filters = [kodi_constants.FILTER_UNWATCHED]
-            if self.options.get("tag"):
-                filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-            all_items = self.metadatautils.kodidb.movies(filters=filters)
-            # return list sorted by recommended score
-            return self.sort_by_recommended(all_items)
-        else:
-            filters = [kodi_constants.FILTER_RATING]
-            if self.options["hide_watched"]:
-                filters.append(kodi_constants.FILTER_UNWATCHED)
-            if self.options.get("tag"):
-                filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
-            return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RATING, filters=filters,
-                                                    limits=(0, self.options["limit"]))
+        ''' get recommended movies - library movies with score higher than 7 '''
+        filters = [kodi_constants.FILTER_RATING]
+        if self.options["hide_watched"]:
+            filters.append(kodi_constants.FILTER_UNWATCHED)
+        if self.options.get("tag"):
+            filters.append({"operator": "contains", "field": "tag", "value": self.options["tag"]})
+        return self.metadatautils.kodidb.movies(sort=kodi_constants.SORT_RATING, filters=filters,
+                                           limits=(0, self.options["limit"]))
 
     def recent(self):
         ''' get recently added movies '''
@@ -349,7 +339,7 @@ class Movies(object):
             for ref_movie in ref_movies:
                 title = ref_movie['title']
                 similarscore += self.get_similarity_score(ref_movie, item, sets=ref_sets[title])
-            item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_movies)
+            item["recommendedscore"] = similarscore / (1+item["playcount"]) // len(ref_movies)
         # return list sorted by score and capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
@@ -372,24 +362,24 @@ class Movies(object):
         # calculate individual scores for contributing factors
         # [feature]_score = (numer of matching [features]) / (number of unique [features] between both)
         genre_score = 0 if not set_genres else \
-            float(len(set_genres.intersection(other_movie["genre"]))) / \
+            float(len(set_genres.intersection(other_movie["genre"]))) // \
             len(set_genres.union(other_movie["genre"]))
         director_score = 0 if not set_directors else \
-            float(len(set_directors.intersection(other_movie["director"]))) / \
+            float(len(set_directors.intersection(other_movie["director"]))) // \
             len(set_directors.union(other_movie["director"]))
         writer_score = 0 if not set_writers else \
-            float(len(set_writers.intersection(other_movie["writer"]))) / \
+            float(len(set_writers.intersection(other_movie["writer"]))) // \
             len(set_writers.union(other_movie["writer"]))
         # cast_score is normalized by fixed amount of 5, and scaled up nonlinearly
-        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_movie["cast"][:5]])))/5)**(1./2)
+        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_movie["cast"][:5]])))//5)**(1.//2)
         # rating_score is "closeness" in rating, scaled to 1 (0 if greater than 3)
         if ref_movie["rating"] and other_movie["rating"] and abs(ref_movie["rating"]-other_movie["rating"]) < 3:
-            rating_score = 1 - abs(ref_movie["rating"]-other_movie["rating"])/3
+            rating_score = 1 - abs(ref_movie["rating"]-other_movie["rating"])//3
         else:
             rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
         if ref_movie["year"] and other_movie["year"] and abs(ref_movie["year"]-other_movie["year"]) < 10:
-            year_score = 1 - abs(ref_movie["year"]-other_movie["year"])/10
+            year_score = 1 - abs(ref_movie["year"]-other_movie["year"])//10
         else:
             year_score = 0
         # mpaa_score gets 1 if same mpaa rating, otherwise 0
@@ -399,5 +389,5 @@ class Movies(object):
             .05*rating_score + .075*year_score + .025*mpaa_score
         # exponentially scale score for movies in same set
         if ref_movie["setid"] and ref_movie["setid"] == other_movie["setid"]:
-            similarscore **= (1./2)
+            similarscore **= (1.//2)
         return similarscore

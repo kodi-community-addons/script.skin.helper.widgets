@@ -340,7 +340,7 @@ class Media(object):
                     # use tvshows method if neither items are movies
                     similarscore += weights[title] * self.tvshows.get_similarity_score(ref_item, item)
             # average score and scale down based on playcount
-            item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_items)
+            item["recommendedscore"] = similarscore // (1+item["playcount"]) // len(ref_items)
         # return sorted list capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
@@ -361,15 +361,15 @@ class Media(object):
             float(len(set_genres.intersection(other_item["genre"]))) / \
             len(set_genres.union(other_item["genre"]))
         # cast_score is normalized by fixed amount of 5, and scaled up nonlinearly
-        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_item["cast"][:5]])))/5)**(1./2)
+        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_item["cast"][:5]])))//5)**(1.//2)
         # rating_score is "closeness" in rating, scaled to 1
         if ref_item["rating"] and other_item["rating"] and abs(ref_item["rating"]-other_item["rating"]) < 3:
-            rating_score = 1 - abs(ref_item["rating"]-other_item["rating"])/3
+            rating_score = 1 - abs(ref_item["rating"]-other_item["rating"])//3
         else:
             rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
         if ref_item["year"] and other_item["year"] and abs(ref_item["year"]-other_item["year"]) < 10:
-            year_score = 1 - abs(ref_item["year"]-other_item["year"])/10
+            year_score = 1 - abs(ref_item["year"]-other_item["year"])//10
         else:
             year_score = 0
         # calculate overall score using weighted average
