@@ -1,0 +1,153 @@
+# Kodi language file
+# Addon Name: Skin Helper Widgets
+# Addon id: script.skin.helper.widgets
+# Addon Provider: marcelveldt
+msgid ""
+msgstr ""
+"Project-Id-Version: XBMC-Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: 2014-10-26 17:05+0000\n"
+"PO-Revision-Date: 2021-04-03 09:05+0000\n"
+"Last-Translator: frodo19\n"
+"Language-Team: LANGUAGE\n"
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgctxt "#32000"
+msgid "Favourites"
+msgstr "Kedvencek"
+
+msgctxt "#32001"
+msgid "Favourite Media"
+msgstr "Kedvenc média"
+
+msgctxt "#32002"
+msgid "Next Episodes"
+msgstr "Következő epizódok"
+
+msgctxt "#32003"
+msgid "Recommended Movies"
+msgstr "Ajánlott filmek"
+
+msgctxt "#32004"
+msgid "Recommended Media"
+msgstr "Ajánlott média"
+
+msgctxt "#32005"
+msgid "Recent Media"
+msgstr "Jelenlegi média"
+
+msgctxt "#32006"
+msgid "Similar Movies"
+msgstr "Hasonló filmek"
+
+msgctxt "#32007"
+msgid "In progress and Recommended Media"
+msgstr "Folyamatban levő és ajánlott média"
+
+msgctxt "#32008"
+msgid "Random Episodes"
+msgstr "Véletlenszerű epizódok"
+
+msgctxt "#32009"
+msgid "Recommended Episodes"
+msgstr "Ajánlott epizódok"
+
+msgctxt "#32010"
+msgid "In progress and recommended Episodes"
+msgstr "Folyamatban levő és ajánlott epizódok"
+
+msgctxt "#32011"
+msgid "In progress Media"
+msgstr "Folyamatban levő média"
+
+msgctxt "#32012"
+msgid "Recently added songs"
+msgstr "Utoljára hozzáadott dalok"
+
+msgctxt "#32013"
+msgid "Recently played songs"
+msgstr "Utoljára játszott dalok"
+
+msgctxt "#32014"
+msgid "Similar TV Shows"
+msgstr "Hasonló sorozatok"
+
+msgctxt "#32015"
+msgid "Recommended albums"
+msgstr "Ajánlott albumok"
+
+msgctxt "#32016"
+msgid "Recommended songs"
+msgstr "Ajánlott dalok"
+
+msgctxt "#32017"
+msgid "PVR Channel groups"
+msgstr "PVR csatorna csoportok"
+
+msgctxt "#32018"
+msgid "Recent recordings"
+msgstr "Jelenlegi felvételek"
+
+msgctxt "#32019"
+msgid "Next unwatched recordings"
+msgstr "Kövekező nem látott felvételek"
+
+msgctxt "#32020"
+msgid "TV Channels"
+msgstr "TV csatornák"
+
+msgctxt "#32021"
+msgid "Timers"
+msgstr "Időzítések"
+
+msgctxt "#32022"
+msgid "Similar Media"
+msgstr "Hasonló média"
+
+msgctxt "#32023"
+msgid "Widgets"
+msgstr "Widgetek"
+
+msgctxt "#32024"
+msgid "Enable artwork lookups"
+msgstr "Képkeresők engedélyezése"
+
+msgctxt "#32025"
+msgid "Show specials in episode widgets"
+msgstr "Epizódwidgeteken a speciálisok megjelenítése"
+
+msgctxt "#32026"
+msgid "Browse albums instead of playing for album widgets"
+msgstr "Inkább album böngészés az album widgetek lejátszása helyett"
+
+msgctxt "#32027"
+msgid "In-progress episodes"
+msgstr "Folyamatban levő epizódok"
+
+msgctxt "#32028"
+msgid "In-progress movies"
+msgstr "Folyamatban levő filmek"
+
+msgctxt "#32029"
+msgid "In-progress and recommended movies"
+msgstr "Folyamatban levő és ajánlott filmek"
+
+msgctxt "#32030"
+msgid "TV Channels (with artwork)"
+msgstr "TV csatornák (artworkkal)"
+
+msgctxt "#32031"
+msgid "Next unwatched recordings (reversed)"
+msgstr "Következő nem látott felvételek (visszajátszás)"
+
+msgctxt "#32032"
+msgid "In-progress and random movies"
+msgstr "Folyamatban levő és véletlenszerű filmek"
+
+msgctxt "#32033"
+msgid "Random albums"
+msgstr "Véletlenszerű albumok"
