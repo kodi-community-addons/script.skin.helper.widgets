@@ -26,9 +26,9 @@ class Tvshows(object):
         '''main listing with all our tvshow nodes'''
         tag = self.options.get("tag", "")
         if tag:
-            label_prefix = "%s - " % tag
+            label_prefix = u"%s - " % tag
         else:
-            label_prefix = ""
+            label_prefix = u""
         icon = "DefaultTvShows.png"
         all_items = [
             (label_prefix + self.addon.getLocalizedString(32044), "inprogress&mediatype=tvshows&tag=%s" % tag, icon),
@@ -407,7 +407,7 @@ class Tvshows(object):
                 title = ref_show['title']
                 similarscore += weights[title] * self.get_similarity_score(
                     ref_show, item, sets=ref_sets[title])
-            item["recommendedscore"] = similarscore // (1+item["playcount"]) // len(ref_shows)
+            item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_shows)
         # return sorted list capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
@@ -427,18 +427,18 @@ class Tvshows(object):
         # calculate individual scores for contributing factors
         # genre_score = (numer of matching genres) / (number of unique genres between both)
         genre_score = 0 if not set_genres else \
-            float(len(set_genres.intersection(other_show["genre"]))) // \
+            float(len(set_genres.intersection(other_show["genre"]))) / \
             len(set_genres.union(other_show["genre"]))
         # cast_score is normalized by fixed amount of 10, and scaled up nonlinearly
-        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_show["cast"][:10]])))//10)**(1.//2)
+        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_show["cast"][:10]])))/10)**(1./2)
         # rating_score is "closeness" in rating, scaled to 1
         if ref_show["rating"] and other_show["rating"] and abs(ref_show["rating"]-other_show["rating"]) < 3:
-            rating_score = 1-abs(ref_show["rating"]-other_show["rating"])//3
+            rating_score = 1-abs(ref_show["rating"]-other_show["rating"])/3
         else:
             rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
         if ref_show["year"] and other_show["year"] and abs(ref_show["year"]-other_show["year"]) < 10:
-            year_score = 1-abs(ref_show["year"]-other_show["year"])//10
+            year_score = 1-abs(ref_show["year"]-other_show["year"])/10
         else:
             year_score = 0
         # studio gets 1 if same studio, otherwise 0

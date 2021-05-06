@@ -176,7 +176,7 @@ class Pvr(object):
             self.metadatautils.extend_dict(item, self.metadatautils.get_pvr_artwork(item["title"], item["channel"]))
         item["type"] = "recording"
         item["channellogo"] = self.metadatautils.get_channellogo(item["channel"])
-        item["file"] = "plugin://script.skin.helper.service?action=playrecording&recordingid=%s"\
+        item["file"] = u"plugin://script.skin.helper.service?action=playrecording&recordingid=%s"\
             % (item["recordingid"])
         item["dateadded"] = item["endtime"].split(" ")[0]
         if item["resume"].get("position"):

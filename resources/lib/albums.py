@@ -122,5 +122,5 @@ class Albums(object):
             item["file"] = "musicdb://albums/%s" % item["albumid"]
             item["isFolder"] = True
         else:
-            item["file"] = "plugin://script.skin.helper.service?action=playalbum&albumid=%s" % item["albumid"]
+            item["file"] = u"plugin://script.skin.helper.service?action=playalbum&albumid=%s" % item["albumid"]
         return item

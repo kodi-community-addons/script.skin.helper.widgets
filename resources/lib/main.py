@@ -117,7 +117,7 @@ class Main(object):
                 options["mediatype"] = "tvshows"
                 options["random"] = True
 
-        #options["skipcache"] = "true"
+        options["skipcache"] = "true"
 
         return options
 

@@ -158,70 +158,6 @@ class Media(object):
 
     def similar(self):
         ''' get similar movies and similar tvshows for given imdbid'''
-        if self.options["exp_recommended"]:
-            # get ref item, and check if movie
-            ref_item = self.get_recently_watched_item()
-            is_ref_movie = ("uniqueid") in ref_item
-            # create list of all items
-            if self.options["hide_watched_similar"]:
-                all_items = self.metadatautils.kodidb.movies(filters=[kodi_constants.FILTER_UNWATCHED])
-                all_items += self.metadatautils.process_method_on_list(
-                    self.tvshows.process_tvshow, self.metadatautils.kodidb.tvshows(
-                        filters=[kodi_constants.FILTER_UNWATCHED]))
-            else:
-                all_items = self.metadatautils.kodidb.movies()
-                all_items += self.metadatautils.process_method_on_list(
-                    self.tvshows.process_tvshow, self.metadatautils.kodidb.tvshows())
-            if not ref_item:
-                return None
-            if is_ref_movie:
-                # define sets for speed
-                set_genres = set(ref_item["genre"])
-                set_directors = set(ref_item["director"])
-                set_writers = set(ref_item["writer"])
-                set_cast = set([x["name"] for x in ref_item["cast"][:5]])
-                sets = (set_genres, set_directors, set_writers, set_cast)
-                # get similarity score for all items
-                for item in all_items:
-                    if ("uniqueid") in item:
-                        # if item is also movie, check if it's the ref_item
-                        if item["title"] == ref_item["title"] and item["year"] == ref_item["year"]:
-                            # don't rank the reference movie
-                            similarscore = 0
-                        else:
-                            # otherwise, use movie method for score
-                            similarscore = self.movies.get_similarity_score(
-                                ref_item, item, sets=sets)
-                    else:
-                        # if item isn't movie, use mixed method
-                        similarscore = self.get_similarity_score(ref_item, item)
-                    # set extraproperties
-                    item["similarscore"] = similarscore
-                    item["extraproperties"] = {"similartitle": ref_item["title"], "originalpath": item["file"]}
-            else:
-                # define sets for speed
-                set_genres = set(ref_item["genre"])
-                set_cast = set([x["name"] for x in ref_item["cast"][:10]])
-                sets = (set_genres, set_cast)
-                # get similarity score for all items
-                for item in all_items:
-                    if not ("uniqueid") in item:
-                        # if item is also tvshow, check if it's the ref_item
-                        if item["title"] == ref_item["title"] and item["year"] == ref_item["year"]:
-                            # don't rank the reference movie
-                            similarscore = 0
-                        else:
-                            # otherwise, use tvshow method for score
-                            similarscore = self.tvshows.get_similarity_score(
-                                ref_item, item, sets=sets)
-                    else:
-                        # if item isn't tvshow, use mixed method
-                        similarscore = self.get_similarity_score(ref_item, item)
-                    # set extraproperties
-                    item["similarscore"] = similarscore
-                    item["extraproperties"] = {"similartitle": ref_item["title"], "originalpath": item["file"]}
-            # return list sorted by score and capped by limit
-            return sorted(all_items, key=itemgetter("similarscore"), reverse=True)[:self.options["limit"]]
         all_items = self.movies.similar()
         all_items += self.tvshows.similar()
         all_items += self.albums.similar()
@@ -340,7 +276,7 @@ class Media(object):
                     # use tvshows method if neither items are movies
                     similarscore += weights[title] * self.tvshows.get_similarity_score(ref_item, item)
             # average score and scale down based on playcount
-            item["recommendedscore"] = similarscore // (1+item["playcount"]) // len(ref_items)
+            item["recommendedscore"] = similarscore / (1+item["playcount"]) / len(ref_items)
         # return sorted list capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 
@@ -361,15 +297,15 @@ class Media(object):
             float(len(set_genres.intersection(other_item["genre"]))) / \
             len(set_genres.union(other_item["genre"]))
         # cast_score is normalized by fixed amount of 5, and scaled up nonlinearly
-        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_item["cast"][:5]])))//5)**(1.//2)
+        cast_score = (float(len(set_cast.intersection([x["name"] for x in other_item["cast"][:5]])))/5)**(1./2)
         # rating_score is "closeness" in rating, scaled to 1
         if ref_item["rating"] and other_item["rating"] and abs(ref_item["rating"]-other_item["rating"]) < 3:
-            rating_score = 1 - abs(ref_item["rating"]-other_item["rating"])//3
+            rating_score = 1 - abs(ref_item["rating"]-other_item["rating"])/3
         else:
             rating_score = 0
         # year_score is "closeness" in release year, scaled to 1 (0 if not from same decade)
         if ref_item["year"] and other_item["year"] and abs(ref_item["year"]-other_item["year"]) < 10:
-            year_score = 1 - abs(ref_item["year"]-other_item["year"])//10
+            year_score = 1 - abs(ref_item["year"]-other_item["year"])/10
         else:
             year_score = 0
         # calculate overall score using weighted average

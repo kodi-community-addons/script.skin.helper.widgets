@@ -339,7 +339,7 @@ class Movies(object):
             for ref_movie in ref_movies:
                 title = ref_movie['title']
                 similarscore += self.get_similarity_score(ref_movie, item, sets=ref_sets[title])
-            item["recommendedscore"] = similarscore / (1+item["playcount"]) // len(ref_movies)
+            item["recommendedscore"] = similarscore // (1+item["playcount"]) // len(ref_movies)
         # return list sorted by score and capped by limit
         return sorted(all_items, key=itemgetter("recommendedscore"), reverse=True)[:self.options["limit"]]
 

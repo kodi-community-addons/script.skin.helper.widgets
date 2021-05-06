@@ -112,7 +112,7 @@ class Favourites(object):
                         result["file"] = "musicdb://albums/%s" % result["albumid"]
                         result["isFolder"] = True
                     else:
-                        result["file"] = "plugin://script.skin.helper.service?action=playalbum&albumid=%s" \
+                        result["file"] = u"plugin://script.skin.helper.service?action=playalbum&albumid=%s" \
                             % result["albumid"]
                     match = result
 
