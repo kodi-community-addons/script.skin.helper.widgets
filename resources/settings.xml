@@ -1,30 +1,90 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<settings>
-    <!-- common-->
-    <category label="32163">
-        <setting id="hide_watched" type="bool" label="32035" default="false"/>
-        <setting id="hide_watched_recent" type="bool" label="32067" default="true"/>
-        <setting id="hide_watched_similar" type="bool" label="32073" default="true"/>
-        <setting id="default_limit" type="number" label="32053" default="25"/>
-        <setting id="num_recent_similar" type="number" label="32072" default="8"/>
-        <setting id="aggresive_refresh" type="bool" label="32071" default="false"/>
-        <setting id="exp_recommended" type="bool" label="32074" default="false"/>
-    </category>
-    <!-- episodes -->
-    <category label="$LOCALIZE[20360]">
-        <setting id="episodes_enable_specials" type="bool" label="32025" default="false"/>
-        <setting id="nextup_inprogressonly" type="bool" label="32036" default="true"/>
-        <setting id="episodes_grouping" type="bool" label="32050" default="false"/>
-    </category>
-    <!-- PVR -->
-    <category label="32054">
-        <setting id="pvr_enable_artwork" type="bool" label="32024" default="true"/>
-    </category>
-    <!-- Music -->
-    <category label="$LOCALIZE[1211]">
-        <setting id="music_enable_artwork" type="bool" label="32024" default="false"/>
-        <setting id="music_browse_album" type="bool" label="32026" default="false"/>
-    </category>
-
-
+<?xml version="1.0" ?>
+<settings version="1">
+	<section id="script.skin.helper.widgets">
+		<category id="common" label="32163" help="">
+			<group id="1">
+				<setting id="hide_watched" type="boolean" label="32035" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="hide_watched_recent" type="boolean" label="32067" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="hide_watched_similar" type="boolean" label="32073" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="default_limit" type="integer" label="32053" help="">
+					<level>0</level>
+					<default>25</default>
+					<control type="edit" format="integer">
+						<heading>32053</heading>
+					</control>
+				</setting>
+				<setting id="num_recent_similar" type="integer" label="32072" help="">
+					<level>0</level>
+					<default>8</default>
+					<control type="edit" format="integer">
+						<heading>32072</heading>
+					</control>
+				</setting>
+				<setting id="aggresive_refresh" type="boolean" label="32071" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="exp_recommended" type="boolean" label="32074" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+		</category>
+		<category id="episodes" label="20360" help="">
+			<group id="1">
+				<setting id="episodes_enable_specials" type="boolean" label="32025" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="nextup_inprogressonly" type="boolean" label="32036" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="episodes_grouping" type="boolean" label="32050" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+		</category>
+		<category id="pvr" label="32054" help="">
+			<group id="1">
+				<setting id="pvr_enable_artwork" type="boolean" label="32024" help="">
+					<level>0</level>
+					<default>true</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+		</category>
+		<category id="music" label="1211" help="">
+			<group id="1">
+				<setting id="music_enable_artwork" type="boolean" label="32024" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+				<setting id="music_browse_album" type="boolean" label="32026" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
+			</group>
+		</category>
+	</section>
 </settings>
