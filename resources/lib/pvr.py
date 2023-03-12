@@ -8,13 +8,10 @@
 '''
 
 import os, sys
-from resources.lib.utils import create_main_entry
+from resources.lib.utils import create_main_entry, log_msg
 from operator import itemgetter
 import xbmc
-if sys.version_info.major == 3:
-    from urllib.parse import quote_plus
-else:
-    from urllib import quote_plus
+from urllib.parse import quote_plus
 
 
 class Pvr(object):
@@ -91,10 +88,7 @@ class Pvr(object):
         if xbmc.getCondVisibility("Pvr.HasTVChannels"):
             # Get a list of all the unwatched tv recordings
             recordings = self.metadatautils.kodidb.recordings()
-            if sys.version_info.major == 3:
-                pvr_backend = xbmc.getInfoLabel("Pvr.BackendName")
-            else:
-                pvr_backend = xbmc.getInfoLabel("Pvr.BackendName").decode("utf-8")
+            pvr_backend = xbmc.getInfoLabel("Pvr.BackendName")
             for item in recordings:
                 # exclude live tv items from recordings list (mythtv workaround)
                 if not ("mythtv" in pvr_backend.lower() and "/livetv/" in item.get("file", "").lower()):
@@ -159,13 +153,21 @@ class Pvr(object):
         item["file"] = "plugin://script.skin.helper.service?action=playchannel&channelid=%s"\
             % (channeldata["channelid"])
         item["channel"] = channelname
-        item["type"] = "channel"
+        item["channelid"] = ""
+        item["dbid"] = ""	
+        if item.get("media_type"):
+            item["type"] = item.get("media_type")
+        else:
+            item["type"] = "musicvideo"
         item["label"] = channelname
-        item["channelid"] = channeldata["channelid"]
+        #item["channelid"] = channeldata["channelid"]
         if not channellogo:
             channellogo = self.metadatautils.get_channellogo(channelname)
         if channellogo:
-            item["art"] = {"thumb": channellogo}
+            if not item.get("art"):
+                item["art"] = {}
+            if not item["art"].get("thumb"):
+                item["art"]["thumb"] = channellogo
         item["channellogo"] = channellogo
         item["isFolder"] = False
         return item
@@ -176,7 +178,7 @@ class Pvr(object):
             self.metadatautils.extend_dict(item, self.metadatautils.get_pvr_artwork(item["title"], item["channel"]))
         item["type"] = "recording"
         item["channellogo"] = self.metadatautils.get_channellogo(item["channel"])
-        item["file"] = u"plugin://script.skin.helper.service?action=playrecording&recordingid=%s"\
+        item["file"] = "plugin://script.skin.helper.service?action=playrecording&recordingid=%s"\
             % (item["recordingid"])
         item["dateadded"] = item["endtime"].split(" ")[0]
         if item["resume"].get("position"):
@@ -189,19 +191,32 @@ class Pvr(object):
 
     def process_timer(self, item):
         '''transform the json received from kodi into something we can use'''
-        item["file"] = "plugin://script.skin.helper.service/?action=launch&path=" + \
-            quote_plus("ReplaceWindow(tvtimers),return")
+        item["file"] = "plugin://script.skin.helper.service?action=playchannel&channelid=%s"\
+            % (item["channelid"])
         if not item["channelid"] == -1:
             channel_details = self.metadatautils.kodidb.channel(item["channelid"])
             channelname = channel_details["label"]
         else:
             channelname = ""
+        log_msg("get_pvr_all - process_timer from json ==%s=" %  (item))
+        item["channelid"] = ""
+        item["dbid"] = ""	
         item["channel"] = channelname
-        item["plot"] = item.get("summary", "")
-        item["type"] = "recording"
+        summary = item.get("summary", "")
+        item["type"] = "musicvideo"
         item["isFolder"] = False
         if self.enable_artwork:
             self.metadatautils.extend_dict(item, self.metadatautils.get_pvr_artwork(item["title"], item["channel"]))
-        item["type"] = "recording"
-        item["channellogo"] = self.metadatautils.get_channellogo(item["channel"])
+        channellogo = self.metadatautils.get_channellogo(channelname)	
+        if item.get("media_type"):
+            item["type"] = item.get("media_type")
+        else:
+            item["type"] = "musicvideo"
+        item["plot"] = "%s[CR]%s"  % (summary, item.get("plot", ""))
+        if channellogo:
+            if not item.get("art"):
+                item["art"] = {}
+            if not item["art"].get("thumb"):
+                item["art"]["thumb"] = channellogo
+        item["channellogo"] = channellogo
         return item

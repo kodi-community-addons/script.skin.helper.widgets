@@ -102,10 +102,7 @@ class Episodes(object):
 
         log_msg("Return entries sorted by dateadded", xbmc.LOGINFO)
         # create our entries and return the result sorted by dateadded
-        if sys.version_info.major == 3:
-            all_items = self.metadatautils.process_method_on_list(self.create_grouped_entry, tvshow_episodes.values())
-        else:
-            all_items = self.metadatautils.process_method_on_list(self.create_grouped_entry, tvshow_episodes.itervalues())
+        all_items = self.metadatautils.process_method_on_list(self.create_grouped_entry, tvshow_episodes.values())
         return sorted(all_items, key=itemgetter("dateadded"), reverse=True)[:self.options["limit"]]
 
     def random(self):

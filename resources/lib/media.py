@@ -38,11 +38,13 @@ class Media(object):
         all_items = [
             (self.addon.getLocalizedString(32011), "inprogress&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32070), "inprogressshowsandmovies&mediatype=media", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32079), "inprogressepisodesandmovies&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32005), "recent&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32004), "recommended&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32007), "inprogressandrecommended&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32060), "inprogressandrandom&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32022), "similar&mediatype=media", "DefaultMovies.png"),
+            (self.addon.getLocalizedString(32080), "similarmoviestvshows&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32059), "random&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32058), "top250&mediatype=media", "DefaultMovies.png"),
             (self.addon.getLocalizedString(32001), "favourites&mediatype=media", "DefaultMovies.png"),
@@ -150,10 +152,17 @@ class Media(object):
         all_items += self.pvr.recordings()
         return sorted(all_items, key=itemgetter("lastplayed"), reverse=True)[:self.options["limit"]]
 
-    def inprogressshowsandmovies(self):
+    def inprogressepisodesandmovies(self):
         ''' get in progress media '''
         all_items = self.movies.inprogress()
         all_items += self.episodes.inprogress()
+        return sorted(all_items, key=itemgetter("lastplayed"), reverse=True)[:self.options["limit"]]
+
+
+    def inprogressshowsandmovies(self):
+        ''' get in progress media '''
+        all_items = self.tvshows.inprogress()
+        all_items += self.movies.inprogress()
         return sorted(all_items, key=itemgetter("lastplayed"), reverse=True)[:self.options["limit"]]
 
     def similar(self):
@@ -164,6 +173,12 @@ class Media(object):
         all_items += self.songs.similar()
         return sorted(all_items, key=lambda k: random.random())[:self.options["limit"]]
 
+    def similarmoviestvshows(self):
+        ''' get similar movies and similar tvshows for given imdbid'''
+        all_items = self.movies.similar()
+        all_items += self.tvshows.similar()
+        return sorted(all_items, key=lambda k: random.random())[:self.options["limit"]]
+		
     def inprogressandrecommended(self):
         ''' get recommended AND in progress media '''
         all_items = self.inprogress()
@@ -176,9 +191,9 @@ class Media(object):
     def inprogressandrandom(self):
         ''' get in progress AND random movies '''
         all_items = self.inprogress()
-        all_ids = [item["movieid"] for item in all_items]
+        all_ids = [item["title"] for item in all_items]
         for item in self.random():
-            if item["movieid"] not in all_ids:
+            if item["title"] not in all_ids:
                 all_items.append(item)
         return all_items[:self.options["limit"]]
 

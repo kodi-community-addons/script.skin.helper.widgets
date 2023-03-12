@@ -332,6 +332,15 @@ msgctxt "#32078"
 msgid "Recommended in Playlist"
 msgstr ""
 
+msgctxt "#32079"
+msgid "In progress episodes and movies"
+msgstr ""
+
+msgctxt "#32080"
+msgid "Similar movies and tvshows"
+msgstr ""
+similarmoviestvshows
+
 msgctxt "#32163"
 msgid "Common"
 msgstr ""
